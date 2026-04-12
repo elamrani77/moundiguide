@@ -1,4 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
 
 const LANGUAGES = [
   { code: "fr", label: "Français", flag: "🇫🇷" },
@@ -10,12 +14,12 @@ const LANGUAGES = [
 ];
 
 const QUICK_TOPICS = {
-  fr: ["🏟️ Stades", "🚇 Transport", "🍜 Restaurants", "🏨 Hôtels", "🚑 Urgences", "🕌 Culture"],
-  en: ["🏟️ Stadiums", "🚇 Transport", "🍜 Food", "🏨 Hotels", "🚑 Emergency", "🕌 Culture"],
-  ar: ["🏟️ ملاعب", "🚇 نقل", "🍜 مطاعم", "🏨 فنادق", "🚑 طوارئ", "🕌 ثقافة"],
-  es: ["🏟️ Estadios", "🚇 Transporte", "🍜 Comida", "🏨 Hoteles", "🚑 Urgencias", "🕌 Cultura"],
-  pt: ["🏟️ Estádios", "🚇 Transporte", "🍜 Comida", "🏨 Hotéis", "🚑 Urgências", "🕌 Cultura"],
-  zh: ["🏟️ 球场", "🚇 交通", "🍜 美食", "🏨 酒店", "🚑 急救", "🕌 文化"],
+  fr: ["🏟️ Stades", "🚇 Transport", "🍜 Restaurants", "🏨 Hôtels", "🚑 Urgences", "🕌 Culture", "☀️ Météo"],
+  en: ["🏟️ Stadiums", "🚇 Transport", "🍜 Food", "🏨 Hotels", "🚑 Emergency", "🕌 Culture", "☀️ Weather"],
+  ar: ["🏟️ ملاعب", "🚇 نقل", "🍜 مطاعم", "🏨 فنادق", "🚑 طوارئ", "🕌 ثقافة", "☀️ طقس"],
+  es: ["🏟️ Estadios", "🚇 Transporte", "🍜 Comida", "🏨 Hoteles", "🚑 Urgencias", "🕌 Cultura", "☀️ Clima"],
+  pt: ["🏟️ Estádios", "🚇 Transporte", "🍜 Comida", "🏨 Hotéis", "🚑 Urgências", "🕌 Cultura", "☀️ Tempo"],
+  zh: ["🏟️ 球场", "🚇 交通", "🍜 美食", "🏨 酒店", "🚑 急救", "🕌 文化", "☀️ 天气"],
 };
 
 const PLACEHOLDERS = {
@@ -28,116 +32,234 @@ const PLACEHOLDERS = {
 };
 
 const SYSTEM_PROMPTS = {
-  fr: `Tu es MoundiGuide, l'assistant officiel IA pour les touristes du Mondial 2030 co-organisé par le Maroc, l'Espagne et le Portugal. Réponds en français. Sois chaleureux, précis et utile. Donne des informations pratiques sur les stades, transports, culture locale, sécurité, gastronomie, hébergement. Sois concis mais complet. Utilise des emojis. Les 6 villes marocaines: Casablanca (Grand Stade Hassan II, 115 000 places), Rabat (Complexe Moulay Abdallah), Marrakech (Grand Stade de Marrakech), Tanger (Grand Stade de Tanger), Agadir (Stade d'Agadir), Fès (Nouveau Stade de Fès).`,
-  en: `You are MoundiGuide, the official AI assistant for tourists at the 2030 World Cup co-hosted by Morocco, Spain, and Portugal. Reply in English. Be warm, precise, and helpful. Provide practical information about stadiums, transport, local culture, safety, gastronomy, accommodation. Be concise but thorough. Use emojis. The 6 Moroccan cities: Casablanca (Grand Stade Hassan II, 115,000 seats), Rabat, Marrakech, Tangier, Agadir, Fez.`,
-  ar: `أنت MoundiGuide، المساعد الذكي الرسمي للسياح في كأس العالم 2030 المشترك بين المغرب وإسبانيا والبرتغال. أجب باللغة العربية. كن ودوداً ودقيقاً ومفيداً. قدم معلومات عملية. استخدم الرموز التعبيرية.`,
-  es: `Eres MoundiGuide, el asistente oficial de IA para turistas del Mundial 2030 co-organizado por Marruecos, España y Portugal. Responde en español. Sé cálido, preciso y útil. Usa emojis.`,
+  fr: `Tu es MoundiGuide, l'assistant officiel IA pour les touristes du Mondial 2030 co-organisé par le Maroc, l'Espagne et le Portugal. Réponds en français. Sois chaleureux, précis et utile. Donne des informations pratiques sur les stades, transports, culture locale, sécurité, gastronomie, hébergement. Sois concis mais complet. Utilise des emojis. Formate tes réponses avec des sections claires. Les 6 villes marocaines: Casablanca (Grand Stade Hassan II, 115 000 places), Rabat (Complexe Moulay Abdallah), Marrakech (Grand Stade de Marrakech), Tanger (Grand Stade de Tanger), Agadir (Stade d'Agadir), Fès (Nouveau Stade de Fès).`,
+  en: `You are MoundiGuide, the official AI assistant for tourists at the 2030 World Cup co-hosted by Morocco, Spain, and Portugal. Reply in English. Be warm, precise, and helpful. Provide practical information about stadiums, transport, local culture, safety, gastronomy, accommodation. Be concise but thorough. Use emojis. Format with clear sections. The 6 Moroccan cities: Casablanca (Grand Stade Hassan II, 115,000 seats), Rabat, Marrakech, Tangier, Agadir, Fez.`,
+  ar: `أنت MoundiGuide، المساعد الذكي الرسمي للسياح في كأس العالم 2030 المشترك بين المغرب وإسبانيا والبرتغال. أجب باللغة العربية. كن ودوداً ودقيقاً ومفيداً. قدم معلومات عملية عن الملاعب والمواصلات والثقافة والمطاعم. استخدم الرموز التعبيرية.`,
+  es: `Eres MoundiGuide, el asistente oficial de IA para turistas del Mundial 2030. Responde en español. Sé cálido, preciso y útil. Usa emojis y formato claro.`,
   pt: `Você é MoundiGuide, o assistente oficial de IA para turistas da Copa do Mundo 2030. Responda em português. Seja caloroso, preciso e útil. Use emojis.`,
   zh: `你是MoundiGuide，2030年世界杯官方AI助手。用中文回答。要热情、准确、有帮助。使用表情符号。`,
 };
 
 const WELCOME_MESSAGES = {
-  fr: "Bienvenue ! 🌍⚽ Je suis MoundiGuide, votre assistant pour le Mondial 2030. Posez-moi vos questions sur les stades, transports, culture ou restaurants au Maroc, Espagne et Portugal !",
-  en: "Welcome! 🌍⚽ I'm MoundiGuide, your 2030 World Cup assistant. Ask me about stadiums, transport, culture or restaurants in Morocco, Spain & Portugal!",
-  ar: "مرحباً! 🌍⚽ أنا MoundiGuide، مساعدكم لكأس العالم 2030. اسألوني عن الملاعب والنقل والثقافة أو المطاعم!",
-  es: "¡Bienvenido! 🌍⚽ Soy MoundiGuide, tu asistente del Mundial 2030. ¡Pregúntame sobre estadios, transporte, cultura o restaurantes!",
-  pt: "Bem-vindo! 🌍⚽ Sou MoundiGuide, seu assistente da Copa 2030. Pergunte-me sobre estádios, transporte, cultura ou restaurantes!",
-  zh: "欢迎！🌍⚽ 我是MoundiGuide，您的2030世界杯助手。问我关于球场、交通、文化或餐厅的问题！",
+  fr: "Bienvenue ! 🌍⚽ Je suis MoundiGuide, votre assistant pour le Mondial 2030.\n\nPosez-moi vos questions sur les stades, transports, culture ou restaurants au Maroc, Espagne et Portugal !",
+  en: "Welcome! 🌍⚽ I'm MoundiGuide, your 2030 World Cup assistant.\n\nAsk me about stadiums, transport, culture or restaurants in Morocco, Spain & Portugal!",
+  ar: "مرحباً! 🌍⚽ أنا MoundiGuide، مساعدكم لكأس العالم 2030.\n\nاسألوني عن الملاعب والنقل والثقافة أو المطاعم!",
+  es: "¡Bienvenido! 🌍⚽ Soy MoundiGuide, tu asistente del Mundial 2030.\n\n¡Pregúntame sobre estadios, transporte, cultura o restaurantes!",
+  pt: "Bem-vindo! 🌍⚽ Sou MoundiGuide, seu assistente da Copa 2030.\n\nPergunte-me sobre estádios, transporte, cultura ou restaurantes!",
+  zh: "欢迎！🌍⚽ 我是MoundiGuide，您的2030世界杯助手。\n\n问我关于球场、交通、文化或餐厅的问题！",
 };
 
 const INFO_DATA = {
   fr: { title: "Infos pratiques", items: [
     { icon: "🚨", label: "Police", value: "19" },{ icon: "🚑", label: "SAMU", value: "15" },
-    { icon: "🚒", label: "Pompiers", value: "15" },{ icon: "💱", label: "Monnaie", value: "1€ ≈ 11 MAD" },
+    { icon: "🚒", label: "Pompiers", value: "15" },{ icon: "💱", label: "Monnaie", value: "Dirham (MAD)" },
     { icon: "🔌", label: "Électricité", value: "220V / Type C,E" },{ icon: "🕐", label: "Fuseau", value: "GMT+1" },
     { icon: "📱", label: "Indicatif", value: "+212" },{ icon: "💧", label: "Eau", value: "Bouteille recommandée" },
   ]},
   en: { title: "Practical info", items: [
     { icon: "🚨", label: "Police", value: "19" },{ icon: "🚑", label: "Ambulance", value: "15" },
-    { icon: "🚒", label: "Fire", value: "15" },{ icon: "💱", label: "Currency", value: "1€ ≈ 11 MAD" },
+    { icon: "🚒", label: "Fire", value: "15" },{ icon: "💱", label: "Currency", value: "Dirham (MAD)" },
     { icon: "🔌", label: "Power", value: "220V / Type C,E" },{ icon: "🕐", label: "Timezone", value: "GMT+1" },
     { icon: "📱", label: "Dial code", value: "+212" },{ icon: "💧", label: "Water", value: "Bottled recommended" },
   ]},
   ar: { title: "معلومات عملية", items: [
     { icon: "🚨", label: "الشرطة", value: "19" },{ icon: "🚑", label: "الإسعاف", value: "15" },
-    { icon: "🚒", label: "الحريق", value: "15" },{ icon: "💱", label: "العملة", value: "1€ ≈ 11 MAD" },
+    { icon: "🚒", label: "الحريق", value: "15" },{ icon: "💱", label: "العملة", value: "درهم (MAD)" },
     { icon: "🔌", label: "الكهرباء", value: "220V" },{ icon: "🕐", label: "التوقيت", value: "GMT+1" },
     { icon: "📱", label: "الرمز", value: "+212" },{ icon: "💧", label: "الماء", value: "زجاجة أفضل" },
   ]},
 };
 
 const STADIUMS = [
-  { city: "Casablanca", name: "Grand Stade Hassan II", capacity: "115 000" },
-  { city: "Rabat", name: "Complexe Moulay Abdallah", capacity: "52 000" },
-  { city: "Marrakech", name: "Grand Stade de Marrakech", capacity: "45 000" },
-  { city: "Tanger", name: "Grand Stade de Tanger", capacity: "65 000" },
-  { city: "Agadir", name: "Stade d'Agadir", capacity: "45 000" },
-  { city: "Fès", name: "Nouveau Stade de Fès", capacity: "50 000" },
+  { city: "Casablanca", name: "Grand Stade Hassan II", capacity: "115 000", lat: 33.5731, lng: -7.5898 },
+  { city: "Rabat", name: "Complexe Moulay Abdallah", capacity: "52 000", lat: 33.9558, lng: -6.8628 },
+  { city: "Marrakech", name: "Grand Stade de Marrakech", capacity: "45 000", lat: 31.6225, lng: -8.0109 },
+  { city: "Tanger", name: "Grand Stade de Tanger", capacity: "65 000", lat: 35.7356, lng: -5.8340 },
+  { city: "Agadir", name: "Stade d'Agadir", capacity: "45 000", lat: 30.3800, lng: -9.5300 },
+  { city: "Fès", name: "Nouveau Stade de Fès", capacity: "50 000", lat: 34.0181, lng: -5.0078 },
 ];
 
-// YallaVamos 2030 brand colors
+const CURRENCIES = [
+  { code: "EUR", symbol: "€", label: "Euro" },
+  { code: "USD", symbol: "$", label: "US Dollar" },
+  { code: "GBP", symbol: "£", label: "British Pound" },
+  { code: "BRL", symbol: "R$", label: "Real" },
+  { code: "JPY", symbol: "¥", label: "Yen" },
+  { code: "CNY", symbol: "¥", label: "Yuan" },
+];
+
 const BRAND = { red: "#C41E3A", green: "#00823C", blue: "#1A56DB", gold: "#F5A623" };
 
-// Theme palettes
 const THEMES = {
   dark: {
     bg: "linear-gradient(165deg, #0C1117 0%, #0D1A12 35%, #0C1320 65%, #0C1117 100%)",
-    headerBg: "rgba(0,0,0,0.5)",
-    tabBg: "rgba(0,0,0,0.3)",
-    inputBg: "rgba(0,0,0,0.4)",
-    card: "rgba(255,255,255,0.04)",
-    cardHover: "rgba(255,255,255,0.08)",
-    border: "rgba(255,255,255,0.08)",
-    text: "rgba(255,255,255,0.88)",
-    textStrong: "#FFFFFF",
-    muted: "rgba(255,255,255,0.45)",
-    inputField: "rgba(255,255,255,0.05)",
-    inputBorder: "rgba(255,255,255,0.08)",
-    inputText: "#FFFFFF",
-    inputPlaceholder: "rgba(255,255,255,0.3)",
-    botBubble: "rgba(255,255,255,0.04)",
-    botBubbleBorder: "rgba(255,255,255,0.08)",
-    botText: "rgba(255,255,255,0.88)",
-    userBubble: `linear-gradient(135deg, ${BRAND.red}, #A01830)`,
-    userText: "#FFFFFF",
-    dropdown: "rgba(12,17,23,0.97)",
-    langActive: "rgba(245,166,35,0.1)",
-    tabActive: "rgba(245,166,35,0.08)",
-    stadiumCapacity: "rgba(245,166,35,0.1)",
-    stadiumCapacityText: BRAND.gold,
-    phraseBorder: "rgba(255,255,255,0.08)",
-    themeIcon: "☀️",
+    headerBg: "rgba(0,0,0,0.6)", tabBg: "rgba(0,0,0,0.3)", inputBg: "rgba(0,0,0,0.4)",
+    card: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.08)",
+    text: "rgba(255,255,255,0.88)", textStrong: "#FFFFFF", muted: "rgba(255,255,255,0.45)",
+    inputField: "rgba(255,255,255,0.05)", inputBorder: "rgba(255,255,255,0.08)", inputText: "#FFFFFF",
+    botBubble: "rgba(255,255,255,0.04)", botBubbleBorder: "rgba(255,255,255,0.08)", botText: "rgba(255,255,255,0.88)",
+    userBubble: `linear-gradient(135deg, ${BRAND.red}, #A01830)`, userText: "#FFFFFF",
+    dropdown: "rgba(12,17,23,0.98)", langActive: "rgba(245,166,35,0.1)", tabActive: "rgba(245,166,35,0.08)",
+    shadow: "0 16px 48px rgba(0,0,0,0.5)", scrollThumb: "rgba(255,255,255,0.1)",
   },
   light: {
     bg: "linear-gradient(165deg, #F8F9FA 0%, #EFF6EE 35%, #EBF0F7 65%, #F8F9FA 100%)",
-    headerBg: "rgba(255,255,255,0.85)",
-    tabBg: "rgba(255,255,255,0.6)",
-    inputBg: "rgba(255,255,255,0.85)",
-    card: "rgba(0,0,0,0.03)",
-    cardHover: "rgba(0,0,0,0.06)",
-    border: "rgba(0,0,0,0.08)",
-    text: "rgba(0,0,0,0.8)",
-    textStrong: "#111111",
-    muted: "rgba(0,0,0,0.45)",
-    inputField: "rgba(0,0,0,0.03)",
-    inputBorder: "rgba(0,0,0,0.1)",
-    inputText: "#111111",
-    inputPlaceholder: "rgba(0,0,0,0.35)",
-    botBubble: "rgba(0,0,0,0.03)",
-    botBubbleBorder: "rgba(0,0,0,0.08)",
-    botText: "rgba(0,0,0,0.8)",
-    userBubble: `linear-gradient(135deg, ${BRAND.red}, #E02040)`,
-    userText: "#FFFFFF",
-    dropdown: "rgba(255,255,255,0.98)",
-    langActive: "rgba(196,30,58,0.08)",
-    tabActive: "rgba(196,30,58,0.06)",
-    stadiumCapacity: "rgba(196,30,58,0.08)",
-    stadiumCapacityText: BRAND.red,
-    phraseBorder: "rgba(0,0,0,0.06)",
-    themeIcon: "🌙",
+    headerBg: "rgba(255,255,255,0.9)", tabBg: "rgba(255,255,255,0.7)", inputBg: "rgba(255,255,255,0.9)",
+    card: "rgba(0,0,0,0.03)", border: "rgba(0,0,0,0.08)",
+    text: "rgba(0,0,0,0.8)", textStrong: "#111111", muted: "rgba(0,0,0,0.45)",
+    inputField: "rgba(0,0,0,0.03)", inputBorder: "rgba(0,0,0,0.1)", inputText: "#111111",
+    botBubble: "rgba(0,0,0,0.03)", botBubbleBorder: "rgba(0,0,0,0.08)", botText: "rgba(0,0,0,0.8)",
+    userBubble: `linear-gradient(135deg, ${BRAND.red}, #E02040)`, userText: "#FFFFFF",
+    dropdown: "rgba(255,255,255,0.99)", langActive: "rgba(196,30,58,0.06)", tabActive: "rgba(196,30,58,0.06)",
+    shadow: "0 16px 48px rgba(0,0,0,0.1)", scrollThumb: "rgba(0,0,0,0.1)",
   },
 };
 
+// ═══════════════════════════════════════
+// SIMPLE MARKDOWN RENDERER
+// ═══════════════════════════════════════
+function renderMarkdown(text) {
+  if (!text) return text;
+  const lines = text.split("\n");
+  return lines.map((line, i) => {
+    let content = line
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>");
+    if (line.startsWith("### ")) return <div key={i} style={{ fontWeight: 600, marginTop: 8, marginBottom: 4 }} dangerouslySetInnerHTML={{ __html: content.slice(4) }} />;
+    if (line.startsWith("## ")) return <div key={i} style={{ fontWeight: 600, fontSize: 15, marginTop: 10, marginBottom: 4 }} dangerouslySetInnerHTML={{ __html: content.slice(3) }} />;
+    if (line.startsWith("- ") || line.startsWith("• ")) return <div key={i} style={{ paddingLeft: 12, marginBottom: 2 }} dangerouslySetInnerHTML={{ __html: "• " + content.slice(2) }} />;
+    if (line.trim() === "") return <div key={i} style={{ height: 8 }} />;
+    return <div key={i} dangerouslySetInnerHTML={{ __html: content }} />;
+  });
+}
+
+// ═══════════════════════════════════════
+// CURRENCY CONVERTER COMPONENT
+// ═══════════════════════════════════════
+function CurrencyConverter({ T, isRTL }) {
+  const [amount, setAmount] = useState("100");
+  const [from, setFrom] = useState("EUR");
+  const [rates, setRates] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("https://open.er-api.com/v6/latest/MAD")
+      .then(r => r.json())
+      .then(data => { setRates(data.rates); setLoading(false); })
+      .catch(() => {
+        setRates({ EUR: 0.091, USD: 0.099, GBP: 0.078, BRL: 0.57, JPY: 14.8, CNY: 0.72 });
+        setLoading(false);
+      });
+  }, []);
+
+  const convert = () => {
+    if (!rates || !amount) return "—";
+    const rateFromCurrency = rates[from];
+    if (!rateFromCurrency) return "—";
+    const madAmount = parseFloat(amount) / rateFromCurrency;
+    return Math.round(madAmount).toLocaleString();
+  };
+
+  const selectStyle = {
+    padding: "8px 10px", borderRadius: 8, border: `1px solid ${T.border}`,
+    background: T.inputField, color: T.textStrong, fontSize: 13,
+    fontFamily: "'Outfit', sans-serif", cursor: "pointer", width: "100%",
+  };
+
+  return (
+    <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: 16, marginTop: 12 }}>
+      <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, color: BRAND.gold, marginBottom: 12 }}>
+        💱 {isRTL ? "محول العملات" : "Convertisseur de devises"}
+      </div>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
+        <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
+          style={{ ...selectStyle, width: "35%", MozAppearance: "textfield" }} />
+        <select value={from} onChange={e => setFrom(e.target.value)} style={{ ...selectStyle, width: "35%" }}>
+          {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
+        </select>
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, color: T.muted, width: "8%", textAlign: "center" }}>→</div>
+        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, color: T.textStrong, width: "22%" }}>MAD</div>
+      </div>
+      <div style={{
+        background: T.tabActive, borderRadius: 8, padding: "12px 14px",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+      }}>
+        <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, color: T.muted }}>
+          {amount} {from} =
+        </span>
+        <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 700, color: BRAND.gold }}>
+          {loading ? "..." : convert()} <span style={{ fontSize: 13, fontWeight: 400 }}>MAD</span>
+        </span>
+      </div>
+      <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 9, color: T.muted, marginTop: 6, textAlign: "center" }}>
+        {isRTL ? "أسعار محدثة تلقائياً" : "Taux mis à jour automatiquement — open.er-api.com"}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
+// MAP COMPONENT (Leaflet via CDN)
+// ═══════════════════════════════════════
+function StadiumMap({ T, onSelectStadium }) {
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+
+  useEffect(() => {
+    if (mapInstanceRef.current) return;
+    if (!window.L) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(link);
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+      script.onload = () => initMap();
+      document.head.appendChild(script);
+    } else {
+      initMap();
+    }
+
+    function initMap() {
+      if (!mapRef.current || mapInstanceRef.current) return;
+      const map = window.L.map(mapRef.current, { zoomControl: false }).setView([32.5, -6.5], 5.5);
+      window.L.control.zoom({ position: "bottomright" }).addTo(map);
+      window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OSM",
+        maxZoom: 18,
+      }).addTo(map);
+
+      const icon = window.L.divIcon({
+        className: "",
+        html: `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,${BRAND.red},${BRAND.green});display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 3px 12px rgba(0,0,0,0.4);border:2px solid white;cursor:pointer">⚽</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+      });
+
+      STADIUMS.forEach(s => {
+        const marker = window.L.marker([s.lat, s.lng], { icon }).addTo(map);
+        marker.bindPopup(`<div style="font-family:Outfit,sans-serif;min-width:160px"><strong style="font-size:14px">${s.city}</strong><br><span style="font-size:11px;color:#666">${s.name}</span><br><span style="font-size:12px;color:${BRAND.red};font-weight:600">🏟️ ${s.capacity} places</span></div>`);
+        marker.on("click", () => onSelectStadium && onSelectStadium(s));
+      });
+
+      mapInstanceRef.current = map;
+      setTimeout(() => map.invalidateSize(), 200);
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  return <div ref={mapRef} style={{ width: "100%", height: 300, borderRadius: 10, overflow: "hidden", border: `1px solid ${T.border}` }} />;
+}
+
+// ═══════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════
 export default function MoundiGuide() {
   const [lang, setLang] = useState("fr");
   const [messages, setMessages] = useState([]);
@@ -145,31 +267,27 @@ export default function MoundiGuide() {
   const [loading, setLoading] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [activeTab, setActiveTab] = useState("chat");
-  const [themeMode, setThemeMode] = useState("system"); // system | dark | light
+  const [themeMode, setThemeMode] = useState("system");
   const [systemDark, setSystemDark] = useState(true);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Detect system theme
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     setSystemDark(mq.matches);
-    const handler = (e) => setSystemDark(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
+    const h = (e) => setSystemDark(e.matches);
+    mq.addEventListener("change", h);
+    return () => mq.removeEventListener("change", h);
   }, []);
 
   const isDark = themeMode === "system" ? systemDark : themeMode === "dark";
   const T = isDark ? THEMES.dark : THEMES.light;
+  const accent = isDark ? BRAND.gold : BRAND.red;
 
   const cycleTheme = () => {
-    const order = ["system", "light", "dark"];
-    const next = order[(order.indexOf(themeMode) + 1) % 3];
-    setThemeMode(next);
+    const o = ["system", "light", "dark"];
+    setThemeMode(o[(o.indexOf(themeMode) + 1) % 3]);
   };
-
-  const themeLabel = themeMode === "system" ? (isDark ? "🌙" : "☀️") : (isDark ? "🌙" : "☀️");
-  const themeTip = themeMode === "system" ? "Auto" : themeMode === "light" ? "Light" : "Dark";
 
   useEffect(() => {
     setMessages([{ role: "assistant", content: WELCOME_MESSAGES[lang] }]);
@@ -179,7 +297,15 @@ export default function MoundiGuide() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async (text) => {
+  // Close lang menu when clicking outside
+  useEffect(() => {
+    if (!showLangMenu) return;
+    const close = () => setShowLangMenu(false);
+    setTimeout(() => document.addEventListener("click", close), 0);
+    return () => document.removeEventListener("click", close);
+  }, [showLangMenu]);
+
+  const sendMessage = useCallback(async (text) => {
     const userText = text || input.trim();
     if (!userText || loading) return;
     setInput("");
@@ -188,136 +314,112 @@ export default function MoundiGuide() {
     setMessages(newMessages);
     setLoading(true);
     try {
-      const apiMessages = newMessages.map((m) => ({ role: m.role, content: m.content }));
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lang, messages: apiMessages }),
+        body: JSON.stringify({ lang, messages: newMessages.map(m => ({ role: m.role, content: m.content })) }),
       });
       const data = await response.json();
-      const reply = data.content?.[0]?.text || "⚠️ Erreur. Réessayez.";
-      setMessages([...newMessages, { role: "assistant", content: reply }]);
+      const reply = data.content?.[0]?.text || data.error || "⚠️ Erreur. Réessayez.";
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     } catch {
-      setMessages([...newMessages, { role: "assistant", content: "⚠️ Connexion échouée." }]);
+      setMessages(prev => [...prev, { role: "assistant", content: "⚠️ Connexion échouée." }]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();
     }
-  };
+  }, [input, loading, messages, lang]);
 
-  const currentLang = LANGUAGES.find((l) => l.code === lang);
+  const currentLang = LANGUAGES.find(l => l.code === lang);
   const isRTL = lang === "ar";
   const info = INFO_DATA[lang] || INFO_DATA.en;
-  const accentColor = isDark ? BRAND.gold : BRAND.red;
+
+  const TABS = [
+    { id: "chat", label: lang === "ar" ? "محادثة" : "Chat", icon: "💬" },
+    { id: "map", label: lang === "ar" ? "خريطة" : lang === "es" ? "Mapa" : lang === "pt" ? "Mapa" : lang === "zh" ? "地图" : "Carte", icon: "🗺️" },
+    { id: "info", label: lang === "ar" ? "معلومات" : "Infos", icon: "ℹ️" },
+    { id: "stadiums", label: lang === "ar" ? "ملاعب" : lang === "es" ? "Estadios" : lang === "pt" ? "Estádios" : lang === "zh" ? "球场" : "Stades", icon: "🏟️" },
+  ];
 
   return (
-    <div style={{
-      minHeight: "100vh", background: T.bg,
-      fontFamily: "'Segoe UI', 'Helvetica Neue', system-ui, sans-serif",
-      display: "flex", flexDirection: "column", alignItems: "center",
-      transition: "background 0.4s ease",
-    }}>
+    <div style={{ minHeight: "100vh", background: T.bg, fontFamily: "'Segoe UI', system-ui, sans-serif", display: "flex", flexDirection: "column", alignItems: "center", transition: "background 0.3s" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;600&display=swap');
-        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes dotPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        @keyframes spin { to{transform:rotate(360deg)} }
-        @keyframes arcRotate { to{transform:rotate(360deg)} }
-        .msg-enter { animation: fadeIn 0.3s ease both; }
-        .topic-btn { transition: all 0.2s; }
-        .topic-btn:hover { transform: translateY(-1px); opacity: 0.85; }
-        .send-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.03); }
-        .tab-btn { transition: all 0.15s; }
-        textarea:focus { outline: none; border-color: ${accentColor} !important; }
-        .theme-btn { transition: all 0.2s; }
-        .theme-btn:hover { transform: scale(1.1); }
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.12)"}; border-radius: 3px; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.3}}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @keyframes arcSpin{to{transform:rotate(360deg)}}
+        .msg-e{animation:fadeIn .25s ease both}
+        .tb:hover{opacity:.8}
+        .sb:hover:not(:disabled){opacity:.9;transform:scale(1.03)}
+        textarea:focus{outline:none;border-color:${accent}!important}
+        ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:${T.scrollThumb};border-radius:3px}
+        *{box-sizing:border-box;margin:0;padding:0}
+        input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+        input[type=number]{-moz-appearance:textfield}
       `}</style>
 
       <div style={{ width: "100%", maxWidth: 520, display: "flex", flexDirection: "column", height: "100vh", position: "relative" }}>
 
         {/* ═══ HEADER ═══ */}
         <div style={{
-          padding: "14px 16px 10px",
-          background: T.headerBg, backdropFilter: "blur(24px)",
-          borderBottom: `1px solid ${T.border}`, flexShrink: 0,
-          transition: "background 0.3s",
+          padding: "12px 16px 8px", background: T.headerBg, backdropFilter: "blur(24px)",
+          borderBottom: `1px solid ${T.border}`, flexShrink: 0, position: "relative", zIndex: 50,
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {/* Arc logo */}
-              <div style={{ position: "relative", width: 38, height: 38 }}>
-                <svg width="38" height="38" viewBox="0 0 38 38" style={{ animation: "arcRotate 20s linear infinite" }}>
-                  <circle cx="19" cy="19" r="16" fill="none" stroke={BRAND.red} strokeWidth="3" strokeDasharray="12 88" />
-                  <circle cx="19" cy="19" r="16" fill="none" stroke={BRAND.green} strokeWidth="3" strokeDasharray="12 88" strokeDashoffset="-25" />
-                  <circle cx="19" cy="19" r="16" fill="none" stroke={BRAND.blue} strokeWidth="3" strokeDasharray="12 88" strokeDashoffset="-50" />
-                  <circle cx="19" cy="19" r="16" fill="none" stroke={BRAND.gold} strokeWidth="3" strokeDasharray="12 88" strokeDashoffset="-75" />
+              <div style={{ position: "relative", width: 36, height: 36 }}>
+                <svg width="36" height="36" viewBox="0 0 38 38" style={{ animation: "arcSpin 20s linear infinite" }}>
+                  <circle cx="19" cy="19" r="16" fill="none" stroke={BRAND.red} strokeWidth="2.5" strokeDasharray="12 88" />
+                  <circle cx="19" cy="19" r="16" fill="none" stroke={BRAND.green} strokeWidth="2.5" strokeDasharray="12 88" strokeDashoffset="-25" />
+                  <circle cx="19" cy="19" r="16" fill="none" stroke={BRAND.blue} strokeWidth="2.5" strokeDasharray="12 88" strokeDashoffset="-50" />
+                  <circle cx="19" cy="19" r="16" fill="none" stroke={BRAND.gold} strokeWidth="2.5" strokeDasharray="12 88" strokeDashoffset="-75" />
                 </svg>
-                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>⚽</div>
+                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>⚽</div>
               </div>
               <div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: 20, letterSpacing: 0.5, lineHeight: 1 }}>
-                  <span style={{ color: BRAND.red }}>M</span>
-                  <span style={{ color: T.textStrong }}>oundi</span>
-                  <span style={{ color: BRAND.green }}>G</span>
-                  <span style={{ color: T.textStrong }}>uide</span>
+                <div style={{ fontFamily: "'Outfit'", fontWeight: 700, fontSize: 18, lineHeight: 1 }}>
+                  <span style={{ color: BRAND.red }}>M</span><span style={{ color: T.textStrong }}>oundi</span>
+                  <span style={{ color: BRAND.green }}>G</span><span style={{ color: T.textStrong }}>uide</span>
                 </div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 9, fontWeight: 400, color: T.muted, letterSpacing: 2, textTransform: "uppercase", marginTop: 2 }}>
-                  YallaVamos 2030
-                </div>
+                <div style={{ fontFamily: "'Outfit'", fontSize: 8, color: T.muted, letterSpacing: 2, textTransform: "uppercase", marginTop: 1 }}>YallaVamos 2030</div>
               </div>
             </div>
-
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {/* Theme toggle */}
-              <button className="theme-btn" onClick={cycleTheme} title={themeTip} style={{
-                width: 32, height: 32, borderRadius: 8, border: `1px solid ${T.border}`,
+              <button onClick={cycleTheme} title={themeMode} style={{
+                width: 30, height: 30, borderRadius: 8, border: `1px solid ${T.border}`,
                 background: T.card, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 14, position: "relative",
+                fontSize: 13, position: "relative",
               }}>
-                {themeLabel}
-                {themeMode === "system" && <div style={{
-                  position: "absolute", bottom: -1, right: -1, width: 8, height: 8, borderRadius: 4,
-                  background: BRAND.green, border: `1.5px solid ${isDark ? "#0C1117" : "#F8F9FA"}`,
-                }} />}
+                {isDark ? "☀️" : "🌙"}
+                {themeMode === "system" && <div style={{ position: "absolute", bottom: -1, right: -1, width: 7, height: 7, borderRadius: 4, background: BRAND.green, border: `1.5px solid ${isDark ? "#0C1117" : "#F8F9FA"}` }} />}
               </button>
-
-              {/* Lang pill */}
               <div style={{ position: "relative" }}>
-                <button onClick={() => setShowLangMenu(!showLangMenu)} style={{
-                  background: T.card, border: `1px solid ${T.border}`,
-                  borderRadius: 20, padding: "5px 12px", cursor: "pointer",
-                  color: T.textStrong, fontSize: 12, fontWeight: 500,
-                  display: "flex", alignItems: "center", gap: 5,
-                  fontFamily: "'Outfit', sans-serif",
+                <button onClick={(e) => { e.stopPropagation(); setShowLangMenu(!showLangMenu); }} style={{
+                  background: T.card, border: `1px solid ${T.border}`, borderRadius: 18, padding: "4px 10px",
+                  cursor: "pointer", color: T.textStrong, fontSize: 11, fontWeight: 500,
+                  display: "flex", alignItems: "center", gap: 4, fontFamily: "'Outfit'",
                 }}>
-                  <span style={{ fontSize: 14 }}>{currentLang.flag}</span>
+                  <span style={{ fontSize: 13 }}>{currentLang.flag}</span>
                   <span>{currentLang.label}</span>
-                  <span style={{ opacity: 0.4, fontSize: 8 }}>▼</span>
+                  <span style={{ opacity: 0.4, fontSize: 7 }}>▼</span>
                 </button>
                 {showLangMenu && (
-                  <div style={{
+                  <div onClick={e => e.stopPropagation()} style={{
                     position: "absolute", right: 0, top: "calc(100% + 6px)",
                     background: T.dropdown, backdropFilter: "blur(20px)",
                     border: `1px solid ${T.border}`, borderRadius: 10,
-                    overflow: "hidden", zIndex: 100, minWidth: 150,
-                    boxShadow: isDark ? "0 16px 48px rgba(0,0,0,0.5)" : "0 16px 48px rgba(0,0,0,0.12)",
-                    animation: "fadeIn 0.15s ease both",
+                    overflow: "hidden", zIndex: 9999, minWidth: 145,
+                    boxShadow: T.shadow, animation: "fadeIn 0.15s ease both",
                   }}>
-                    {LANGUAGES.map((l) => (
+                    {LANGUAGES.map(l => (
                       <button key={l.code} onClick={() => { setLang(l.code); setShowLangMenu(false); }} style={{
-                        display: "flex", alignItems: "center", gap: 8,
-                        width: "100%", padding: "9px 14px",
+                        display: "flex", alignItems: "center", gap: 7, width: "100%", padding: "8px 12px",
                         background: lang === l.code ? T.langActive : "transparent",
-                        border: "none", cursor: "pointer",
-                        color: lang === l.code ? accentColor : T.text,
-                        fontSize: 12, textAlign: "left", fontFamily: "'Outfit', sans-serif",
+                        border: "none", cursor: "pointer", color: lang === l.code ? accent : T.text,
+                        fontSize: 12, textAlign: "left", fontFamily: "'Outfit'",
                       }}>
-                        <span style={{ fontSize: 15 }}>{l.flag}</span>
-                        <span>{l.label}</span>
+                        <span style={{ fontSize: 14 }}>{l.flag}</span><span>{l.label}</span>
                       </button>
                     ))}
                   </div>
@@ -325,36 +427,23 @@ export default function MoundiGuide() {
               </div>
             </div>
           </div>
-
-          {/* Brand color bar */}
-          <div style={{ display: "flex", height: 3, marginTop: 10, borderRadius: 2, overflow: "hidden" }}>
-            <div style={{ flex: 1, background: BRAND.red }} />
-            <div style={{ flex: 1, background: BRAND.gold }} />
-            <div style={{ flex: 1, background: BRAND.green }} />
-            <div style={{ flex: 1, background: BRAND.blue }} />
+          <div style={{ display: "flex", height: 2.5, marginTop: 8, borderRadius: 2, overflow: "hidden" }}>
+            {[BRAND.red, BRAND.gold, BRAND.green, BRAND.blue].map((c, i) => <div key={i} style={{ flex: 1, background: c }} />)}
           </div>
         </div>
 
         {/* ═══ TABS ═══ */}
-        <div style={{
-          display: "flex", background: T.tabBg, backdropFilter: "blur(12px)",
-          borderBottom: `1px solid ${T.border}`, flexShrink: 0, transition: "background 0.3s",
-        }}>
-          {[
-            { id: "chat", label: lang === "ar" ? "محادثة" : lang === "es" ? "Chat" : lang === "pt" ? "Chat" : lang === "zh" ? "聊天" : "Chat", icon: "💬" },
-            { id: "info", label: lang === "ar" ? "معلومات" : lang === "es" ? "Info" : lang === "pt" ? "Info" : lang === "zh" ? "信息" : "Infos", icon: "ℹ️" },
-            { id: "stadiums", label: lang === "ar" ? "ملاعب" : lang === "es" ? "Estadios" : lang === "pt" ? "Estádios" : lang === "zh" ? "球场" : "Stades", icon: "🏟️" },
-          ].map(tab => (
-            <button key={tab.id} className="tab-btn" onClick={() => setActiveTab(tab.id)} style={{
-              flex: 1, padding: "10px 0", border: "none", cursor: "pointer",
+        <div style={{ display: "flex", background: T.tabBg, backdropFilter: "blur(12px)", borderBottom: `1px solid ${T.border}`, flexShrink: 0, position: "relative", zIndex: 10 }}>
+          {TABS.map(tab => (
+            <button key={tab.id} className="tb" onClick={() => setActiveTab(tab.id)} style={{
+              flex: 1, padding: "9px 0", border: "none", cursor: "pointer",
               background: activeTab === tab.id ? T.tabActive : "transparent",
-              borderBottom: activeTab === tab.id ? `2px solid ${accentColor}` : "2px solid transparent",
-              color: activeTab === tab.id ? accentColor : T.muted,
-              fontSize: 12, fontWeight: 500, fontFamily: "'Outfit', sans-serif",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
-              transition: "all 0.15s",
+              borderBottom: activeTab === tab.id ? `2px solid ${accent}` : "2px solid transparent",
+              color: activeTab === tab.id ? accent : T.muted,
+              fontSize: 11, fontWeight: 500, fontFamily: "'Outfit'",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 4, transition: "all 0.15s",
             }}>
-              <span style={{ fontSize: 13 }}>{tab.icon}</span>{tab.label}
+              <span style={{ fontSize: 12 }}>{tab.icon}</span>{tab.label}
             </button>
           ))}
         </div>
@@ -362,55 +451,33 @@ export default function MoundiGuide() {
         {/* ═══ CONTENT ═══ */}
         <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
 
-          {/* ─── CHAT ─── */}
+          {/* CHAT */}
           {activeTab === "chat" && (
-            <div style={{ flex: 1, padding: "16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ flex: 1, padding: "14px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
               {messages.map((msg, i) => (
-                <div key={i} className="msg-enter" style={{
-                  display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-                  direction: isRTL ? "rtl" : "ltr",
-                }}>
+                <div key={i} className="msg-e" style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", direction: isRTL ? "rtl" : "ltr" }}>
                   {msg.role === "assistant" && (
-                    <div style={{
-                      width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-                      background: `linear-gradient(135deg, ${BRAND.red}, ${BRAND.green})`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 13, marginRight: isRTL ? 0 : 7, marginLeft: isRTL ? 7 : 0, marginTop: 2,
-                    }}>⚽</div>
+                    <div style={{ width: 26, height: 26, borderRadius: "50%", flexShrink: 0, background: `linear-gradient(135deg, ${BRAND.red}, ${BRAND.green})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, marginRight: isRTL ? 0 : 6, marginLeft: isRTL ? 6 : 0, marginTop: 2 }}>⚽</div>
                   )}
                   <div style={{
-                    maxWidth: "80%", padding: "10px 14px",
-                    borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                    maxWidth: "82%", padding: "10px 13px",
+                    borderRadius: msg.role === "user" ? "14px 14px 3px 14px" : "14px 14px 14px 3px",
                     background: msg.role === "user" ? T.userBubble : T.botBubble,
                     border: msg.role === "user" ? "none" : `1px solid ${T.botBubbleBorder}`,
                     color: msg.role === "user" ? T.userText : T.botText,
-                    fontSize: 13, lineHeight: 1.6,
-                    fontFamily: isRTL ? "'Noto Sans Arabic', sans-serif" : "'Outfit', sans-serif",
-                    fontWeight: 300, textAlign: isRTL ? "right" : "left", whiteSpace: "pre-wrap",
+                    fontSize: 13, lineHeight: 1.55,
+                    fontFamily: isRTL ? "'Noto Sans Arabic'" : "'Outfit'", fontWeight: 300,
+                    textAlign: isRTL ? "right" : "left",
                   }}>
-                    {msg.content}
+                    {msg.role === "assistant" ? renderMarkdown(msg.content) : msg.content}
                   </div>
                 </div>
               ))}
               {loading && (
-                <div className="msg-enter" style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <div style={{
-                    width: 28, height: 28, borderRadius: "50%",
-                    background: `linear-gradient(135deg, ${BRAND.red}, ${BRAND.green})`,
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13,
-                  }}>⚽</div>
-                  <div style={{
-                    padding: "10px 14px", borderRadius: "16px 16px 16px 4px",
-                    background: T.botBubble, border: `1px solid ${T.botBubbleBorder}`,
-                    display: "flex", gap: 4,
-                  }}>
-                    {[0, 0.15, 0.3].map((d, i) => (
-                      <div key={i} style={{
-                        width: 6, height: 6, borderRadius: "50%",
-                        background: accentColor, animation: `dotPulse 1s ease-in-out infinite`,
-                        animationDelay: `${d}s`,
-                      }} />
-                    ))}
+                <div className="msg-e" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 26, height: 26, borderRadius: "50%", background: `linear-gradient(135deg, ${BRAND.red}, ${BRAND.green})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>⚽</div>
+                  <div style={{ padding: "10px 13px", borderRadius: "14px 14px 14px 3px", background: T.botBubble, border: `1px solid ${T.botBubbleBorder}`, display: "flex", gap: 4 }}>
+                    {[0, .15, .3].map((d, i) => <div key={i} style={{ width: 5, height: 5, borderRadius: "50%", background: accent, animation: `dotPulse 1s ease-in-out infinite`, animationDelay: `${d}s` }} />)}
                   </div>
                 </div>
               )}
@@ -418,144 +485,128 @@ export default function MoundiGuide() {
             </div>
           )}
 
-          {/* ─── INFO ─── */}
-          {activeTab === "info" && (
-            <div style={{ padding: "16px 14px", animation: "fadeIn 0.3s ease" }}>
-              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 16, fontWeight: 600, color: T.textStrong, marginBottom: 14, direction: isRTL ? "rtl" : "ltr" }}>
-                {info.title}
+          {/* MAP */}
+          {activeTab === "map" && (
+            <div style={{ padding: "14px 12px", animation: "fadeIn 0.3s ease" }}>
+              <div style={{ fontFamily: "'Outfit'", fontSize: 15, fontWeight: 600, color: T.textStrong, marginBottom: 10 }}>
+                🗺️ {isRTL ? "خريطة الملاعب" : lang === "es" ? "Mapa de estadios" : "Carte des stades"}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <StadiumMap T={T} onSelectStadium={(s) => sendMessage(
+                lang === "ar" ? `أخبرني عن ملعب ${s.city}` :
+                lang === "es" ? `Háblame del estadio de ${s.city}` :
+                `Parle-moi du stade de ${s.city}, accès, restaurants et hôtels à proximité`
+              )} />
+              <div style={{ fontFamily: "'Outfit'", fontSize: 10, color: T.muted, marginTop: 8, textAlign: "center" }}>
+                {isRTL ? "انقر على ملعب للحصول على معلومات" : "Cliquez sur un stade pour obtenir des informations"}
+              </div>
+            </div>
+          )}
+
+          {/* INFO */}
+          {activeTab === "info" && (
+            <div style={{ padding: "14px 12px", animation: "fadeIn 0.3s ease" }}>
+              <div style={{ fontFamily: "'Outfit'", fontSize: 15, fontWeight: 600, color: T.textStrong, marginBottom: 12, direction: isRTL ? "rtl" : "ltr" }}>{info.title}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7 }}>
                 {info.items.map((item, i) => (
-                  <div key={i} style={{
-                    background: T.card, border: `1px solid ${T.border}`,
-                    borderRadius: 10, padding: "12px", direction: isRTL ? "rtl" : "ltr",
-                    transition: "background 0.2s",
-                  }}>
-                    <div style={{ fontSize: 18, marginBottom: 4 }}>{item.icon}</div>
-                    <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 10, fontWeight: 400, color: T.muted, textTransform: "uppercase", letterSpacing: 0.5 }}>{item.label}</div>
-                    <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600, color: T.textStrong, marginTop: 2 }}>{item.value}</div>
+                  <div key={i} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: 10, direction: isRTL ? "rtl" : "ltr" }}>
+                    <div style={{ fontSize: 16, marginBottom: 3 }}>{item.icon}</div>
+                    <div style={{ fontFamily: "'Outfit'", fontSize: 9, color: T.muted, textTransform: "uppercase", letterSpacing: .5 }}>{item.label}</div>
+                    <div style={{ fontFamily: "'Outfit'", fontSize: 13, fontWeight: 600, color: T.textStrong, marginTop: 1 }}>{item.value}</div>
                   </div>
                 ))}
               </div>
+              <CurrencyConverter T={T} isRTL={isRTL} />
               {/* Darija phrases */}
-              <div style={{ marginTop: 16, background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px" }}>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 600, color: accentColor, marginBottom: 10 }}>
-                  🗣️ {lang === "ar" ? "عبارات بالدارجة" : lang === "es" ? "Frases en Darija" : lang === "pt" ? "Frases em Darija" : lang === "zh" ? "达里贾常用语" : "Phrases en Darija"}
+              <div style={{ marginTop: 14, background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: 14 }}>
+                <div style={{ fontFamily: "'Outfit'", fontSize: 13, fontWeight: 600, color: accent, marginBottom: 10 }}>
+                  🗣️ {isRTL ? "عبارات بالدارجة" : "Phrases en Darija"}
                 </div>
                 {[
-                  { darija: "Salam", trans: lang === "ar" ? "مرحبا" : lang === "es" ? "Hola" : lang === "pt" ? "Olá" : lang === "zh" ? "你好" : "Bonjour" },
-                  { darija: "Beshhal?", trans: lang === "ar" ? "بكم؟" : lang === "es" ? "¿Cuánto?" : lang === "pt" ? "Quanto?" : lang === "zh" ? "多少钱？" : "Combien ?" },
-                  { darija: "Shukran", trans: lang === "ar" ? "شكرا" : lang === "es" ? "Gracias" : lang === "pt" ? "Obrigado" : lang === "zh" ? "谢谢" : "Merci" },
-                  { darija: "La, shukran", trans: lang === "ar" ? "لا، شكرا" : lang === "es" ? "No, gracias" : lang === "pt" ? "Não, obrigado" : lang === "zh" ? "不用了" : "Non, merci" },
-                  { darija: "Fin kayn...?", trans: lang === "ar" ? "فين كاين؟" : lang === "es" ? "¿Dónde está?" : lang === "pt" ? "Onde fica?" : lang === "zh" ? "在哪里？" : "Où est...?" },
-                ].map((ph, i) => (
-                  <div key={i} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "7px 0", borderBottom: i < 4 ? `1px solid ${T.phraseBorder}` : "none",
-                    direction: isRTL ? "rtl" : "ltr",
-                  }}>
-                    <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 500, color: T.textStrong }}>{ph.darija}</span>
-                    <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, color: T.muted }}>{ph.trans}</span>
+                  { d: "Salam", t: lang==="ar"?"مرحبا":lang==="es"?"Hola":"Bonjour" },
+                  { d: "Beshhal?", t: lang==="ar"?"بكم؟":lang==="es"?"¿Cuánto?":"Combien ?" },
+                  { d: "Shukran", t: lang==="ar"?"شكرا":lang==="es"?"Gracias":"Merci" },
+                  { d: "La, shukran", t: lang==="ar"?"لا شكرا":lang==="es"?"No, gracias":"Non, merci" },
+                  { d: "Fin kayn...?", t: lang==="ar"?"فين كاين؟":lang==="es"?"¿Dónde está?":"Où est...?" },
+                  { d: "Mezyan", t: lang==="ar"?"مزيان / جيد":lang==="es"?"Bien":"Bien / Cool" },
+                ].map((p, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: i < 5 ? `1px solid ${T.border}` : "none" }}>
+                    <span style={{ fontFamily: "'Outfit'", fontSize: 13, fontWeight: 500, color: T.textStrong }}>{p.d}</span>
+                    <span style={{ fontFamily: "'Outfit'", fontSize: 12, color: T.muted }}>{p.t}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ─── STADIUMS ─── */}
+          {/* STADIUMS */}
           {activeTab === "stadiums" && (
-            <div style={{ padding: "16px 14px", animation: "fadeIn 0.3s ease" }}>
-              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 16, fontWeight: 600, color: T.textStrong, marginBottom: 4 }}>
-                🇲🇦 {lang === "ar" ? "ملاعب المغرب" : lang === "es" ? "Estadios de Marruecos" : lang === "pt" ? "Estádios de Marrocos" : lang === "zh" ? "摩洛哥球场" : "Stades du Maroc"}
+            <div style={{ padding: "14px 12px", animation: "fadeIn 0.3s ease" }}>
+              <div style={{ fontFamily: "'Outfit'", fontSize: 15, fontWeight: 600, color: T.textStrong, marginBottom: 3 }}>
+                🇲🇦 {isRTL ? "ملاعب المغرب" : "Stades du Maroc"}
               </div>
-              <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, color: T.muted, marginBottom: 14 }}>
-                6 {lang === "ar" ? "مدن مستضيفة" : lang === "es" ? "ciudades" : lang === "pt" ? "cidades" : lang === "zh" ? "个城市" : "villes hôtes"}
+              <div style={{ fontFamily: "'Outfit'", fontSize: 10, color: T.muted, marginBottom: 12 }}>
+                6 {isRTL ? "مدن مستضيفة" : "villes hôtes"} — {isRTL ? "انقر للتفاصيل" : "Cliquez pour les détails"}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {STADIUMS.map((s, i) => (
-                  <button key={i} className="topic-btn" onClick={() => sendMessage(
-                    lang === "ar" ? `أخبرني عن ملعب ${s.city}` :
-                    lang === "es" ? `Háblame del estadio de ${s.city}` :
-                    lang === "pt" ? `Fale-me do estádio de ${s.city}` :
-                    lang === "zh" ? `告诉我${s.city}球场的信息` :
-                    `Parle-moi du stade de ${s.city}, accès, restaurants et hôtels à proximité`
-                  )} style={{
-                    background: T.card, border: `1px solid ${T.border}`,
-                    borderRadius: 10, padding: "12px 14px", cursor: "pointer",
-                    textAlign: "left", display: "flex", alignItems: "center", gap: 12,
-                    borderLeft: `3px solid ${[BRAND.red, BRAND.green, BRAND.gold, BRAND.blue, BRAND.red, BRAND.green][i]}`,
-                  }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600, color: T.textStrong }}>{s.city}</div>
-                      <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 11, color: T.muted, marginTop: 2 }}>{s.name}</div>
-                    </div>
-                    <div style={{
-                      fontFamily: "'Outfit', sans-serif", fontSize: 11, fontWeight: 600,
-                      color: T.stadiumCapacityText, background: T.stadiumCapacity,
-                      padding: "3px 8px", borderRadius: 6,
-                    }}>{s.capacity}</div>
-                  </button>
-                ))}
-              </div>
+              {STADIUMS.map((s, i) => (
+                <button key={i} className="tb" onClick={() => sendMessage(
+                  lang === "ar" ? `أخبرني عن ملعب ${s.city}` :
+                  `Parle-moi du stade de ${s.city}, accès, restaurants et hôtels à proximité`
+                )} style={{
+                  background: T.card, border: `1px solid ${T.border}`, borderRadius: 10,
+                  padding: "11px 12px", cursor: "pointer", textAlign: "left", width: "100%",
+                  display: "flex", alignItems: "center", gap: 10, marginBottom: 7,
+                  borderLeft: `3px solid ${[BRAND.red, BRAND.green, BRAND.gold, BRAND.blue, BRAND.red, BRAND.green][i]}`,
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: "'Outfit'", fontSize: 13, fontWeight: 600, color: T.textStrong }}>{s.city}</div>
+                    <div style={{ fontFamily: "'Outfit'", fontSize: 10, color: T.muted, marginTop: 1 }}>{s.name}</div>
+                  </div>
+                  <div style={{ fontFamily: "'Outfit'", fontSize: 10, fontWeight: 600, color: isDark ? BRAND.gold : BRAND.red, background: T.tabActive, padding: "2px 7px", borderRadius: 5 }}>
+                    {s.capacity}
+                  </div>
+                </button>
+              ))}
             </div>
           )}
         </div>
 
         {/* ═══ QUICK TOPICS ═══ */}
-        <div style={{
-          padding: "6px 14px", display: "flex", gap: 6,
-          overflowX: "auto", flexShrink: 0, scrollbarWidth: "none",
-          borderTop: `1px solid ${T.border}`,
-        }}>
+        <div style={{ padding: "5px 12px", display: "flex", gap: 5, overflowX: "auto", flexShrink: 0, scrollbarWidth: "none", borderTop: `1px solid ${T.border}` }}>
           {QUICK_TOPICS[lang].map((topic, i) => (
-            <button key={i} className="topic-btn" onClick={() => sendMessage(topic)} style={{
-              whiteSpace: "nowrap", padding: "5px 10px",
-              background: T.card, border: `1px solid ${T.border}`,
-              borderRadius: 16, color: T.muted, fontSize: 11,
-              cursor: "pointer", fontFamily: isRTL ? "'Noto Sans Arabic', sans-serif" : "'Outfit', sans-serif",
-              fontWeight: 400,
+            <button key={i} className="tb" onClick={() => sendMessage(topic)} style={{
+              whiteSpace: "nowrap", padding: "4px 9px", background: T.card, border: `1px solid ${T.border}`,
+              borderRadius: 14, color: T.muted, fontSize: 10, cursor: "pointer",
+              fontFamily: isRTL ? "'Noto Sans Arabic'" : "'Outfit'", fontWeight: 400,
             }}>{topic}</button>
           ))}
         </div>
 
         {/* ═══ INPUT ═══ */}
-        <div style={{
-          padding: "10px 14px 14px", background: T.inputBg,
-          backdropFilter: "blur(24px)", flexShrink: 0, transition: "background 0.3s",
-        }}>
-          <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
-            <textarea
-              ref={inputRef} value={input}
-              onChange={e => setInput(e.target.value)}
+        <div style={{ padding: "8px 12px 12px", background: T.inputBg, backdropFilter: "blur(24px)", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: 7, alignItems: "flex-end" }}>
+            <textarea ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
               placeholder={PLACEHOLDERS[lang]} rows={1} dir={isRTL ? "rtl" : "ltr"}
               style={{
-                flex: 1, resize: "none", padding: "10px 12px",
-                background: T.inputField, border: `1px solid ${T.inputBorder}`,
-                borderRadius: 12, color: T.inputText, fontSize: 13,
-                fontFamily: isRTL ? "'Noto Sans Arabic', sans-serif" : "'Outfit', sans-serif",
-                fontWeight: 300, lineHeight: 1.5, transition: "border-color 0.2s",
-              }}
-            />
-            <button className="send-btn" onClick={() => sendMessage()} disabled={!input.trim() || loading} style={{
-              width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                flex: 1, resize: "none", padding: "9px 11px", background: T.inputField,
+                border: `1px solid ${T.inputBorder}`, borderRadius: 10, color: T.inputText,
+                fontSize: 13, fontFamily: isRTL ? "'Noto Sans Arabic'" : "'Outfit'",
+                fontWeight: 300, lineHeight: 1.5, transition: "border-color .2s",
+              }} />
+            <button className="sb" onClick={() => sendMessage()} disabled={!input.trim() || loading} style={{
+              width: 38, height: 38, borderRadius: 10, flexShrink: 0,
               background: input.trim() && !loading ? `linear-gradient(135deg, ${BRAND.red}, ${BRAND.green})` : T.card,
               border: input.trim() && !loading ? "none" : `1px solid ${T.border}`,
               cursor: input.trim() && !loading ? "pointer" : "not-allowed",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 16, transition: "all 0.2s", color: input.trim() && !loading ? "white" : T.muted,
+              fontSize: 15, transition: "all .2s", color: input.trim() && !loading ? "white" : T.muted,
             }}>
-              {loading
-                ? <div style={{ width: 16, height: 16, border: `2px solid ${T.border}`, borderTopColor: accentColor, borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
-                : "➤"}
+              {loading ? <div style={{ width: 14, height: 14, border: `2px solid ${T.border}`, borderTopColor: accent, borderRadius: "50%", animation: "spin .6s linear infinite" }} /> : "➤"}
             </button>
           </div>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 8 }}>
-            <div style={{ width: 8, height: 3, borderRadius: 2, background: BRAND.red }} />
-            <div style={{ width: 8, height: 3, borderRadius: 2, background: BRAND.gold }} />
-            <div style={{ width: 8, height: 3, borderRadius: 2, background: BRAND.green }} />
-            <div style={{ width: 8, height: 3, borderRadius: 2, background: BRAND.blue }} />
-            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 9, color: T.muted, letterSpacing: 1.5, marginLeft: 6 }}>YALLAVAMOS 2030</span>
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 5, marginTop: 6 }}>
+            {[BRAND.red, BRAND.gold, BRAND.green, BRAND.blue].map((c, i) => <div key={i} style={{ width: 7, height: 2.5, borderRadius: 2, background: c }} />)}
+            <span style={{ fontFamily: "'Outfit'", fontSize: 8, color: T.muted, letterSpacing: 1.5, marginLeft: 4 }}>YALLAVAMOS 2030</span>
           </div>
         </div>
       </div>
