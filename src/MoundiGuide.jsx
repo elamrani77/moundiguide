@@ -11,6 +11,15 @@ const LANGUAGES = [
 
 const PLACEHOLDERS = { fr:"Posez votre question...", en:"Ask your question...", ar:"...اطرح سؤالك", es:"Haz tu pregunta...", pt:"Faça sua pergunta...", zh:"请输入问题..." };
 
+const QUICK_TOPICS = {
+  fr: ["🏟️ Stades", "🚇 Transport", "🍜 Restaurants", "🏨 Hôtels", "🚑 Urgences", "🕌 Culture", "☀️ Météo"],
+  en: ["🏟️ Stadiums", "🚇 Transport", "🍜 Food", "🏨 Hotels", "🚑 Emergency", "🕌 Culture", "☀️ Weather"],
+  ar: ["🏟️ ملاعب", "🚇 نقل", "🍜 مطاعم", "🏨 فنادق", "🚑 طوارئ", "🕌 ثقافة", "☀️ طقس"],
+  es: ["🏟️ Estadios", "🚇 Transporte", "🍜 Comida", "🏨 Hoteles", "🚑 Urgencias", "🕌 Cultura", "☀️ Clima"],
+  pt: ["🏟️ Estádios", "🚇 Transporte", "🍜 Comida", "🏨 Hotéis", "🚑 Urgências", "🕌 Cultura", "☀️ Tempo"],
+  zh: ["🏟️ 球场", "🚇 交通", "🍜 美食", "🏨 酒店", "🚑 急救", "🕌 文化", "☀️ 天气"],
+};
+
 const SYSTEM_PROMPTS = {
   fr:`Tu es MoundiGuide, assistant IA du Mondial 2030 (Maroc, Espagne, Portugal). Réponds en 3-5 phrases MAX. Sois direct, pratique. Emojis. Villes: Casablanca, Rabat, Marrakech, Tanger, Agadir, Fès.`,
   en:`You are MoundiGuide, 2030 World Cup AI assistant. Reply in 3-5 sentences MAX. Be direct, practical. Emojis. Cities: Casablanca, Rabat, Marrakech, Tangier, Agadir, Fez.`,
