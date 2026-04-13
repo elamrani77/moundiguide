@@ -66,17 +66,64 @@ const DARIJA = [{d:"Salam",t:{fr:"Bonjour",en:"Hello",ar:"مرحبا",es:"Hola"}
 const BR = {red:"#C41E3A",green:"#00823C",blue:"#1A56DB",gold:"#F5A623"};
 
 const VIDEOS = [
-  {id:"eMKxJMpOkKs",title:"YallaVamos 2030 — Vidéo officielle"},
-  {id:"dMfYBg8NbKI",title:"Grand Stade Hassan II — Casablanca"},
-  {id:"SVa7gVMLfEo",title:"FIFA World Cup 2030 — Morocco"},
-  {id:"Tn0pJ7rXE5Q",title:"Maroc — La terre du football"},
+  {id:"eMKxJMpOkKs",title:"🎬 YallaVamos 2030 — Vidéo officielle"},
+  {id:"dMfYBg8NbKI",title:"🏟️ Grand Stade Hassan II — Construction"},
+  {id:"xQGzgE4LIGY",title:"🏆 France 2018 — Tous les buts"},
+  {id:"BKqSxG9ypEk",title:"🇦🇷 Argentine 2022 — Le sacre de Messi"},
+  {id:"YjmM-2NZGGE",title:"🇲🇦 Maroc 2022 — L'épopée historique"},
+  {id:"r7eFsfINmpg",title:"⚽ Top 50 — Plus beaux buts en Coupe du Monde"},
 ];
+
+const CAROUSEL_PHOTOS = [
+  "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=800&h=350&fit=crop",
+  "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=350&fit=crop",
+  "https://images.unsplash.com/photo-1597212618440-806b84589018?w=800&h=350&fit=crop",
+  "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&h=350&fit=crop",
+  "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&h=350&fit=crop",
+  "https://images.unsplash.com/photo-1569383746724-6f1b882b8f46?w=800&h=350&fit=crop",
+];
+const CAROUSEL_LABELS = ["Casablanca","Rabat","Marrakech","Tanger","Agadir","Fès"];
 const TH = {
   dark:{bg:"#0C1117",hdr:"rgba(0,0,0,0.7)",card:"rgba(255,255,255,0.04)",bdr:"rgba(255,255,255,0.07)",txt:"rgba(255,255,255,0.88)",str:"#FFF",mut:"rgba(255,255,255,0.4)",fld:"rgba(255,255,255,0.05)",bot:"rgba(255,255,255,0.04)",bbdr:"rgba(255,255,255,0.07)",usr:`linear-gradient(135deg,${BR.red},#A01830)`,dd:"rgba(12,17,23,0.98)",la:"rgba(245,166,35,0.08)",sh:"0 12px 40px rgba(0,0,0,0.5)",sc:"rgba(255,255,255,0.08)",adBg:"#0A0E13",chatBg:"rgba(0,0,0,0.3)"},
   light:{bg:"#F5F6F8",hdr:"rgba(255,255,255,0.92)",card:"rgba(0,0,0,0.025)",bdr:"rgba(0,0,0,0.07)",txt:"rgba(0,0,0,0.8)",str:"#111",mut:"rgba(0,0,0,0.4)",fld:"rgba(0,0,0,0.03)",bot:"rgba(0,0,0,0.03)",bbdr:"rgba(0,0,0,0.07)",usr:`linear-gradient(135deg,${BR.red},#E02040)`,dd:"rgba(255,255,255,0.99)",la:"rgba(196,30,58,0.05)",sh:"0 12px 40px rgba(0,0,0,0.08)",sc:"rgba(0,0,0,0.08)",adBg:"#1A1E24",chatBg:"rgba(255,255,255,0.5)"},
 };
 
 function md(t){if(!t)return t;return t.split("\n").map((l,i)=>{let c=l.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");if(l.startsWith("- ")||l.startsWith("• "))return<div key={i} style={{paddingLeft:10,marginBottom:1}} dangerouslySetInnerHTML={{__html:"• "+c.slice(2)}}/>;if(l.trim()==="")return<div key={i} style={{height:5}}/>;return<div key={i} dangerouslySetInnerHTML={{__html:c}}/>;});}
+
+// Splash Screen
+function Splash({onDone}){
+  useEffect(()=>{const t=setTimeout(onDone,2800);return()=>clearTimeout(t);},[onDone]);
+  return(<div style={{position:"fixed",inset:0,zIndex:999999,background:"linear-gradient(135deg,#0C1117 0%,#1a0a0a 50%,#0C1117 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",animation:"fadeIn .5s ease"}}>
+    <style>{`@keyframes kickBall{0%{transform:translateY(0) rotate(0deg)}30%{transform:translateY(-60px) rotate(180deg)}50%{transform:translateY(0) rotate(360deg)}70%{transform:translateY(-30px) rotate(540deg)}100%{transform:translateY(0) rotate(720deg)}}@keyframes growBar{from{width:0}to{width:100%}}@keyframes fadeOut{from{opacity:1}to{opacity:0}}`}</style>
+    <div style={{fontSize:64,animation:"kickBall 1.5s ease-in-out infinite"}}>⚽</div>
+    <div style={{fontFamily:"'Outfit',sans-serif",fontSize:28,fontWeight:800,marginTop:16,letterSpacing:1}}>
+      <span style={{color:"#C41E3A"}}>M</span><span style={{color:"#FFF"}}>oundi</span><span style={{color:"#00823C"}}>G</span><span style={{color:"#FFF"}}>uide</span>
+    </div>
+    <div style={{fontFamily:"'Outfit',sans-serif",fontSize:11,color:"#F5A623",letterSpacing:4,marginTop:6}}>YALLAVAMOS 2030</div>
+    <div style={{width:120,height:3,background:"rgba(255,255,255,0.1)",borderRadius:2,marginTop:20,overflow:"hidden"}}>
+      <div style={{height:"100%",background:"linear-gradient(90deg,#C41E3A,#F5A623,#00823C)",borderRadius:2,animation:"growBar 2.5s ease-out forwards"}}/>
+    </div>
+    <div style={{display:"flex",gap:6,marginTop:14}}>
+      <span style={{fontSize:20}}>🇲🇦</span><span style={{fontSize:20}}>🇪🇸</span><span style={{fontSize:20}}>🇵🇹</span>
+    </div>
+  </div>);
+}
+
+// Photo Carousel
+function Carousel({C}){
+  const[idx,setIdx]=useState(0);
+  useEffect(()=>{const id=setInterval(()=>setIdx(p=>(p+1)%CAROUSEL_PHOTOS.length),3500);return()=>clearInterval(id);},[]);
+  return(<div style={{position:"relative",width:"100%",height:180,borderRadius:10,overflow:"hidden",border:`1px solid ${C.bdr}`}}>
+    {CAROUSEL_PHOTOS.map((p,i)=>(<img key={i} src={p} alt={CAROUSEL_LABELS[i]} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",opacity:i===idx?1:0,transition:"opacity .8s ease"}}/>))}
+    <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"20px 12px 8px",background:"linear-gradient(transparent,rgba(0,0,0,0.7))"}}>
+      <div style={{fontFamily:"'Outfit'",fontSize:16,fontWeight:700,color:"#FFF"}}>{CAROUSEL_LABELS[idx]}</div>
+      <div style={{fontFamily:"'Outfit'",fontSize:9,color:"rgba(255,255,255,0.7)"}}>Ville hôte — Mondial 2030</div>
+    </div>
+    <div style={{position:"absolute",bottom:6,right:10,display:"flex",gap:4}}>
+      {CAROUSEL_PHOTOS.map((_,i)=>(<div key={i} onClick={()=>setIdx(i)} style={{width:i===idx?16:6,height:6,borderRadius:3,background:i===idx?"#F5A623":"rgba(255,255,255,0.4)",cursor:"pointer",transition:"all .3s"}}/>))}
+    </div>
+  </div>);
+}
 
 // Ad Banner
 function AdBanner({C}){const[o,setO]=useState(0);const t=ADS.join("     ★     ");useEffect(()=>{const id=setInterval(()=>setO(p=>p-1),30);return()=>clearInterval(id);},[]);
@@ -97,6 +144,7 @@ function SMap({C,onSelect,height}){const ref=useRef(null);const mR=useRef(null);
 // MAIN APP
 // ═══════════════════════════════════════
 export default function MoundiGuide(){
+  const[splash,setSplash]=useState(true);
   const[lang,setLang]=useState("fr");
   const[msgs,setMsgs]=useState([]);
   const[input,setInput]=useState("");
@@ -166,6 +214,8 @@ export default function MoundiGuide(){
   );
 
   return(
+    <>
+    {splash&&<Splash onDone={()=>setSplash(false)}/>}
     <div style={{height:"100vh",width:"100vw",overflow:"hidden",background:C.bg,fontFamily:"'Segoe UI',system-ui,sans-serif",display:"flex",flexDirection:"column",transition:"background .3s"}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;600&display=swap');
@@ -251,6 +301,9 @@ export default function MoundiGuide(){
           {/* CENTER: Map + Matches + Stadiums + Info */}
           <div style={{flex:1,overflowY:"auto",minWidth:0}}>
             <div style={{padding:12}}>
+              <Carousel C={C}/>
+            </div>
+            <div style={{padding:"0 12px 12px"}}>
               <div style={{fontFamily:F,fontSize:14,fontWeight:700,color:C.str,marginBottom:8}}>🗺️ Carte des stades</div>
               <SMap C={C} onSelect={s=>send(`Parle-moi du stade de ${s.city}`)} height={280}/>
             </div>
@@ -335,7 +388,7 @@ export default function MoundiGuide(){
               {renderInput()}
             </>)}
             {tab==="matchs"&&(<div style={{padding:10}}><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:8}}>📅 Matchs</div>{MATCHES.map((m,i)=>(<div key={i} style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:7,padding:"7px 9px",marginBottom:5,borderLeft:`3px solid ${m.ph==="F"?BR.gold:m.ph==="S"?BR.blue:m.ph==="Q"?BR.green:BR.red}`}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}><span style={{fontFamily:F,fontSize:7,color:ac,fontWeight:600}}>{m.ph==="G"?"Groupe":m.ph==="8"?"8èmes":m.ph==="Q"?"Quarts":m.ph==="S"?"Demis":"Finale"}</span><span style={{fontFamily:F,fontSize:7,color:C.mut}}>{m.d}</span></div><div style={{fontFamily:F,fontSize:11,fontWeight:600,color:C.str}}>{m.a} vs {m.b}</div><div style={{fontFamily:F,fontSize:8,color:C.mut}}>📍 {m.c}</div></div>))}</div>)}
-            {tab==="map"&&(<div style={{padding:10}}><SMap C={C} onSelect={s=>send(`Parle-moi du stade de ${s.city}`)} height={280}/><div style={{marginTop:6}}><Weather C={C} city={weatherCity}/></div><div style={{display:"flex",gap:4,marginTop:5,flexWrap:"wrap"}}>{STADIUMS.map(s=><button key={s.city} onClick={()=>setWeatherCity(s.city)} style={{padding:"2px 5px",borderRadius:10,border:`1px solid ${C.bdr}`,background:weatherCity===s.city?C.la:C.card,color:weatherCity===s.city?ac:C.txt,fontSize:8,cursor:"pointer",fontFamily:F}}>{s.city}</button>)}</div></div>)}
+            {tab==="map"&&(<div style={{padding:10}}><Carousel C={C}/><div style={{marginTop:8}}><SMap C={C} onSelect={s=>send(`Parle-moi du stade de ${s.city}`)} height={280}/></div><div style={{marginTop:6}}><Weather C={C} city={weatherCity}/></div><div style={{display:"flex",gap:4,marginTop:5,flexWrap:"wrap"}}>{STADIUMS.map(s=><button key={s.city} onClick={()=>setWeatherCity(s.city)} style={{padding:"2px 5px",borderRadius:10,border:`1px solid ${C.bdr}`,background:weatherCity===s.city?C.la:C.card,color:weatherCity===s.city?ac:C.txt,fontSize:8,cursor:"pointer",fontFamily:F}}>{s.city}</button>)}</div></div>)}
             {tab==="rankings"&&(<div style={{padding:10}}><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:6}}>🏆 FIFA Rankings — Jan 2026</div>{FIFA_RANKINGS.map((r,idx)=>(<div key={r.r} className={`card-anim stagger-${Math.min(idx%6,5)}`} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 5px",borderRadius:5,marginBottom:1,background:(r.f==="🇲🇦"||r.f==="🇪🇸"||r.f==="🇵🇹")?C.la:"transparent"}}><span style={{fontFamily:F,fontSize:9,fontWeight:600,color:C.mut,width:14,textAlign:"right"}}>{r.r}</span><span style={{fontSize:13}}>{r.f}</span><span style={{fontFamily:F,fontSize:10,fontWeight:r.f==="🇲🇦"?700:500,color:C.str,flex:1}}>{r.t}</span><span style={{fontFamily:F,fontSize:8,color:C.mut}}>{r.p}</span><span style={{fontSize:7,color:r.c==="up"?"#22C55E":r.c==="dn"?"#EF4444":"#888"}}>{r.c==="up"?"▲":r.c==="dn"?"▼":"•"}</span></div>))}<div style={{height:1,background:C.bdr,margin:"10px 0"}}/><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:6}}>📰 Actualités</div>{NEWS.map((n,i)=>(<div key={i} className="card-anim" onClick={()=>send(n.t)} style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:7,padding:"7px 9px",marginBottom:5,cursor:"pointer"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}><span style={{fontFamily:F,fontSize:7,color:n.tc,fontWeight:600}}>{n.tg}</span><span style={{fontFamily:F,fontSize:7,color:C.mut}}>{n.d}</span></div><div style={{fontFamily:F,fontSize:10,fontWeight:500,color:C.str,lineHeight:1.3}}>{n.t}</div></div>))}</div>)}
             {tab==="videos"&&(<div style={{padding:10,animation:"fadeIn .3s ease"}}><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:8}}>🎬 Vidéos Mondial 2030</div>{VIDEOS.map((v,i)=>(<div key={i} className="card-anim" style={{marginBottom:10,borderRadius:10,overflow:"hidden",border:`1px solid ${C.bdr}`}}><div style={{position:"relative",paddingBottom:"56.25%",height:0}}><iframe src={`https://www.youtube.com/embed/${v.id}`} title={v.title} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowFullScreen style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",border:"none"}}/></div><div style={{padding:"8px 10px",background:C.card}}><div style={{fontFamily:F,fontSize:11,fontWeight:600,color:C.str}}>{v.title}</div></div></div>))}</div>)}
             {tab==="info"&&(<div style={{padding:10}}><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:6}}>ℹ️ Infos pratiques</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5}}>{INFO_ITEMS.map((it,i)=>(<div key={i} style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:7,padding:8,textAlign:"center"}}><div style={{fontSize:15}}>{it.i}</div><div style={{fontFamily:F,fontSize:12,fontWeight:600,color:C.str}}>{it.v}</div><div style={{fontFamily:F,fontSize:8,color:C.mut}}>{it.l}</div></div>))}</div><CurrConv C={C}/><div style={{marginTop:8,background:C.card,border:`1px solid ${C.bdr}`,borderRadius:8,padding:10}}><div style={{fontFamily:F,fontSize:11,fontWeight:600,color:ac,marginBottom:6}}>🗣️ Darija</div>{DARIJA.map((p,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:i<4?`1px solid ${C.bdr}`:"none"}}><span style={{fontFamily:F,fontSize:11,fontWeight:500,color:C.str}}>{p.d}</span><span style={{fontFamily:F,fontSize:10,color:C.mut}}>{p.t[lang]||p.t.en}</span></div>))}</div></div>)}
@@ -349,5 +402,6 @@ export default function MoundiGuide(){
         <span style={{fontFamily:F,fontSize:7,color:C.mut,letterSpacing:1.5,marginLeft:3}}>YALLAVAMOS 2030</span>
       </div>
     </div>
+    </>
   );
 }
