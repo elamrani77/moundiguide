@@ -35,13 +35,13 @@ const STADIUMS = [
   { city:"Fès", name:"Nouveau Stade de Fès", cap:"50 000", lat:34.02, lng:-5.01, img:"https://images.unsplash.com/photo-1569383746724-6f1b882b8f46?w=400&h=200&fit=crop" },
 ];
 const FIFA_RANKINGS = [
-  {r:1,t:"France",f:"🇫🇷",p:1860,c:"up"},{r:2,t:"Spain",f:"🇪🇸",p:1853,c:"dn"},{r:3,t:"Argentina",f:"🇦🇷",p:1849,c:"dn"},
-  {r:4,t:"England",f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",p:1797,c:"="},{r:5,t:"Brazil",f:"🇧🇷",p:1775,c:"dn"},{r:6,t:"Portugal",f:"🇵🇹",p:1756,c:"up"},
-  {r:7,t:"Netherlands",f:"🇳🇱",p:1747,c:"="},{r:8,t:"Belgium",f:"🇧🇪",p:1729,c:"dn"},{r:9,t:"Italy",f:"🇮🇹",p:1726,c:"up"},
-  {r:10,t:"Germany",f:"🇩🇪",p:1713,c:"="},{r:11,t:"Colombia",f:"🇨🇴",p:1694,c:"up"},{r:12,t:"Uruguay",f:"🇺🇾",p:1680,c:"dn"},
-  {r:13,t:"Croatia",f:"🇭🇷",p:1676,c:"="},{r:14,t:"Japan",f:"🇯🇵",p:1652,c:"up"},{r:15,t:"Mexico",f:"🇲🇽",p:1643,c:"up"},
-  {r:16,t:"USA",f:"🇺🇸",p:1639,c:"dn"},{r:17,t:"Morocco",f:"🇲🇦",p:1633,c:"up"},{r:18,t:"Switzerland",f:"🇨🇭",p:1621,c:"dn"},
-  {r:19,t:"Denmark",f:"🇩🇰",p:1610,c:"="},{r:20,t:"Senegal",f:"🇸🇳",p:1598,c:"up"},
+  {r:1,t:"Spain",f:"🇪🇸",p:1867,c:"="},{r:2,t:"Argentina",f:"🇦🇷",p:1849,c:"="},{r:3,t:"France",f:"🇫🇷",p:1843,c:"="},
+  {r:4,t:"England",f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",p:1797,c:"="},{r:5,t:"Brazil",f:"🇧🇷",p:1775,c:"="},{r:6,t:"Portugal",f:"🇵🇹",p:1756,c:"="},
+  {r:7,t:"Netherlands",f:"🇳🇱",p:1747,c:"="},{r:8,t:"Morocco",f:"🇲🇦",p:1733,c:"up"},{r:9,t:"Belgium",f:"🇧🇪",p:1729,c:"dn"},
+  {r:10,t:"Germany",f:"🇩🇪",p:1713,c:"="},{r:11,t:"Croatia",f:"🇭🇷",p:1701,c:"="},{r:12,t:"Senegal",f:"🇸🇳",p:1694,c:"up"},
+  {r:13,t:"Italy",f:"🇮🇹",p:1690,c:"dn"},{r:14,t:"Colombia",f:"🇨🇴",p:1679,c:"="},{r:15,t:"USA",f:"🇺🇸",p:1665,c:"dn"},
+  {r:16,t:"Mexico",f:"🇲🇽",p:1658,c:"dn"},{r:17,t:"Uruguay",f:"🇺🇾",p:1650,c:"="},{r:18,t:"Switzerland",f:"🇨🇭",p:1637,c:"="},
+  {r:19,t:"Japan",f:"🇯🇵",p:1625,c:"="},{r:20,t:"Iran",f:"🇮🇷",p:1612,c:"up"},
 ];
 const MATCHES = [
   {ph:"G",d:"15 Jun",tm:"18:00",a:"🇲🇦 Maroc",b:"Brésil 🇧🇷",c:"Casablanca"},{ph:"G",d:"16 Jun",tm:"21:00",a:"🇪🇸 Espagne",b:"Argentine 🇦🇷",c:"Rabat"},
@@ -64,6 +64,13 @@ const INFO_ITEMS = [{i:"🚨",l:"Police",v:"19"},{i:"🚑",l:"SAMU",v:"15"},{i:"
 const DARIJA = [{d:"Salam",t:{fr:"Bonjour",en:"Hello",ar:"مرحبا",es:"Hola"}},{d:"Beshhal?",t:{fr:"Combien?",en:"How much?",ar:"بكم؟",es:"¿Cuánto?"}},{d:"Shukran",t:{fr:"Merci",en:"Thanks",ar:"شكرا",es:"Gracias"}},{d:"Fin kayn?",t:{fr:"Où est?",en:"Where?",ar:"فين؟",es:"¿Dónde?"}},{d:"Mezyan",t:{fr:"Bien",en:"Good",ar:"مزيان",es:"Bien"}}];
 
 const BR = {red:"#C41E3A",green:"#00823C",blue:"#1A56DB",gold:"#F5A623"};
+
+const VIDEOS = [
+  {id:"eMKxJMpOkKs",title:"YallaVamos 2030 — Vidéo officielle"},
+  {id:"dMfYBg8NbKI",title:"Grand Stade Hassan II — Casablanca"},
+  {id:"SVa7gVMLfEo",title:"FIFA World Cup 2030 — Morocco"},
+  {id:"Tn0pJ7rXE5Q",title:"Maroc — La terre du football"},
+];
 const TH = {
   dark:{bg:"#0C1117",hdr:"rgba(0,0,0,0.7)",card:"rgba(255,255,255,0.04)",bdr:"rgba(255,255,255,0.07)",txt:"rgba(255,255,255,0.88)",str:"#FFF",mut:"rgba(255,255,255,0.4)",fld:"rgba(255,255,255,0.05)",bot:"rgba(255,255,255,0.04)",bbdr:"rgba(255,255,255,0.07)",usr:`linear-gradient(135deg,${BR.red},#A01830)`,dd:"rgba(12,17,23,0.98)",la:"rgba(245,166,35,0.08)",sh:"0 12px 40px rgba(0,0,0,0.5)",sc:"rgba(255,255,255,0.08)",adBg:"#0A0E13",chatBg:"rgba(0,0,0,0.3)"},
   light:{bg:"#F5F6F8",hdr:"rgba(255,255,255,0.92)",card:"rgba(0,0,0,0.025)",bdr:"rgba(0,0,0,0.07)",txt:"rgba(0,0,0,0.8)",str:"#111",mut:"rgba(0,0,0,0.4)",fld:"rgba(0,0,0,0.03)",bot:"rgba(0,0,0,0.03)",bbdr:"rgba(0,0,0,0.07)",usr:`linear-gradient(135deg,${BR.red},#E02040)`,dd:"rgba(255,255,255,0.99)",la:"rgba(196,30,58,0.05)",sh:"0 12px 40px rgba(0,0,0,0.08)",sc:"rgba(0,0,0,0.08)",adBg:"#1A1E24",chatBg:"rgba(255,255,255,0.5)"},
@@ -84,7 +91,7 @@ function CurrConv({C}){const[a,sA]=useState("100");const[f,sF]=useState("EUR");c
 return(<div style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:9,padding:10,marginTop:8}}><div style={{fontFamily:"'Outfit'",fontSize:11,fontWeight:600,color:BR.gold,marginBottom:6}}>💱 Convertisseur</div><div style={{display:"flex",gap:5,alignItems:"center"}}><input type="number" value={a} onChange={e=>sA(e.target.value)} style={{...ss,width:"28%"}}/><select value={f} onChange={e=>sF(e.target.value)} style={{...ss,width:"25%",cursor:"pointer"}}>{CURRENCIES.map(c=><option key={c.c} value={c.c}>{c.s} {c.c}</option>)}</select><span style={{color:C.mut,fontSize:11}}>→</span><div style={{fontFamily:"'Outfit'",fontSize:16,fontWeight:700,color:BR.gold}}>{r} <span style={{fontSize:10,fontWeight:400}}>MAD</span></div></div></div>);}
 
 // Map
-function SMap({C,onSelect,height}){const ref=useRef(null);const mR=useRef(null);useEffect(()=>{if(mR.current)return;if(!window.L){const l=document.createElement("link");l.rel="stylesheet";l.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";document.head.appendChild(l);const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";s.onload=()=>go();document.head.appendChild(s);}else go();function go(){if(!ref.current||mR.current)return;const m=window.L.map(ref.current,{zoomControl:false}).setView([32.5,-6.5],5.5);window.L.control.zoom({position:"bottomright"}).addTo(m);window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"©OSM",maxZoom:18}).addTo(m);const ic=window.L.divIcon({className:"",html:`<div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,${BR.red},${BR.green});display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,0.4);border:2px solid white;cursor:pointer">⚽</div>`,iconSize:[24,24],iconAnchor:[12,12]});STADIUMS.forEach(s=>{const mk=window.L.marker([s.lat,s.lng],{icon:ic}).addTo(m);mk.bindPopup(`<div style="font-family:Outfit,sans-serif"><strong>${s.city}</strong><br><span style="font-size:11px;color:#666">${s.name}</span><br><span style="color:${BR.red};font-weight:600">${s.cap}</span></div>`);mk.on("click",()=>onSelect&&onSelect(s));});mR.current=m;setTimeout(()=>m.invalidateSize(),200);}return()=>{if(mR.current){mR.current.remove();mR.current=null;}};},[]);return<div ref={ref} style={{width:"100%",height:height||240,borderRadius:9,overflow:"hidden",border:`1px solid ${C.bdr}`}}/>;}
+function SMap({C,onSelect,height}){const ref=useRef(null);const mR=useRef(null);useEffect(()=>{if(mR.current)return;if(!window.L){const l=document.createElement("link");l.rel="stylesheet";l.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";document.head.appendChild(l);const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";s.onload=()=>go();document.head.appendChild(s);}else go();function go(){if(!ref.current||mR.current)return;const m=window.L.map(ref.current,{zoomControl:false}).setView([32.5,-6.5],5.5);window.L.control.zoom({position:"bottomright"}).addTo(m);window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"©OSM",maxZoom:18}).addTo(m);const ic=window.L.divIcon({className:"",html:`<div style="position:relative;width:28px;height:36px;cursor:pointer"><div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:linear-gradient(135deg,${BR.red},${BR.green});transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.4);border:2px solid white"><span style="transform:rotate(45deg);font-size:12px">⚽</span></div><div style="width:8px;height:8px;border-radius:50%;background:rgba(196,30,58,0.3);margin:2px auto 0;animation:pulse 2s infinite"></div></div>`,iconSize:[28,36],iconAnchor:[14,36]});STADIUMS.forEach(s=>{const mk=window.L.marker([s.lat,s.lng],{icon:ic}).addTo(m);mk.bindPopup(`<div style="font-family:Outfit,sans-serif"><strong>${s.city}</strong><br><span style="font-size:11px;color:#666">${s.name}</span><br><span style="color:${BR.red};font-weight:600">${s.cap}</span></div>`);mk.on("click",()=>onSelect&&onSelect(s));});mR.current=m;setTimeout(()=>m.invalidateSize(),200);}return()=>{if(mR.current){mR.current.remove();mR.current=null;}};},[]);return<div ref={ref} style={{width:"100%",height:height||240,borderRadius:9,overflow:"hidden",border:`1px solid ${C.bdr}`}}/>;}
 
 // ═══════════════════════════════════════
 // MAIN APP
@@ -166,7 +173,13 @@ export default function MoundiGuide(){
         @keyframes dp{0%,100%{opacity:1}50%{opacity:.3}}@keyframes sp{to{transform:rotate(360deg)}}@keyframes as{to{transform:rotate(360deg)}}
         @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(196,30,58,0.4)}70%{box-shadow:0 0 0 8px rgba(196,30,58,0)}}
         @keyframes popIn{from{opacity:0;transform:scale(0.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
-        .me{animation:fadeIn .2s ease both}.tb{transition:all .12s}.sb:hover:not(:disabled){opacity:.9;transform:scale(1.03)}
+        @keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+        @keyframes cardHover{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+        .me{animation:fadeIn .25s ease both}.tb{transition:all .15s}.sb:hover:not(:disabled){opacity:.9;transform:scale(1.05)}
+        .card-anim{animation:slideIn .3s ease both;transition:transform .2s,box-shadow .2s}.card-anim:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.15)}
+        .stagger-1{animation-delay:.05s}.stagger-2{animation-delay:.1s}.stagger-3{animation-delay:.15s}.stagger-4{animation-delay:.2s}.stagger-5{animation-delay:.25s}
         ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:${C.sc};border-radius:3px}
         *{box-sizing:border-box;margin:0;padding:0}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}
@@ -194,14 +207,19 @@ export default function MoundiGuide(){
               <button onClick={e=>{e.stopPropagation();setShowLang(!showLang);}} style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:14,padding:"3px 8px",cursor:"pointer",color:C.str,fontSize:10,fontWeight:500,display:"flex",alignItems:"center",gap:3,fontFamily:F}}>
                 <span style={{fontSize:11}}>{curLang.flag}</span><span>{curLang.label}</span><span style={{opacity:.4,fontSize:7}}>▼</span>
               </button>
-              {showLang&&(<div onClick={e=>e.stopPropagation()} style={{position:"fixed",right:14,top:40,background:C.dd,backdropFilter:"blur(20px)",border:`1px solid ${C.bdr}`,borderRadius:8,overflow:"hidden",zIndex:99999,minWidth:130,boxShadow:C.sh,animation:"fadeIn .12s ease both"}}>
-                {LANGUAGES.map(l=>(<button key={l.code} onClick={()=>{setLang(l.code);setShowLang(false);}} style={{display:"flex",alignItems:"center",gap:5,width:"100%",padding:"6px 10px",background:lang===l.code?C.la:"transparent",border:"none",cursor:"pointer",color:lang===l.code?ac:C.txt,fontSize:11,fontFamily:F}}><span style={{fontSize:12}}>{l.flag}</span><span>{l.label}</span></button>))}
-              </div>)}
             </div>
           </div>
         </div>
         <div style={{display:"flex",height:2,marginTop:4,borderRadius:1,overflow:"hidden",maxWidth:1400,margin:"4px auto 0"}}>{[BR.red,BR.gold,BR.green,BR.blue].map((c,i)=><div key={i} style={{flex:1,background:c}}/>)}</div>
       </div>
+
+      {/* Language overlay */}
+      {showLang&&(<div onClick={()=>setShowLang(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:99999,display:"flex",alignItems:"center",justifyContent:"center",animation:"fadeIn .15s ease"}}>
+        <div onClick={e=>e.stopPropagation()} style={{background:C.dd,border:`1px solid ${C.bdr}`,borderRadius:14,padding:"12px 6px",minWidth:200,boxShadow:C.sh,animation:"popIn .2s ease both"}}>
+          <div style={{fontFamily:F,fontSize:11,fontWeight:600,color:C.mut,textAlign:"center",padding:"4px 0 8px",letterSpacing:1}}>🌍 LANGUE</div>
+          {LANGUAGES.map(l=>(<button key={l.code} onClick={()=>{setLang(l.code);setShowLang(false);}} style={{display:"flex",alignItems:"center",gap:8,width:"100%",padding:"10px 16px",background:lang===l.code?C.la:"transparent",border:"none",cursor:"pointer",color:lang===l.code?ac:C.txt,fontSize:13,fontFamily:F,borderRadius:8,fontWeight:lang===l.code?600:400,transition:"all .15s"}}><span style={{fontSize:18}}>{l.flag}</span><span>{l.label}</span>{lang===l.code&&<span style={{marginLeft:"auto",fontSize:12}}>✓</span>}</button>))}
+        </div>
+      </div>)}
 
       <AdBanner C={C}/>
 
@@ -272,6 +290,13 @@ export default function MoundiGuide(){
                 {DARIJA.map((p,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<4?`1px solid ${C.bdr}`:"none"}}><span style={{fontFamily:F,fontSize:10,fontWeight:500,color:C.str}}>{p.d}</span><span style={{fontFamily:F,fontSize:9,color:C.mut}}>{p.t[lang]||p.t.en}</span></div>))}
               </div>
             </div>
+            {/* Videos */}
+            <div style={{padding:12}}>
+              <div style={{fontFamily:F,fontSize:12,fontWeight:700,color:C.str,marginBottom:6}}>🎬 Vidéos Mondial 2030</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                {VIDEOS.map((v,i)=>(<div key={i} className="card-anim" style={{borderRadius:9,overflow:"hidden",border:`1px solid ${C.bdr}`}}><div style={{position:"relative",paddingBottom:"56.25%",height:0}}><iframe src={`https://www.youtube.com/embed/${v.id}`} title={v.title} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowFullScreen style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",border:"none"}}/></div><div style={{padding:"6px 8px",background:C.card}}><div style={{fontFamily:F,fontSize:9,fontWeight:600,color:C.str}}>{v.title}</div></div></div>))}
+              </div>
+            </div>
           </div>
 
           {/* RIGHT: Floating Chat Bubble */}
@@ -295,7 +320,7 @@ export default function MoundiGuide(){
         /* ═══ MOBILE LAYOUT ═══ */
         <>
           <div style={{display:"flex",background:dk?"rgba(0,0,0,0.3)":"rgba(255,255,255,0.6)",borderBottom:`1px solid ${C.bdr}`,flexShrink:0}}>
-            {[{id:"chat",ic:"💬",l:"Chat"},{id:"matchs",ic:"📅",l:"Matchs"},{id:"map",ic:"🗺️",l:"Carte"},{id:"rankings",ic:"🏆",l:"FIFA"},{id:"info",ic:"ℹ️",l:"Infos"}].map(t=>(
+            {[{id:"chat",ic:"💬",l:"Chat"},{id:"matchs",ic:"📅",l:"Matchs"},{id:"map",ic:"🗺️",l:"Carte"},{id:"rankings",ic:"🏆",l:"FIFA"},{id:"videos",ic:"🎬",l:"Vidéos"},{id:"info",ic:"ℹ️",l:"Infos"}].map(t=>(
               <button key={t.id} className="tb" onClick={()=>setTab(t.id)} style={{flex:1,padding:"7px 0",border:"none",cursor:"pointer",background:tab===t.id?C.la:"transparent",borderBottom:tab===t.id?`2px solid ${ac}`:"2px solid transparent",color:tab===t.id?ac:C.mut,fontSize:9,fontWeight:500,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:3}}>
                 <span style={{fontSize:10}}>{t.ic}</span>{t.l}
               </button>
@@ -311,7 +336,8 @@ export default function MoundiGuide(){
             </>)}
             {tab==="matchs"&&(<div style={{padding:10}}><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:8}}>📅 Matchs</div>{MATCHES.map((m,i)=>(<div key={i} style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:7,padding:"7px 9px",marginBottom:5,borderLeft:`3px solid ${m.ph==="F"?BR.gold:m.ph==="S"?BR.blue:m.ph==="Q"?BR.green:BR.red}`}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}><span style={{fontFamily:F,fontSize:7,color:ac,fontWeight:600}}>{m.ph==="G"?"Groupe":m.ph==="8"?"8èmes":m.ph==="Q"?"Quarts":m.ph==="S"?"Demis":"Finale"}</span><span style={{fontFamily:F,fontSize:7,color:C.mut}}>{m.d}</span></div><div style={{fontFamily:F,fontSize:11,fontWeight:600,color:C.str}}>{m.a} vs {m.b}</div><div style={{fontFamily:F,fontSize:8,color:C.mut}}>📍 {m.c}</div></div>))}</div>)}
             {tab==="map"&&(<div style={{padding:10}}><SMap C={C} onSelect={s=>send(`Parle-moi du stade de ${s.city}`)} height={280}/><div style={{marginTop:6}}><Weather C={C} city={weatherCity}/></div><div style={{display:"flex",gap:4,marginTop:5,flexWrap:"wrap"}}>{STADIUMS.map(s=><button key={s.city} onClick={()=>setWeatherCity(s.city)} style={{padding:"2px 5px",borderRadius:10,border:`1px solid ${C.bdr}`,background:weatherCity===s.city?C.la:C.card,color:weatherCity===s.city?ac:C.txt,fontSize:8,cursor:"pointer",fontFamily:F}}>{s.city}</button>)}</div></div>)}
-            {tab==="rankings"&&(<div style={{padding:10}}><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:6}}>🏆 FIFA Rankings</div>{FIFA_RANKINGS.map(r=>(<div key={r.r} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 5px",borderRadius:5,marginBottom:1,background:(r.f==="🇲🇦"||r.f==="🇪🇸"||r.f==="🇵🇹")?C.la:"transparent"}}><span style={{fontFamily:F,fontSize:9,fontWeight:600,color:C.mut,width:14,textAlign:"right"}}>{r.r}</span><span style={{fontSize:13}}>{r.f}</span><span style={{fontFamily:F,fontSize:10,fontWeight:r.f==="🇲🇦"?700:500,color:C.str,flex:1}}>{r.t}</span><span style={{fontFamily:F,fontSize:8,color:C.mut}}>{r.p}</span><span style={{fontSize:7,color:r.c==="up"?"#22C55E":r.c==="dn"?"#EF4444":"#888"}}>{r.c==="up"?"▲":r.c==="dn"?"▼":"•"}</span></div>))}<div style={{height:1,background:C.bdr,margin:"10px 0"}}/><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:6}}>📰 Actualités</div>{NEWS.map((n,i)=>(<div key={i} onClick={()=>send(n.t)} style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:7,padding:"7px 9px",marginBottom:5,cursor:"pointer"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}><span style={{fontFamily:F,fontSize:7,color:n.tc,fontWeight:600}}>{n.tg}</span><span style={{fontFamily:F,fontSize:7,color:C.mut}}>{n.d}</span></div><div style={{fontFamily:F,fontSize:10,fontWeight:500,color:C.str,lineHeight:1.3}}>{n.t}</div></div>))}</div>)}
+            {tab==="rankings"&&(<div style={{padding:10}}><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:6}}>🏆 FIFA Rankings — Jan 2026</div>{FIFA_RANKINGS.map((r,idx)=>(<div key={r.r} className={`card-anim stagger-${Math.min(idx%6,5)}`} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 5px",borderRadius:5,marginBottom:1,background:(r.f==="🇲🇦"||r.f==="🇪🇸"||r.f==="🇵🇹")?C.la:"transparent"}}><span style={{fontFamily:F,fontSize:9,fontWeight:600,color:C.mut,width:14,textAlign:"right"}}>{r.r}</span><span style={{fontSize:13}}>{r.f}</span><span style={{fontFamily:F,fontSize:10,fontWeight:r.f==="🇲🇦"?700:500,color:C.str,flex:1}}>{r.t}</span><span style={{fontFamily:F,fontSize:8,color:C.mut}}>{r.p}</span><span style={{fontSize:7,color:r.c==="up"?"#22C55E":r.c==="dn"?"#EF4444":"#888"}}>{r.c==="up"?"▲":r.c==="dn"?"▼":"•"}</span></div>))}<div style={{height:1,background:C.bdr,margin:"10px 0"}}/><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:6}}>📰 Actualités</div>{NEWS.map((n,i)=>(<div key={i} className="card-anim" onClick={()=>send(n.t)} style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:7,padding:"7px 9px",marginBottom:5,cursor:"pointer"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}><span style={{fontFamily:F,fontSize:7,color:n.tc,fontWeight:600}}>{n.tg}</span><span style={{fontFamily:F,fontSize:7,color:C.mut}}>{n.d}</span></div><div style={{fontFamily:F,fontSize:10,fontWeight:500,color:C.str,lineHeight:1.3}}>{n.t}</div></div>))}</div>)}
+            {tab==="videos"&&(<div style={{padding:10,animation:"fadeIn .3s ease"}}><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:8}}>🎬 Vidéos Mondial 2030</div>{VIDEOS.map((v,i)=>(<div key={i} className="card-anim" style={{marginBottom:10,borderRadius:10,overflow:"hidden",border:`1px solid ${C.bdr}`}}><div style={{position:"relative",paddingBottom:"56.25%",height:0}}><iframe src={`https://www.youtube.com/embed/${v.id}`} title={v.title} allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowFullScreen style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",border:"none"}}/></div><div style={{padding:"8px 10px",background:C.card}}><div style={{fontFamily:F,fontSize:11,fontWeight:600,color:C.str}}>{v.title}</div></div></div>))}</div>)}
             {tab==="info"&&(<div style={{padding:10}}><div style={{fontFamily:F,fontSize:13,fontWeight:700,color:C.str,marginBottom:6}}>ℹ️ Infos pratiques</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5}}>{INFO_ITEMS.map((it,i)=>(<div key={i} style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:7,padding:8,textAlign:"center"}}><div style={{fontSize:15}}>{it.i}</div><div style={{fontFamily:F,fontSize:12,fontWeight:600,color:C.str}}>{it.v}</div><div style={{fontFamily:F,fontSize:8,color:C.mut}}>{it.l}</div></div>))}</div><CurrConv C={C}/><div style={{marginTop:8,background:C.card,border:`1px solid ${C.bdr}`,borderRadius:8,padding:10}}><div style={{fontFamily:F,fontSize:11,fontWeight:600,color:ac,marginBottom:6}}>🗣️ Darija</div>{DARIJA.map((p,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:i<4?`1px solid ${C.bdr}`:"none"}}><span style={{fontFamily:F,fontSize:11,fontWeight:500,color:C.str}}>{p.d}</span><span style={{fontFamily:F,fontSize:10,color:C.mut}}>{p.t[lang]||p.t.en}</span></div>))}</div></div>)}
           </div>
         </>
