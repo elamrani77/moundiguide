@@ -110,10 +110,10 @@ function Splash({onDone}){
 }
 
 // Photo Carousel
-function Carousel({C}){
+function Carousel({C,big}){
   const[idx,setIdx]=useState(0);
   useEffect(()=>{const id=setInterval(()=>setIdx(p=>(p+1)%CAROUSEL_PHOTOS.length),3500);return()=>clearInterval(id);},[]);
-  return(<div style={{position:"relative",width:"100%",height:180,borderRadius:10,overflow:"hidden",border:`1px solid ${C.bdr}`}}>
+  return(<div style={{position:"relative",width:"100%",height:big?320:180,borderRadius:10,overflow:"hidden",border:`1px solid ${C.bdr}`}}>
     {CAROUSEL_PHOTOS.map((p,i)=>(<img key={i} src={p} alt={CAROUSEL_LABELS[i]} style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",opacity:i===idx?1:0,transition:"opacity .8s ease"}}/>))}
     <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"20px 12px 8px",background:"linear-gradient(transparent,rgba(0,0,0,0.7))"}}>
       <div style={{fontFamily:"'Outfit'",fontSize:16,fontWeight:700,color:"#FFF"}}>{CAROUSEL_LABELS[idx]}</div>
@@ -176,8 +176,15 @@ export default function MoundiGuide(){
     finally{setLoading(false);inpRef.current?.focus();}
   },[input,loading,msgs,lang,isDesk]);
 
-  const startVoice=()=>{if(!("webkitSpeechRecognition" in window)&&!("SpeechRecognition" in window))return;const SR=window.SpeechRecognition||window.webkitSpeechRecognition;const rec=new SR();rec.lang=lang==="ar"?"ar-MA":lang;rec.continuous=false;rec.onresult=e=>{setInput(e.results[0][0].transcript);setListening(false);};rec.onerror=()=>setListening(false);rec.onend=()=>setListening(false);rec.start();setListening(true);recRef.current=rec;};
-  const stopVoice=()=>{if(recRef.current){recRef.current.stop();setListening(false);}};
+  const toggleVoice=()=>{
+    if(listening){if(recRef.current){recRef.current.stop();}setListening(false);return;}
+    if(!("webkitSpeechRecognition" in window)&&!("SpeechRecognition" in window)){alert("Voice not supported on this browser");return;}
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    const rec=new SR();rec.lang=lang==="ar"?"ar-MA":lang==="zh"?"zh-CN":lang==="pt"?"pt-PT":lang;rec.continuous=false;rec.interimResults=false;
+    rec.onresult=e=>{const t=e.results[0][0].transcript;setInput(prev=>prev+t);setListening(false);};
+    rec.onerror=()=>setListening(false);rec.onend=()=>setListening(false);
+    rec.start();setListening(true);recRef.current=rec;
+  };
 
   const curLang=LANGUAGES.find(l=>l.code===lang);
   const isRTL=lang==="ar";
@@ -203,7 +210,7 @@ export default function MoundiGuide(){
   const renderInput=()=>(
     <div style={{padding:"6px 8px 8px",background:C.chatBg,flexShrink:0}}>
       <div style={{display:"flex",gap:5,alignItems:"flex-end"}}>
-        <button onMouseDown={startVoice} onMouseUp={stopVoice} onTouchStart={startVoice} onTouchEnd={stopVoice} style={{width:32,height:32,borderRadius:7,flexShrink:0,border:`1px solid ${C.bdr}`,background:listening?BR.red:C.card,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:listening?"white":C.mut,animation:listening?"pulse 1s infinite":"none"}}>🎤</button>
+        <button onClick={toggleVoice} style={{width:32,height:32,borderRadius:7,flexShrink:0,border:`1px solid ${C.bdr}`,background:listening?BR.red:C.card,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:listening?"white":C.mut,animation:listening?"pulse 1s infinite":"none"}}>🎤</button>
         <input ref={inpRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();send();}}} placeholder={PLACEHOLDERS[lang]} dir={isRTL?"rtl":"ltr"}
           style={{flex:1,padding:"7px 9px",background:C.fld,border:`1px solid ${C.bdr}`,borderRadius:9,color:C.str,fontSize:12,fontFamily:isRTL?"'Noto Sans Arabic'":F,fontWeight:300,outline:"none"}} />
         <button onClick={()=>send()} disabled={!input.trim()||loading} className="sb" style={{width:32,height:32,borderRadius:7,flexShrink:0,background:input.trim()&&!loading?`linear-gradient(135deg,${BR.red},${BR.green})`:C.card,border:input.trim()&&!loading?"none":`1px solid ${C.bdr}`,cursor:input.trim()&&!loading?"pointer":"not-allowed",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:input.trim()&&!loading?"white":C.mut}}>
@@ -216,7 +223,7 @@ export default function MoundiGuide(){
   return(
     <>
     {splash&&<Splash onDone={()=>setSplash(false)}/>}
-    <div style={{height:"100vh",width:"100vw",overflow:"hidden",background:C.bg,fontFamily:"'Segoe UI',system-ui,sans-serif",display:"flex",flexDirection:"column",transition:"background .3s"}}>
+    <div style={{height:"100vh",width:"100vw",overflow:"hidden",overscrollBehavior:"contain",background:C.bg,fontFamily:"'Segoe UI',system-ui,sans-serif",display:"flex",flexDirection:"column",transition:"background .3s"}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;600&display=swap');
         @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -233,7 +240,7 @@ export default function MoundiGuide(){
         ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:${C.sc};border-radius:3px}
         *{box-sizing:border-box;margin:0;padding:0}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}
-        html,body{overflow:hidden;height:100%;width:100%}
+        html,body{height:100%;width:100%;overscroll-behavior:contain}
       `}</style>
 
       {/* HEADER */}
@@ -301,7 +308,7 @@ export default function MoundiGuide(){
           {/* CENTER: Map + Matches + Stadiums + Info */}
           <div style={{flex:1,overflowY:"auto",minWidth:0}}>
             <div style={{padding:12}}>
-              <Carousel C={C}/>
+              <Carousel C={C} big={true}/>
             </div>
             <div style={{padding:"0 12px 12px"}}>
               <div style={{fontFamily:F,fontSize:14,fontWeight:700,color:C.str,marginBottom:8}}>🗺️ Carte des stades</div>
@@ -372,9 +379,9 @@ export default function MoundiGuide(){
       ):(
         /* ═══ MOBILE LAYOUT ═══ */
         <>
-          <div style={{display:"flex",background:dk?"rgba(0,0,0,0.3)":"rgba(255,255,255,0.6)",borderBottom:`1px solid ${C.bdr}`,flexShrink:0}}>
+          <div style={{display:"flex",background:dk?"rgba(0,0,0,0.3)":"rgba(255,255,255,0.6)",borderBottom:`1px solid ${C.bdr}`,flexShrink:0,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
             {[{id:"chat",ic:"💬",l:"Chat"},{id:"matchs",ic:"📅",l:"Matchs"},{id:"map",ic:"🗺️",l:"Carte"},{id:"rankings",ic:"🏆",l:"FIFA"},{id:"videos",ic:"🎬",l:"Vidéos"},{id:"info",ic:"ℹ️",l:"Infos"}].map(t=>(
-              <button key={t.id} className="tb" onClick={()=>setTab(t.id)} style={{flex:1,padding:"7px 0",border:"none",cursor:"pointer",background:tab===t.id?C.la:"transparent",borderBottom:tab===t.id?`2px solid ${ac}`:"2px solid transparent",color:tab===t.id?ac:C.mut,fontSize:9,fontWeight:500,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:3}}>
+              <button key={t.id} className="tb" onClick={()=>setTab(t.id)} style={{minWidth:56,padding:"7px 8px",border:"none",cursor:"pointer",background:tab===t.id?C.la:"transparent",borderBottom:tab===t.id?`2px solid ${ac}`:"2px solid transparent",color:tab===t.id?ac:C.mut,fontSize:9,fontWeight:500,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:2,whiteSpace:"nowrap",flexShrink:0}}>
                 <span style={{fontSize:10}}>{t.ic}</span>{t.l}
               </button>
             ))}
