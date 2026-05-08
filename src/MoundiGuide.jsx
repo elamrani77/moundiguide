@@ -383,7 +383,7 @@ function HomePage({C,dk,ac,F,lang,send,setPage,isDesk}){
       {/* ── HERO ── */}
       <div style={{position:"relative",height:"100vh",minHeight:560,overflow:"hidden"}}>
         {/* Hero image */}
-        <img src="/hero.jpg" alt="YallaVamos 2030"
+        <img src="/hero.png" alt="YallaVamos 2030"
           style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",objectPosition:"center top"}}
           onError={e=>{e.target.style.background="linear-gradient(135deg,#0A0F1A,#1A0505)";e.target.style.opacity=1;}}
         />
