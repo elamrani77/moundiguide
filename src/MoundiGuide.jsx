@@ -75,12 +75,12 @@ const TICKET_CATS = [
   {cat:"Category 4",price:"110 USD",color:"#00913F",desc:"Host nation residents price (MAD equiv.)",icon:"🇲🇦"},
 ];
 const CITIES = [
-  {city:"Casablanca",img:"https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=600&h=400&fit=crop",flag:"🌊"},
-  {city:"Rabat",     img:"https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=400&fit=crop",flag:"👑"},
-  {city:"Marrakech", img:"https://images.unsplash.com/photo-1597212618440-806b84589018?w=600&h=400&fit=crop",flag:"🌹"},
-  {city:"Tanger",    img:"https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=600&h=400&fit=crop",flag:"🌊"},
-  {city:"Agadir",    img:"https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=600&h=400&fit=crop",flag:"🏖️"},
-  {city:"Fès",       img:"https://images.unsplash.com/photo-1569383746724-6f1b882b8f46?w=600&h=400&fit=crop",flag:"🕌"},
+  {city:"Casablanca",img:"/casablanca.jpg",flag:"🌊"},
+  {city:"Rabat",     img:"/rabat.jpg",     flag:"👑"},
+  {city:"Marrakech", img:"/marrakech.jpg", flag:"🌹"},
+  {city:"Tanger",    img:"/tanger.jpg",    flag:"🌊"},
+  {city:"Agadir",    img:"/agadir.jpg",    flag:"🏖️"},
+  {city:"Fès",       img:"/fes.jpg",       flag:"🕌"},
 ];
 
 const BR = { red:"#E41C3A", green:"#00913F", blue:"#1A56DB", gold:"#F0B429" };
@@ -665,6 +665,7 @@ function HomePage({C,dk,ac,F,lang,send,setPage,isDesk}){
           <div style={{position:"relative",borderRadius:20,overflow:"hidden",height:isDesk?400:260,boxShadow:C.sh}}>
             {CITIES.map((c,i)=>(
               <img key={i} src={c.img} alt={c.city}
+                onError={e=>{e.target.src="/fallback.svg";}}
                 style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",
                   opacity:i===cityIdx?1:0,transform:i===cityIdx?"scale(1.04)":"scale(1)",
                   transition:"opacity 1.2s ease, transform 7s ease"}}/>
