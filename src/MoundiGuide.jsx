@@ -1,4 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, useInView } from "framer-motion";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 
 // ═══════════════════════════════════════
 // DATA
@@ -75,16 +79,23 @@ const TICKET_CATS = [
   {cat:"Category 4",price:"110 USD",color:"#00913F",desc:"Host nation residents price (MAD equiv.)",icon:"🇲🇦"},
 ];
 const CITIES = [
-  {city:"Casablanca",img:"/casablanca.jpg",flag:"🌊"},
-  {city:"Rabat",     img:"/rabat.jpg",     flag:"👑"},
-  {city:"Marrakech", img:"/marrakech.jpg", flag:"🌹"},
-  {city:"Tanger",    img:"/tanger.jpg",    flag:"🌊"},
-  {city:"Agadir",    img:"/agadir.jpg",    flag:"🏖️"},
-  {city:"Fès",       img:"/fes.jpg",       flag:"🕌"},
+  {city:"Casablanca",img:"/casablanca.jpg",      flag:"🌊"},
+  {city:"Rabat",     img:"/rabat.jpg",            flag:"👑"},
+  {city:"Marrakech", img:"/MARRAKECH-CITY.webp", flag:"🌹"},
+  {city:"Tanger",    img:"/Tanger.jpg",           flag:"🌊"},
+  {city:"Agadir",    img:"/AGADIR.jpg",           flag:"🏖️"},
+  {city:"Fès",       img:"/fes.webp",             flag:"🕌"},
 ];
 
-const BR = { red:"#E41C3A", green:"#00913F", blue:"#1A56DB", gold:"#F0B429" };
-const PHASE_COLORS = {G:BR.red,"8":"#9333EA",Q:BR.blue,S:BR.green,F:BR.gold};
+const BR = { red:"#E41C3A", green:"#00913F", blue:"#1A56DB", gold:"#F0B429", check:"#22C55E", purple:"#9333EA" };
+const PHASE_COLORS = {G:BR.red,"8":BR.purple,Q:BR.blue,S:BR.green,F:BR.gold};
+const TEAM_ACCENT = {
+  Spain:"#AA151B",Argentina:"#74ACDF",France:"#002395",England:"#CF081F",
+  Brazil:"#009C3B",Portugal:"#006600",Netherlands:"#FF6400",Morocco:"#E41C3A",
+  Belgium:"#EF3340",Germany:"#000000",Croatia:"#FF0000",Senegal:"#00853F",
+  Italy:"#009246",Colombia:"#FCD116",USA:"#002868",Mexico:"#006847",
+  Uruguay:"#75AADB",Switzerland:"#FF0000",Japan:"#BC002D",Iran:"#239F40",
+};
 
 // ── Full UI translations (6 languages) ──
 const TRANSLATIONS = {
@@ -320,11 +331,11 @@ function MoundiLogo({size=36, showText=true, textColor="#111"}){
 // ══════════════════════════════════════════════
 // NAVBAR
 // ══════════════════════════════════════════════
-function Navbar({page, setPage, scrolled, dk, C, themeMode, setThemeMode, lang, curLang, showLang, setShowLang, isDesk}){
+function Navbar({page, setPage, scrolled, dk, C, themeMode, setThemeMode, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam}){
   const [menuOpen, setMenuOpen] = useState(false);
   const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const navBg = scrolled
-    ? (dk ? "rgba(7,9,26,0.96)" : "rgba(255,255,255,0.97)")
+    ? (dk ? "rgba(18,20,20,0.96)" : "rgba(255,255,255,0.97)")
     : "transparent";
   const linkColor = scrolled ? C.str : "#FFFFFF";
   const F = "'Outfit'";
@@ -343,8 +354,12 @@ function Navbar({page, setPage, scrolled, dk, C, themeMode, setThemeMode, lang, 
   };
 
   return(
-    <nav style={{position:"fixed",top:0,left:0,right:0,zIndex:1000,background:navBg,backdropFilter:scrolled?"blur(24px)":"none",
-      borderBottom:scrolled?`1px solid ${C.bdr}`:"none",transition:"all .35s ease",padding:"0 24px"}}>
+    <motion.nav
+      initial={{opacity:0,y:-24}}
+      animate={{opacity:1,y:0}}
+      transition={{duration:0.6,ease:"easeOut"}}
+      style={{position:"fixed",top:0,left:0,right:0,zIndex:1000,background:navBg,backdropFilter:scrolled?"blur(24px)":"none",
+      borderBottom:scrolled?`1px solid ${C.bdr}`:"none",transition:"background .35s ease, border-color .35s ease, backdrop-filter .35s ease",padding:"0 24px"}}>
       <div style={{maxWidth:1280,margin:"0 auto",height:68,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
 
         {/* Logo — Bug 2 fix: size 52px desktop / 44px mobile */}
@@ -370,6 +385,16 @@ function Navbar({page, setPage, scrolled, dk, C, themeMode, setThemeMode, lang, 
               {dk?"☀️":"🌙"}
             </button>
 
+            {/* Team badge */}
+            {selectedTeam&&(
+              <button onClick={onPickTeam}
+                style={{background:"none",border:`1px solid ${scrolled?C.bdr:"rgba(255,255,255,0.35)"}`,
+                  borderRadius:20,padding:"4px 10px",cursor:"pointer",display:"flex",alignItems:"center",gap:5,transition:"all .2s"}}>
+                <span style={{fontSize:16}}>{selectedTeam.f}</span>
+                <span style={{fontFamily:F,fontSize:11,color:linkColor}}>{selectedTeam.t}</span>
+              </button>
+            )}
+
             {/* Language */}
             <button onClick={e=>{e.stopPropagation();setShowLang(p=>!p);}}
               style={{background:"none",border:`1px solid ${scrolled?C.bdr:"rgba(255,255,255,0.35)"}`,
@@ -383,6 +408,11 @@ function Navbar({page, setPage, scrolled, dk, C, themeMode, setThemeMode, lang, 
         ):(
           /* Mobile: hamburger */
           <div style={{display:"flex",alignItems:"center",gap:10}}>
+            {selectedTeam&&(
+              <button onClick={onPickTeam} style={{background:"none",border:"none",cursor:"pointer",fontSize:20,lineHeight:1}}>
+                {selectedTeam.f}
+              </button>
+            )}
             <button onClick={()=>setMenuOpen(p=>!p)}
               style={{background:"none",border:`1px solid ${scrolled?C.bdr:"rgba(255,255,255,0.4)"}`,
                 borderRadius:8,width:36,height:36,cursor:"pointer",color:linkColor,fontSize:18,
@@ -395,7 +425,7 @@ function Navbar({page, setPage, scrolled, dk, C, themeMode, setThemeMode, lang, 
 
       {/* Mobile dropdown menu */}
       {!isDesk&&menuOpen&&(
-        <div style={{background:dk?"rgba(7,9,26,0.98)":"rgba(255,255,255,0.99)",
+        <div style={{background:dk?"rgba(18,20,20,0.98)":"rgba(255,255,255,0.99)",
           borderTop:`1px solid ${C.bdr}`,padding:"16px 24px 20px",animation:"slideDown .2s ease"}}>
           {[{id:"home",label:T.mobileHome},{id:"ticket",label:T.mobileTick},{id:"schedule",label:T.mobileSch}].map(({id,label})=>(
             <button key={id} onClick={()=>{setPage(id);setMenuOpen(false);}}
@@ -420,7 +450,7 @@ function Navbar({page, setPage, scrolled, dk, C, themeMode, setThemeMode, lang, 
           </div>
         </div>
       )}
-    </nav>
+    </motion.nav>
   );
 }
 
@@ -430,7 +460,7 @@ function Navbar({page, setPage, scrolled, dk, C, themeMode, setThemeMode, lang, 
 function Splash({onDone}){
   useEffect(()=>{const t=setTimeout(onDone,2600);return()=>clearTimeout(t);},[onDone]);
   return(
-    <div style={{position:"fixed",inset:0,zIndex:999999,background:"#07091A",
+    <div style={{position:"fixed",inset:0,zIndex:999999,background:"#121414",
       display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
       <style>{`@keyframes kickBall{0%{transform:translateY(0) rotate(0deg)}30%{transform:translateY(-60px) rotate(180deg)}50%{transform:translateY(0) rotate(360deg)}70%{transform:translateY(-30px) rotate(540deg)}100%{transform:translateY(0) rotate(720deg)}}@keyframes growBar{from{width:0}to{width:100%}}@keyframes spl{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
       <div style={{fontSize:72,animation:"kickBall 1.5s ease-in-out infinite",filter:"drop-shadow(0 0 20px rgba(240,180,41,0.6))"}}>⚽</div>
@@ -509,7 +539,7 @@ function ChatFloat({C,dk,lang,msgs,input,setInput,loading,send,listening,toggleV
   );
   return(
     <div style={{position:"fixed",bottom:28,right:28,width:360,height:520,borderRadius:20,
-      background:dk?"rgba(7,9,26,0.95)":"rgba(255,255,255,0.97)",
+      background:dk?"rgba(18,20,20,0.95)":"rgba(255,255,255,0.97)",
       border:`1px solid ${C.bdr}`,boxShadow:C.sh,zIndex:900,
       display:"flex",flexDirection:"column",backdropFilter:"blur(24px)",
       animation:"popIn .25s ease both"}}>
@@ -570,6 +600,29 @@ function HomePage({C,dk,ac,F,lang,send,setPage,isDesk}){
   const[amt,sA]=useState("100");const[cur,sCur]=useState("EUR");
   useEffect(()=>{const id=setInterval(()=>setCityIdx(p=>(p+1)%CITIES.length),3500);return()=>clearInterval(id);},[]);
   useEffect(()=>{fetch("https://open.er-api.com/v6/latest/MAD").then(r=>r.json()).then(d=>sR(d.rates)).catch(()=>sR({EUR:.091,USD:.099,GBP:.078,BRL:.57,JPY:14.8}));},[]);
+  const citiesRef=useRef(null);const citiesInView=useInView(citiesRef,{once:true,margin:"-80px"});
+  const fanWallRef=useRef(null);const fanWallInView=useInView(fanWallRef,{once:true,margin:"-80px"});
+  const timelineRef=useRef(null);const timelineInView=useInView(timelineRef,{margin:"-50px"});
+  const timelineLineRef=useRef(null);
+  const [selectedStadium,setSelectedStadium]=useState(null);
+
+  // Countdown to June 15, 2030 18:00 UTC
+  const KICKOFF=new Date("2030-06-15T18:00:00Z").getTime();
+  const [countdown,setCountdown]=useState({d:0,h:0,m:0,s:0});
+  useEffect(()=>{
+    const tick=()=>{const diff=Math.max(0,KICKOFF-Date.now());setCountdown({d:Math.floor(diff/86400000),h:Math.floor(diff/3600000)%24,m:Math.floor(diff/60000)%60,s:Math.floor(diff/1000)%60});};
+    tick();const id=setInterval(tick,1000);return()=>clearInterval(id);
+  },[]);
+
+  // GSAP ScrollTrigger for timeline line
+  useEffect(()=>{
+    if(!timelineLineRef.current||!timelineRef.current)return;
+    const ctx=gsap.context(()=>{
+      gsap.fromTo(timelineLineRef.current,{scaleX:0},{scaleX:1,duration:1.4,ease:"power2.out",transformOrigin:"left center",
+        scrollTrigger:{trigger:timelineRef.current,start:"top 80%",toggleActions:"play none none reverse"}});
+    });
+    return()=>ctx.revert();
+  },[]);
   const convResult=rt&&amt?Math.round(parseFloat(amt)/(rt[cur]||1)).toLocaleString():"—";
   const inpS={padding:"8px 10px",borderRadius:10,border:`1px solid ${C.bdr}`,background:C.fld,color:C.str,fontSize:13,fontFamily:F,outline:"none"};
 
@@ -579,13 +632,30 @@ function HomePage({C,dk,ac,F,lang,send,setPage,isDesk}){
       {/* ── HERO ── */}
       <div style={{position:"relative",height:"100vh",minHeight:560,overflow:"hidden"}}>
         {/* Hero image */}
-        <img src="/hero.png" alt="YallaVamos 2030"
-          style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",objectPosition:"center top"}}
-          onError={e=>{e.target.style.background="linear-gradient(135deg,#0A0F1A,#1A0505)";e.target.style.opacity=1;}}
+        <img src="/stadium-night.png" alt="Stadium Night"
+          style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",objectPosition:"center"}}
+          onError={e=>{e.target.style.display="none";}}
         />
-        {/* Gradient overlays */}
-        <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.65) 100%)"}}/>
-        <div style={{position:"absolute",inset:0,background:"linear-gradient(to right, rgba(0,0,0,0.3) 0%, transparent 60%)"}}/>
+        {/* Dark overlay */}
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(18,20,20,0.95))"}}/>
+
+        {/* Morocco flag — top right */}
+        <img src="/morocco-flag.png" alt="" aria-hidden="true" style={{
+          position:"absolute",top:80,right:isDesk?40:16,width:80,opacity:0.8,
+          animation:"flagWave 2.5s ease-in-out infinite",transformOrigin:"left center",
+          pointerEvents:"none",zIndex:2,
+        }} onError={e=>{e.target.style.display="none";}}/>
+
+        {/* Trophy — floating right side */}
+        {isDesk&&(
+          <img src="/trophy-2030.png" alt="" aria-hidden="true" style={{
+            position:"absolute",right:isDesk?"8%":"4%",top:"50%",transform:"translateY(-50%)",
+            height:isDesk?320:200,objectFit:"contain",
+            animation:"floatTrophy 3s ease-in-out infinite",
+            filter:"drop-shadow(0 0 40px rgba(240,180,41,0.45))",
+            pointerEvents:"none",zIndex:2,
+          }} onError={e=>{e.target.style.display="none";}}/>
+        )}
 
         {/* Hero content */}
         <div style={{position:"absolute",bottom:0,left:0,right:0,padding:isDesk?"48px 64px":"32px 24px",maxWidth:700}}>
@@ -596,12 +666,26 @@ function HomePage({C,dk,ac,F,lang,send,setPage,isDesk}){
           </div>
 
           {/* Title */}
-          <div style={{fontFamily:"'Outfit',sans-serif",fontSize:isDesk?64:38,fontWeight:900,color:"#FFF",lineHeight:1.08,marginBottom:14,letterSpacing:-1}}>
-            <span style={{color:BR.gold}}>Yalla</span>
-            <span style={{color:"#FFF"}}> Vamos</span>
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={{hidden:{},visible:{transition:{staggerChildren:0.14,delayChildren:0.15}}}}
+            style={{fontFamily:"'Outfit',sans-serif",fontSize:isDesk?64:38,fontWeight:900,lineHeight:1.08,marginBottom:14,letterSpacing:-1}}
+          >
+            <motion.span
+              variants={{hidden:{opacity:0,y:40},visible:{opacity:1,y:0,transition:{duration:0.75,ease:[0.25,0.46,0.45,0.94]}}}}
+              style={{display:"inline-block",color:BR.gold}}
+            >Yalla</motion.span>
+            <motion.span
+              variants={{hidden:{opacity:0,y:40},visible:{opacity:1,y:0,transition:{duration:0.75,ease:[0.25,0.46,0.45,0.94]}}}}
+              style={{display:"inline-block",color:"#FFF"}}
+            >&nbsp;Vamos</motion.span>
             <br/>
-            <span style={{color:"#FFF"}}>2030</span>
-          </div>
+            <motion.span
+              variants={{hidden:{opacity:0,y:40},visible:{opacity:1,y:0,transition:{duration:0.75,ease:[0.25,0.46,0.45,0.94]}}}}
+              style={{display:"inline-block",color:"#FFF"}}
+            >2030</motion.span>
+          </motion.div>
 
           {/* Subtitle */}
           <p style={{fontFamily:F,fontSize:isDesk?17:14,color:"rgba(255,255,255,0.82)",marginBottom:28,lineHeight:1.6,maxWidth:480}}>
@@ -653,22 +737,89 @@ function HomePage({C,dk,ac,F,lang,send,setPage,isDesk}){
         </div>
       </div>
 
+      {/* ── COUNTDOWN TO KICKOFF ── */}
+      <div style={{position:"relative",overflow:"hidden",padding:isDesk?"64px 32px":"40px 16px",textAlign:"center",background:"#0a0a0a"}}>
+        {/* Blurred stadium background */}
+        <img src="/stadium-aerial.png" alt="" aria-hidden="true" style={{
+          position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",
+          filter:"blur(8px) brightness(0.3)",pointerEvents:"none",zIndex:0,
+        }} onError={e=>{e.target.style.display="none";}}/>
+        <div style={{position:"relative",zIndex:1}}>
+          <div style={{fontFamily:F,fontSize:11,fontWeight:600,color:BR.gold,letterSpacing:4,textTransform:"uppercase",marginBottom:12}}>
+            Countdown to Kickoff
+          </div>
+          <div style={{display:"flex",justifyContent:"center",gap:isDesk?24:10,flexWrap:"wrap",marginBottom:40}}>
+            {[
+              {val:countdown.d, label:"DAYS"},
+              {val:countdown.h, label:"HOURS"},
+              {val:countdown.m, label:"MINUTES"},
+              {val:countdown.s, label:"SECONDS"},
+            ].map(({val,label})=>(
+              <div key={label} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
+                <div style={{
+                  background:"#1a1a1a",border:`2px solid ${BR.gold}`,borderRadius:16,
+                  padding:isDesk?"20px 28px":"14px 18px",minWidth:isDesk?120:76,
+                }}>
+                  <div
+                    key={`${label}-${val}`}
+                    style={{
+                      fontFamily:F,fontSize:isDesk?72:42,fontWeight:900,color:"#FFF",
+                      lineHeight:1,textAlign:"center",
+                      animation:"flipNum 0.3s ease both",
+                    }}
+                  >{String(val).padStart(2,"0")}</div>
+                </div>
+                <div style={{fontFamily:F,fontSize:isDesk?11:9,fontWeight:600,color:BR.gold,letterSpacing:2}}>{label}</div>
+              </div>
+            ))}
+          </div>
+          {/* Trophy + text */}
+          <img src="/trophy-2030.png" alt="" aria-hidden="true" style={{
+            height:120,objectFit:"contain",marginBottom:16,
+            filter:"drop-shadow(0 0 30px rgba(240,180,41,0.6))",
+          }} onError={e=>{e.target.style.display="none";}}/>
+          <div style={{fontFamily:F,fontSize:isDesk?28:20,fontWeight:800,color:BR.gold,letterSpacing:2}}>
+            Yalla Vamos 2030
+          </div>
+          <div style={{fontFamily:F,fontSize:13,color:"rgba(255,255,255,0.45)",marginTop:8}}>
+            June 15, 2030 · Casablanca
+          </div>
+        </div>
+      </div>
+
       {/* ── MAIN CONTENT ── */}
       <div style={{maxWidth:1280,margin:"0 auto",padding:isDesk?"40px 32px":"20px 16px"}}>
 
         {/* Cities carousel */}
-        <div style={{marginBottom:48}}>
-          <div style={{textAlign:"center",marginBottom:28}}>
+        <div ref={citiesRef} style={{marginBottom:48}}>
+          <motion.div
+            initial={{opacity:0,y:24}}
+            animate={citiesInView?{opacity:1,y:0}:{opacity:0,y:24}}
+            transition={{duration:0.6,ease:[0.25,0.46,0.45,0.94]}}
+            style={{textAlign:"center",marginBottom:28}}
+          >
             <div style={{fontFamily:F,fontSize:isDesk?32:24,fontWeight:800,color:C.str}}>🇲🇦 {T.secCities}</div>
             <div style={{fontFamily:F,fontSize:13,color:C.mut,marginTop:6}}>{T.secCitiesSub}</div>
-          </div>
-          <div style={{position:"relative",borderRadius:20,overflow:"hidden",height:isDesk?400:260,boxShadow:C.sh}}>
+          </motion.div>
+          <motion.div
+            initial={{opacity:0,y:32}}
+            animate={citiesInView?{opacity:1,y:0}:{opacity:0,y:32}}
+            transition={{duration:0.65,delay:0.1,ease:[0.25,0.46,0.45,0.94]}}
+            style={{position:"relative",borderRadius:20,overflow:"hidden",height:isDesk?400:260,boxShadow:C.sh}}
+          >
             {CITIES.map((c,i)=>(
-              <img key={i} src={c.img} alt={c.city}
-                onError={e=>{e.target.src="/fallback.svg";}}
-                style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",
-                  opacity:i===cityIdx?1:0,transform:i===cityIdx?"scale(1.04)":"scale(1)",
-                  transition:"opacity 1.2s ease, transform 7s ease"}}/>
+              <div key={i} style={{position:"absolute",inset:0,
+                background:`linear-gradient(135deg,${BR.red}cc,${BR.blue}99)`,
+                display:"flex",alignItems:"center",justifyContent:"center",
+                opacity:i===cityIdx?1:0,transform:i===cityIdx?"scale(1.04)":"scale(1)",
+                transition:"opacity 1.2s ease, transform 7s ease"}}>
+                <img src={c.img} alt={c.city}
+                  onError={e=>{e.target.style.display="none";}}
+                  style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
+                <div style={{position:"relative",zIndex:1,fontSize:isDesk?52:36,color:"rgba(255,255,255,0.18)"}}>
+                  {c.flag}
+                </div>
+              </div>
             ))}
             <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 55%)"}}/>
             <div style={{position:"absolute",bottom:24,left:28}}>
@@ -676,20 +827,62 @@ function HomePage({C,dk,ac,F,lang,send,setPage,isDesk}){
               <div style={{fontFamily:F,fontSize:11,color:"rgba(255,255,255,0.6)",marginTop:4,letterSpacing:2,textTransform:"uppercase"}}>{T.villeHote}</div>
             </div>
             <div style={{position:"absolute",bottom:28,right:24,display:"flex",gap:6}}>
-              {CITIES.map((_,i)=><div key={i} onClick={()=>setCityIdx(i)} style={{width:i===cityIdx?20:6,height:6,borderRadius:3,background:i===cityIdx?BR.gold:"rgba(255,255,255,0.35)",cursor:"pointer",transition:"all .4s"}}/>)}
+              {CITIES.map((_,i)=>(
+                <motion.div
+                  key={i}
+                  initial={{opacity:0,scale:0.4}}
+                  animate={citiesInView?{opacity:1,scale:1}:{opacity:0,scale:0.4}}
+                  transition={{duration:0.35,delay:0.25+i*0.08,ease:"backOut"}}
+                  onClick={()=>setCityIdx(i)}
+                  style={{width:i===cityIdx?20:6,height:6,borderRadius:3,background:i===cityIdx?BR.gold:"rgba(255,255,255,0.35)",cursor:"pointer",transition:"all .4s"}}
+                />
+              ))}
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* 3-column grid: Map / Weather+Currency / News */}
         <div style={{display:"grid",gridTemplateColumns:isDesk?"1.4fr 1fr 0.9fr":"1fr",gap:24,marginBottom:48}}>
 
-          {/* Map */}
+          {/* Map + stadium panel */}
           <div style={{background:C.card,border:`1px solid ${C.bdr}`,borderRadius:20,padding:20,backdropFilter:"blur(16px)"}}>
             <div style={{fontFamily:F,fontSize:15,fontWeight:700,color:C.str,marginBottom:14,display:"flex",alignItems:"center",gap:8}}>
               <span style={{fontSize:20}}>🗺️</span> {T.secMap}
             </div>
-            <SMap C={C} onSelect={s=>send(`Parle-moi du stade de ${s.city}`)} height={260}/>
+            <SMap C={C} onSelect={s=>{send(`Parle-moi du stade de ${s.city}`);setSelectedStadium(s);}} height={selectedStadium?200:260}/>
+            {/* Stadium info panel */}
+            {selectedStadium&&(
+              <div style={{marginTop:12,borderRadius:14,overflow:"hidden",border:`1px solid ${C.bdr}`,animation:"slideDown .25s ease"}}>
+                {/* Header image */}
+                <div style={{position:"relative",height:110}}>
+                  <img src="/stadium-night.png" alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={e=>{e.target.style.display="none";}}/>
+                  <img src="/stadium-aerial.png" alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none";}}/>
+                  <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,transparent 40%,rgba(0,0,0,0.8))"}}/>
+                  <button onClick={()=>setSelectedStadium(null)} style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.55)",border:"none",borderRadius:6,color:"#FFF",width:24,height:24,cursor:"pointer",fontSize:13,lineHeight:1}}>✕</button>
+                  <div style={{position:"absolute",bottom:8,left:12}}>
+                    <div style={{fontFamily:F,fontSize:13,fontWeight:700,color:"#FFF"}}>{selectedStadium.name}</div>
+                    <div style={{fontFamily:F,fontSize:10,color:"rgba(255,255,255,0.65)"}}>{selectedStadium.city} · {selectedStadium.cap} places</div>
+                  </div>
+                </div>
+                {/* Weather */}
+                <div style={{padding:"10px 12px",background:C.card}}>
+                  <Weather C={C} city={selectedStadium.city}/>
+                  {/* Action buttons */}
+                  <div style={{display:"flex",gap:8,marginTop:10}}>
+                    <a href={`https://www.google.com/maps?q=${selectedStadium.lat},${selectedStadium.lng}`} target="_blank" rel="noopener noreferrer"
+                      style={{flex:1,padding:"8px 0",borderRadius:10,background:`linear-gradient(135deg,${BR.blue},#0F3DAA)`,textDecoration:"none",
+                        fontFamily:F,fontSize:11,fontWeight:600,color:"#FFF",textAlign:"center",display:"block"}}>
+                      📍 Itinéraire
+                    </a>
+                    <button onClick={()=>{if(navigator.share)navigator.share({title:selectedStadium.name,text:`${selectedStadium.city} — ${selectedStadium.cap} places`,url:window.location.href}).catch(()=>{});else{navigator.clipboard?.writeText(`${selectedStadium.name}, ${selectedStadium.city}`);alert("Copié !");};}}
+                      style={{flex:1,padding:"8px 0",borderRadius:10,background:C.fld,border:`1px solid ${C.bdr}`,
+                        fontFamily:F,fontSize:11,fontWeight:600,color:C.str,cursor:"pointer"}}>
+                      🔗 Partager
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Weather + Currency */}
@@ -769,6 +962,167 @@ function HomePage({C,dk,ac,F,lang,send,setPage,isDesk}){
                 <span style={{fontFamily:F,fontSize:13,color:C.mut}}>{p.t[lang]||p.t.en}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* ── FAN WALL ── */}
+        <div ref={fanWallRef} style={{marginBottom:56}}>
+
+          {/* Section heading */}
+          <motion.div
+            initial={{opacity:0,y:24}}
+            animate={fanWallInView?{opacity:1,y:0}:{opacity:0,y:24}}
+            transition={{duration:0.6,ease:[0.25,0.46,0.45,0.94]}}
+            style={{textAlign:"center",marginBottom:32}}
+          >
+            <div style={{fontFamily:F,fontSize:isDesk?32:24,fontWeight:800,color:C.str}}>📸 Fan Wall</div>
+            <div style={{fontFamily:F,fontSize:13,color:C.mut,marginTop:6}}>Les 6 villes hôtes du Maroc</div>
+          </motion.div>
+
+          {/* Cork board */}
+          <div style={{
+            borderRadius:20,overflow:"hidden",position:"relative",
+            backgroundColor:"#C4873A",
+            backgroundImage:`repeating-radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0) 0 0 / 4px 4px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.14 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`,
+            backgroundSize:"4px 4px, 200px 200px",
+            boxShadow:"inset 0 0 70px rgba(0,0,0,0.28), 0 8px 32px rgba(0,0,0,0.28)",
+            padding:isDesk?"0 28px 36px":"0 14px 24px",
+          }}>
+            {/* Inner border shadow */}
+            <div style={{position:"absolute",inset:0,border:"10px solid rgba(0,0,0,0.08)",borderRadius:20,pointerEvents:"none",zIndex:10}}/>
+
+            {/* Fairy lights */}
+            <img src="/fairy-lights.png" alt="" style={{
+              width:"100%",display:"block",
+              maxHeight:80,objectFit:"contain",
+              marginBottom:20,
+            }}/>
+
+            {/* Polaroid grid */}
+            <motion.div
+              variants={{hidden:{},visible:{transition:{staggerChildren:0.1}}}}
+              initial="hidden"
+              animate={fanWallInView?"visible":"hidden"}
+              style={{
+                display:"grid",
+                gridTemplateColumns:isDesk?"repeat(6,1fr)":"repeat(3,1fr)",
+                gap:isDesk?18:10,
+                justifyItems:"center",
+                alignItems:"start",
+              }}
+            >
+              {[
+                {city:"Casablanca",img:"/casablanca.jpg",  flag:"🌊",rot:-5,pin:BR.red},
+                {city:"Rabat",     img:"/rabat.jpg",       flag:"👑",rot: 3,pin:BR.blue},
+                {city:"Fès",       img:"/fes.webp",        flag:"🕌",rot:-4,pin:BR.gold},
+                {city:"Marrakech", img:"/MARRAKECH-CITY.webp",flag:"🌹",rot: 6,pin:BR.green},
+                {city:"Tanger",    img:"/Tanger.jpg",      flag:"🌊",rot:-3,pin:BR.purple},
+                {city:"Agadir",    img:"/AGADIR.jpg",      flag:"🏖️",rot: 5,pin:BR.red},
+              ].map((p)=>(
+                <motion.div
+                  key={p.city}
+                  layout="position"
+                  variants={{
+                    hidden:{opacity:0,y:-50,rotate:0},
+                    visible:{opacity:1,y:0,rotate:p.rot,transition:{duration:0.55,ease:[0.25,0.46,0.45,0.94]}}
+                  }}
+                  style={{position:"relative",width:"100%",maxWidth:150,paddingTop:12}}
+                >
+                  {/* Push pin */}
+                  <div style={{
+                    position:"absolute",top:0,left:"50%",transform:"translateX(-50%)",
+                    width:16,height:16,borderRadius:"50%",background:p.pin,zIndex:3,
+                    boxShadow:`0 2px 8px rgba(0,0,0,0.55),0 0 0 2px rgba(255,255,255,0.22),inset 0 1px 3px rgba(255,255,255,0.35)`,
+                  }}/>
+                  {/* Polaroid body */}
+                  <div style={{
+                    background:"var(--polaroid-paper)",padding:"8px 8px 34px 8px",
+                    boxShadow:"0 6px 22px rgba(0,0,0,0.42)",position:"relative",
+                  }}>
+                    <img src={p.img} alt={p.city}
+                      onError={e=>{e.target.src="/fallback.svg";}}
+                      style={{width:"100%",height:isDesk?118:85,objectFit:"cover",display:"block"}}
+                    />
+                    <img src="/polaroid-frame.png" alt="" aria-hidden="true" style={{
+                      position:"absolute",inset:0,width:"100%",height:"100%",
+                      objectFit:"fill",opacity:0.15,pointerEvents:"none",mixBlendMode:"multiply",
+                    }}/>
+                    <div style={{
+                      textAlign:"center",marginTop:6,fontFamily:"'Outfit',sans-serif",
+                      fontSize:isDesk?11:8,fontWeight:600,color:"var(--polaroid-ink)",fontStyle:"italic",
+                    }}>{p.flag} {p.city}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Horizontal Timeline */}
+          <div ref={timelineRef} style={{marginTop:44}}>
+            <motion.div
+              initial={{opacity:0,y:16}}
+              animate={timelineInView?{opacity:1,y:0}:{opacity:0,y:16}}
+              transition={{duration:0.5,ease:[0.25,0.46,0.45,0.94]}}
+              style={{fontFamily:F,fontSize:isDesk?20:17,fontWeight:700,color:C.str,textAlign:"center",marginBottom:28}}
+            >
+              🗓️ Road to 2030
+            </motion.div>
+            <div style={{overflowX:"auto",paddingBottom:8}}>
+              <div style={{minWidth:580,position:"relative",height:170}}>
+                {/* Gray base track */}
+                <div style={{position:"absolute",top:"50%",left:"5%",right:"5%",height:2,background:C.bdr,transform:"translateY(-50%)"}}/>
+                {/* Animated green fill (GSAP) */}
+                <div ref={timelineLineRef} style={{
+                  position:"absolute",top:"calc(50% - 1px)",left:"5%",height:2,
+                  background:`linear-gradient(90deg,${BR.check},${BR.gold})`,
+                  width:`${(3/7)*90}%`,
+                  transformOrigin:"left center",
+                }}/>
+                {[
+                  {date:"Dec 2022",  label:"FIFA Announcement",    status:"done"},
+                  {date:"Feb 2024",  label:"Host Cities",          status:"done"},
+                  {date:"Jun 2024",  label:"Construction",         status:"done"},
+                  {date:"Jan 2029",  label:"Ticket Sales Open",    status:"current"},
+                  {date:"Mar 2030",  label:"Qualification",        status:"future"},
+                  {date:"Jun 14",    label:"Opening Ceremony",     status:"future"},
+                  {date:"Jun 15",    label:"First Match",          status:"future"},
+                  {date:"Jul 13",    label:"Final 🏆",             status:"future"},
+                ].map((ev,i,arr)=>{
+                  const pct = 5 + (i/(arr.length-1))*90;
+                  const above = i%2===0;
+                  const dotColor = ev.status==="done"?BR.check:ev.status==="current"?BR.gold:C.bdr;
+                  const dotFill  = ev.status==="done"?BR.check:ev.status==="current"?BR.gold:"transparent";
+                  return(
+                    <motion.div
+                      key={i}
+                      initial={{opacity:0,scale:0.4}}
+                      animate={timelineInView?{opacity:1,scale:1}:{opacity:0,scale:0.4}}
+                      transition={{duration:0.35,delay:0.4+i*0.1,ease:"backOut"}}
+                      style={{position:"absolute",left:`${pct}%`,top:"50%",transform:"translate(-50%,-50%)",zIndex:2}}
+                    >
+                      {/* Dot */}
+                      <div style={{
+                        width:ev.status==="current"?18:12,height:ev.status==="current"?18:12,
+                        borderRadius:"50%",background:dotFill,border:`2px solid ${dotColor}`,
+                        animation:ev.status==="current"?"goldRing 1.8s ease-out infinite":
+                                  ev.status==="done"?`particleBurst 0.4s ease ${0.4+i*0.1}s both`:undefined,
+                        transform:"translate(-50%,-50%)",position:"absolute",top:"50%",left:"50%",
+                      }}/>
+                      {/* Label */}
+                      <div style={{
+                        position:"absolute",
+                        ...(above?{bottom:18}:{top:18}),
+                        left:"50%",transform:"translateX(-50%)",
+                        textAlign:"center",width:72,
+                      }}>
+                        <div style={{fontFamily:F,fontSize:isDesk?10:8.5,fontWeight:ev.status==="current"?700:ev.status==="done"?600:400,color:ev.status==="current"?BR.gold:ev.status==="done"?C.str:C.mut,lineHeight:1.3}}>{ev.label}</div>
+                        <div style={{fontFamily:F,fontSize:7.5,color:C.mut,marginTop:1}}>{ev.date}</div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -887,7 +1241,7 @@ function SchedulePage({C,dk,ac,F,send,isDesk,lang}){
     <div style={{minHeight:"100vh",paddingTop:68}}>
 
       {/* Page hero */}
-      <div style={{background:`linear-gradient(135deg,#07091A 0%,#0A1A0A 50%,#07091A 100%)`,padding:isDesk?"56px 48px":"36px 20px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+      <div style={{background:`linear-gradient(135deg,#121414 0%,#0A1A0A 50%,#121414 100%)`,padding:isDesk?"56px 48px":"36px 20px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at center, ${BR.green}18 0%, transparent 70%)`}}/>
         <div style={{position:"relative"}}>
           <div style={{fontFamily:F,fontSize:12,fontWeight:600,color:BR.gold,letterSpacing:3,textTransform:"uppercase",marginBottom:12}}>{T.schBadge}</div>
@@ -948,7 +1302,7 @@ function SchedulePage({C,dk,ac,F,send,isDesk,lang}){
                   <span style={{fontSize:15}}>{r.f}</span>
                   <span style={{fontFamily:F,fontSize:12,fontWeight:isHost?700:400,color:isHost?C.str:C.txt,flex:1}}>{r.t}</span>
                   <span style={{fontFamily:F,fontSize:10,color:C.mut}}>{r.p}</span>
-                  <span style={{fontSize:9,color:r.c==="up"?"#22C55E":r.c==="dn"?"#EF4444":"#666"}}>{r.c==="up"?"▲":r.c==="dn"?"▼":"•"}</span>
+                  <span style={{fontSize:9,color:r.c==="up"?BR.check:r.c==="dn"?BR.red:C.mut}}>{r.c==="up"?"▲":r.c==="dn"?"▼":"•"}</span>
                 </div>
               );
             })}
@@ -983,7 +1337,7 @@ function Footer({C,F,setPage,dk,lang}){
       <div style={{maxWidth:1200,margin:"0 auto"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:24,marginBottom:24}}>
           <div>
-            <MoundiLogo size={36} textColor={dk?"#FFF":"#07091A"}/>
+            <MoundiLogo size={36} textColor={C.str}/>
             <div style={{fontFamily:F,fontSize:12,color:C.mut,marginTop:10,maxWidth:280,lineHeight:1.6}}>
               {T.footDesc}
             </div>
@@ -1035,26 +1389,25 @@ export default function MoundiGuide(){
   const[isDesk,setIsDesk]=useState(typeof window!=="undefined"&&window.innerWidth>=768);
   const[chatOpen,setChatOpen]=useState(false);
   const[scrolled,setScrolled]=useState(false);
+  const[selectedTeam,setSelectedTeam]=useState({t:"Morocco",f:"🇲🇦"});
+  const[showTeamPicker,setShowTeamPicker]=useState(false);
+  const hasShownPicker=useRef(false);
   const endRef=useRef(null);const inpRef=useRef(null);const recRef=useRef(null);
 
   useEffect(()=>{const mq=window.matchMedia("(prefers-color-scheme:dark)");setSysDark(mq.matches);const h=e=>setSysDark(e.matches);mq.addEventListener("change",h);return()=>mq.removeEventListener("change",h);},[]);
   useEffect(()=>{const h=()=>setIsDesk(window.innerWidth>=768);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
-  useEffect(()=>{
-    const el=document.getElementById("scroll-container");
-    if(!el)return;
-    const h=()=>setScrolled(el.scrollTop>60);
-    el.addEventListener("scroll",h,{passive:true});
-    return()=>el.removeEventListener("scroll",h);
-  },[page]);
-  useEffect(()=>{setScrolled(false);document.getElementById("scroll-container")?.scrollTo(0,0);},[page]);
+  useEffect(()=>{setScrolled(false);window.scrollTo(0,0);},[page]);
+  useEffect(()=>{const h=()=>setScrolled(window.scrollY>60);window.addEventListener("scroll",h,{passive:true});return()=>window.removeEventListener("scroll",h);},[]);
+  useEffect(()=>{if(!splash&&!hasShownPicker.current){hasShownPicker.current=true;const t=setTimeout(()=>setShowTeamPicker(true),600);return()=>clearTimeout(t);}},[splash]);
 
   const dk=themeMode==="system"?sysDark:themeMode==="dark";
   const TH={
-    dark:{bg:"#07091A",hdr:"rgba(7,9,26,0.92)",card:"rgba(255,255,255,0.055)",bdr:"rgba(255,255,255,0.09)",txt:"rgba(255,255,255,0.76)",str:"#FFFFFF",mut:"rgba(255,255,255,0.35)",fld:"rgba(255,255,255,0.07)",bot:"rgba(255,255,255,0.05)",bbdr:"rgba(255,255,255,0.09)",usr:`linear-gradient(135deg,${BR.red},#9E0F28)`,sh:"0 24px 64px rgba(0,0,0,0.7)",sc:"rgba(255,255,255,0.07)"},
+    dark:{bg:"#121414",hdr:"rgba(18,20,20,0.92)",card:"rgba(255,255,255,0.055)",bdr:"rgba(255,255,255,0.09)",txt:"rgba(255,255,255,0.76)",str:"#e3e2e2",mut:"rgba(255,255,255,0.35)",fld:"rgba(255,255,255,0.07)",bot:"rgba(255,255,255,0.05)",bbdr:"rgba(255,255,255,0.09)",usr:`linear-gradient(135deg,${BR.red},#9E0F28)`,sh:"0 24px 64px rgba(0,0,0,0.7)",sc:"rgba(255,255,255,0.07)"},
     light:{bg:"#EDF0F7",hdr:"rgba(255,255,255,0.96)",card:"rgba(255,255,255,0.78)",bdr:"rgba(0,0,0,0.08)",txt:"rgba(0,0,0,0.70)",str:"#07091A",mut:"rgba(0,0,0,0.38)",fld:"rgba(0,0,0,0.04)",bot:"rgba(255,255,255,0.85)",bbdr:"rgba(0,0,0,0.08)",usr:`linear-gradient(135deg,${BR.red},#B5102A)`,sh:"0 16px 48px rgba(0,0,0,0.11)",sc:"rgba(0,0,0,0.06)"},
   };
   const C=dk?TH.dark:TH.light;
-  const ac=dk?BR.gold:BR.red;
+  const teamColor=TEAM_ACCENT[selectedTeam?.t]||BR.red;
+  const ac=teamColor;
   const F="'Outfit'";
   const isRTL=lang==="ar";
 
@@ -1081,12 +1434,12 @@ export default function MoundiGuide(){
   };
 
   const curLang=LANGUAGES.find(l=>l.code===lang);
-  const bgStyle=dk?{background:"radial-gradient(ellipse at 15% 0%, rgba(228,28,58,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, rgba(26,86,219,0.06) 0%, transparent 50%), #07091A"}:{background:"#EDF0F7"};
+  const bgStyle=dk?{background:"radial-gradient(ellipse at 15% 0%, rgba(228,28,58,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, rgba(26,86,219,0.06) 0%, transparent 50%), #121414"}:{background:"#EDF0F7"};
 
   return(
     <>
     {splash&&<Splash onDone={()=>setSplash(false)}/>}
-    <div style={{height:"100vh",width:"100vw",overflow:"hidden",...bgStyle,fontFamily:F,display:"flex",flexDirection:"column"}}>
+    <div style={{minHeight:"100vh",width:"100%",...bgStyle,fontFamily:F}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;600&display=swap');
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -1095,12 +1448,18 @@ export default function MoundiGuide(){
         @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(228,28,58,0.45)}70%{box-shadow:0 0 0 12px rgba(228,28,58,0)}}
         @keyframes popIn{from{opacity:0;transform:scale(0.92) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
         @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes floatTrophy{0%,100%{transform:translateY(-10px)}50%{transform:translateY(10px)}}
+        @keyframes flagWave{0%,100%{transform:rotate(-3deg) scaleX(1)}50%{transform:rotate(3deg) scaleX(0.97)}}
+        @keyframes flipNum{from{transform:perspective(400px) rotateX(90deg);opacity:0}to{transform:perspective(400px) rotateX(0deg);opacity:1}}
+        @keyframes goldRing{0%{box-shadow:0 0 0 0 rgba(240,180,41,0.7)}70%{box-shadow:0 0 0 18px rgba(240,180,41,0)}100%{box-shadow:0 0 0 0 rgba(240,180,41,0)}}
+        @keyframes particleBurst{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(3)}}
         *{box-sizing:border-box;margin:0;padding:0}
         ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:${C.sc};border-radius:4px}
         input:focus{border-color:${ac}88!important}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
         input[type=number]{-moz-appearance:textfield}
-        html,body{height:100%;width:100%}
+        html,body{min-height:100%;width:100%}
+        :root{--polaroid-paper:#FFFDF5;--polaroid-ink:#3A2A1A}
         select option{background:${dk?"#0F1220":"#FFF"};color:${C.str}}
         a:hover{opacity:.85}
       `}</style>
@@ -1109,12 +1468,12 @@ export default function MoundiGuide(){
       <Navbar page={page} setPage={setPage} scrolled={scrolled} dk={dk} C={C}
         themeMode={themeMode} setThemeMode={setThemeMode}
         lang={lang} curLang={curLang} showLang={showLang} setShowLang={setShowLang}
-        isDesk={isDesk}/>
+        isDesk={isDesk} selectedTeam={selectedTeam} onPickTeam={()=>setShowTeamPicker(true)}/>
 
       {/* Language overlay */}
       {showLang&&(
         <div onClick={()=>setShowLang(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",backdropFilter:"blur(4px)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <div onClick={e=>e.stopPropagation()} style={{background:dk?"rgba(7,9,26,0.99)":"rgba(255,255,255,0.99)",border:`1px solid ${C.bdr}`,borderRadius:20,padding:"16px 10px",minWidth:230,boxShadow:C.sh,animation:"popIn .2s ease"}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:dk?"rgba(18,20,20,0.99)":"rgba(255,255,255,0.99)",border:`1px solid ${C.bdr}`,borderRadius:20,padding:"16px 10px",minWidth:230,boxShadow:C.sh,animation:"popIn .2s ease"}}>
             <div style={{fontFamily:F,fontSize:10,fontWeight:600,color:C.mut,textAlign:"center",padding:"4px 0 12px",letterSpacing:2,textTransform:"uppercase"}}>{(TRANSLATIONS[lang]||TRANSLATIONS.en).langLabel}</div>
             {LANGUAGES.map(l=>(
               <button key={l.code} onClick={()=>{setLang(l.code);setShowLang(false);}}
@@ -1127,12 +1486,46 @@ export default function MoundiGuide(){
         </div>
       )}
 
-      {/* Scrollable page content */}
-      <div id="scroll-container" style={{flex:1,overflowY:"auto",overflowX:"hidden",direction:lang==="ar"?"rtl":"ltr"}}>
-        {page==="home"    &&<HomePage    C={C} dk={dk} ac={ac} F={F} lang={lang} send={send} setPage={setPage} isDesk={isDesk}/>}
-        {page==="ticket"  &&<TicketPage  C={C} dk={dk} F={F} isDesk={isDesk} lang={lang}/>}
-        {page==="schedule"&&<SchedulePage C={C} dk={dk} ac={ac} F={F} send={send} isDesk={isDesk} lang={lang}/>}
-        <Footer C={C} F={F} setPage={setPage} dk={dk} lang={lang}/>
+      {/* Team picker modal */}
+      {showTeamPicker&&(
+        <div onClick={()=>setShowTeamPicker(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(6px)",zIndex:9998,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:dk?"rgba(18,20,20,0.99)":"rgba(255,255,255,0.99)",border:`1px solid ${C.bdr}`,borderRadius:24,padding:"24px 20px",maxWidth:480,width:"100%",boxShadow:C.sh,animation:"popIn .25s ease"}}>
+            <div style={{textAlign:"center",marginBottom:20}}>
+              <div style={{fontSize:32,marginBottom:8}}>⚽</div>
+              <div style={{fontFamily:F,fontSize:18,fontWeight:800,color:C.str,marginBottom:4}}>Choisissez votre équipe</div>
+              <div style={{fontFamily:F,fontSize:12,color:C.mut}}>Votre sélection personnalise l'interface</div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
+              {FIFA_RANKINGS.map(r=>{
+                const isSelected=selectedTeam?.t===r.t;
+                const tColor=TEAM_ACCENT[r.t]||BR.red;
+                return(
+                  <button key={r.t} onClick={()=>{setSelectedTeam({t:r.t,f:r.f});setShowTeamPicker(false);}}
+                    style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"10px 4px",borderRadius:12,
+                      border:`2px solid ${isSelected?tColor:C.bdr}`,
+                      background:isSelected?`${tColor}18`:C.fld,cursor:"pointer",transition:"all .15s"}}>
+                    <span style={{fontSize:24}}>{r.f}</span>
+                    <span style={{fontFamily:F,fontSize:8,fontWeight:isSelected?700:400,color:isSelected?tColor:C.mut,textAlign:"center",lineHeight:1.2}}>{r.t}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button onClick={()=>setShowTeamPicker(false)}
+              style={{display:"block",width:"100%",marginTop:16,padding:"10px",borderRadius:12,
+                border:`1px solid ${C.bdr}`,background:"transparent",fontFamily:F,fontSize:13,
+                color:C.mut,cursor:"pointer"}}>
+              ✕ Fermer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Page content */}
+      <div style={{overflowX:"hidden",direction:lang==="ar"?"rtl":"ltr"}}>
+        {!splash&&page==="home"    &&<HomePage    C={C} dk={dk} ac={ac} F={F} lang={lang} send={send} setPage={setPage} isDesk={isDesk}/>}
+        {!splash&&page==="ticket"  &&<TicketPage  C={C} dk={dk} F={F} isDesk={isDesk} lang={lang}/>}
+        {!splash&&page==="schedule"&&<SchedulePage C={C} dk={dk} ac={ac} F={F} send={send} isDesk={isDesk} lang={lang}/>}
+        {!splash&&<Footer C={C} F={F} setPage={setPage} dk={dk} lang={lang}/>}
       </div>
 
       {/* Floating AI Chat */}
