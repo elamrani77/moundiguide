@@ -3,3 +3,6 @@ dist
 .env
 .env.local
 .vercel
+.DS_Store
+Thumbs.db
+*.log
