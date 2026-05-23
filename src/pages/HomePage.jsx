@@ -515,37 +515,18 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               </button>
             </div>
             {geoToast&&<div style={{fontFamily:font,fontSize:10,color:BR.red,marginBottom:12}}>{geoToast}</div>}
-            {/* POI Category filter pills */}
-            <div className="pills-row" style={{display:"flex",flexWrap:"nowrap",overflowX:"auto",overflowY:"visible",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",gap:8,marginBottom:16,paddingBottom:4}}>
-              {[
-                {id:"all",    icon:"🗺️",label:"Tout",    count:filteredPois.length,  color:"#1A56DB"},
-                ...POI_CATS.map(c=>({...c,count:POIS.filter(p=>p.category===c.id).length})),
-                {id:"favs",   icon:"♥",  label:"Favoris", count:favorites.length,     color:"#EC4899"},
-              ].map(cat=>{
-                const isActive=cat.id==="favs"?showFavsOnly:(poiCategory===cat.id&&!showFavsOnly);
-                const aCo=cat.color||"#00823C";
-                return(
-                  <button key={cat.id}
-                    onClick={()=>{
-                      if(cat.id==="favs"){setShowFavsOnly(p=>!p);setPoiCategory("all");}
-                      else{setPoiCategory(cat.id);setShowFavsOnly(false);}
-                    }}
-                    style={{display:"flex",alignItems:"center",gap:5,padding:"7px 14px",borderRadius:999,
-                      border:`1.5px solid ${isActive?aCo:C.bdr}`,
-                      background:isActive?`${aCo}20`:C.fld,
-                      color:isActive?aCo:C.mut,
-                      fontFamily:font,fontSize:11,fontWeight:isActive?700:500,cursor:"pointer",
-                      transition:"all .18s",whiteSpace:"nowrap",flexShrink:0,
-                      boxShadow:isActive?`0 2px 10px ${aCo}33`:"none"}}>
-                    <span style={{fontSize:13}}>{cat.icon}</span>
-                    <span>{cat.label}</span>
-                    <span style={{background:isActive?`${aCo}28`:"rgba(0,0,0,0.07)",
-                      color:isActive?aCo:C.mut,borderRadius:999,padding:"1px 7px",fontSize:9,fontWeight:700,lineHeight:"16px"}}>
-                      {cat.count}
-                    </span>
-                  </button>
-                );
-              })}
+            {/* POI Category filter — dropdown */}
+            <div style={{position:"relative",display:"inline-block",marginBottom:16}}>
+              <select
+                value={showFavsOnly?"favs":poiCategory}
+                onChange={e=>{const v=e.target.value;if(v==="favs"){setShowFavsOnly(true);setPoiCategory("all");}else{setPoiCategory(v);setShowFavsOnly(false);}}}
+                style={{width:200,borderRadius:12,border:"1.5px solid #E5E7EB",padding:"10px 36px 10px 14px",fontSize:14,background:"white",color:"#374151",appearance:"none",WebkitAppearance:"none",cursor:"pointer",fontFamily:font,outline:"none"}}
+              >
+                <option value="all">🗺️ Tout ({filteredPois.length})</option>
+                {POI_CATS.map(c=><option key={c.id} value={c.id}>{c.icon} {c.label} ({POIS.filter(p=>p.category===c.id).length})</option>)}
+                <option value="favs">♥ Favoris ({favorites.length})</option>
+              </select>
+              <div style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",pointerEvents:"none",color:"#6B7280",fontSize:12}}>▾</div>
             </div>
             <SMap C={C}
               onSelect={s=>{send(`Parle-moi du stade de ${s.city}`);setSelectedStadium(s);setSelectedPoi(null);}}

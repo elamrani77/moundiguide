@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useLiveScores } from "../hooks/useLiveScores";
 
 const videos = ["/wc2026-intro.mp4", "/pepsi-football.mp4", "/adidas_com.mp4"];
 
@@ -52,15 +53,22 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
   const [layoutMode,setLayoutMode]=useState("split3");
   const [userPicked,setUserPicked]=useState(false);
   const [videoIdx,setVideoIdx]=useState(0);
+  const [videoPlaying,setVideoPlaying]=useState(true);
   const resumeRef=useRef(null);
+  const videoTimerRef=useRef(null);
 
+  const { fixtures, latestGoal } = useLiveScores(60000);
   const tc = TEAM_COLORS[teamCode] || TEAM_COLORS.DEFAULT;
+  const tickerPrefix = fixtures.length > 0
+    ? fixtures.slice(0,3).map(f=>`⚽ ${f.home} ${f.homeGoals}-${f.awayGoals} ${f.away} ${f.minute}'`).join(' · ') + ' · '
+    : '';
 
-  // Slot rotation
+  // Slot rotation — pauses while video is playing
   useEffect(()=>{
-    const t=setInterval(()=>setSlot(s=>(s+1)%3),3500);
+    if(videoPlaying) return;
+    const t=setInterval(()=>setSlot(s=>(s+1)%4),4000);
     return()=>clearInterval(t);
-  },[]);
+  },[videoPlaying]);
 
   // Auto-cycle: chained setTimeout, respects per-mode durations
   useEffect(()=>{
@@ -77,6 +85,17 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
     if(resumeRef.current) clearTimeout(resumeRef.current);
     resumeRef.current=setTimeout(()=>setUserPicked(false),15000);
   }
+
+  function handleVideoMeta(e){
+    if(videoTimerRef.current)clearTimeout(videoTimerRef.current);
+    const delay=Math.max((e.target.duration||30)*1000,30000);
+    videoTimerRef.current=setTimeout(()=>{
+      setVideoPlaying(false);
+      setVideoIdx(i=>(i+1)%videos.length);
+    },delay);
+  }
+
+  useEffect(()=>()=>{if(videoTimerRef.current)clearTimeout(videoTimerRef.current);},[]);
 
   const screenH = layoutMode==="full" ? 340 : layoutMode==="split2" ? 300 : 280;
   const gridCols = layoutMode==="full" ? "1fr" : layoutMode==="split2" ? "1fr 1.6fr" : "1fr 1fr 1.6fr";
@@ -106,7 +125,7 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
         <div style={{display:"flex",animation:"ledTicker 18s linear infinite",whiteSpace:"nowrap"}}>
           {[...Array(4)].map((_,i)=>(
             <span key={i} style={{fontFamily:MONO,fontSize:11,letterSpacing:3,color:tc.accent,paddingRight:40}}>
-              <span style={{fontFamily:"sans-serif"}}>⚽</span> YALLA VAMOS 2030 &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🏟️</span> GRAND STADE HASSAN II &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🗓️</span> 15 JUIN 2030 &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🇲🇦</span> MAROC &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🇪🇸</span> ESPAGNE &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🇵🇹</span> PORTUGAL &nbsp;·&nbsp; 48 ÉQUIPES · 104 MATCHS &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🏆</span> FIFA WORLD CUP 2030 &nbsp;·&nbsp;
+              {tickerPrefix}<span style={{fontFamily:"sans-serif"}}>⚽</span> YALLA VAMOS 2030 &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🏟️</span> GRAND STADE HASSAN II &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🗓️</span> 15 JUIN 2030 &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🇲🇦</span> MAROC &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🇪🇸</span> ESPAGNE &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🇵🇹</span> PORTUGAL &nbsp;·&nbsp; 48 ÉQUIPES · 104 MATCHS &nbsp;·&nbsp; <span style={{fontFamily:"sans-serif"}}>🏆</span> FIFA WORLD CUP 2030 &nbsp;·&nbsp;
             </span>
           ))}
         </div>
@@ -134,7 +153,8 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
               src={videos[videoIdx]}
               autoPlay muted loop={false} playsInline
               style={{width:"100%",height:"100%",objectFit:"cover",display:"block",position:"absolute",top:0,left:0,zIndex:1,pointerEvents:"none"}}
-              onEnded={()=>setVideoIdx(i=>(i+1)%videos.length)}
+              onPlay={()=>setVideoPlaying(true)}
+              onLoadedMetadata={handleVideoMeta}
               onError={e=>{e.target.style.display="none";}}
             />
             <div style={{position:"absolute",bottom:0,left:0,right:0,height:60,background:"linear-gradient(to top,rgba(0,0,0,0.85),transparent)",zIndex:2}}/>
@@ -244,6 +264,26 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
               <div style={{fontFamily:MONO,fontSize:17,fontWeight:800,color:"white",letterSpacing:4}}>BILLETS OFFICIELS</div>
               <div style={{fontFamily:"monospace",fontSize:12,color:tc.accent,letterSpacing:2}}>fifa.com/tickets</div>
             </div>
+
+            {/* SLOT 3 — Live Scores */}
+            <div style={{position:"absolute",inset:0,opacity:slot===3?1:0,transition:"opacity 0.4s ease",background:"linear-gradient(135deg,#00001a,#050508)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,zIndex:1,padding:12}}>
+              <div style={{fontFamily:MONO,fontSize:9,letterSpacing:3,color:"#F0B429",marginBottom:4}}>LIVE SCORES</div>
+              {fixtures.length > 0 ? fixtures.slice(0,3).map((f,i)=>(
+                <div key={i} style={{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 8px",borderRadius:6,background:"rgba(255,255,255,0.04)"}}>
+                  <span style={{fontFamily:MONO,fontSize:10,color:"white",flex:1,textAlign:"right",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{f.home}</span>
+                  <span style={{fontFamily:MONO,fontSize:13,fontWeight:700,color:"#F0B429",margin:"0 8px",whiteSpace:"nowrap"}}>
+                    {f.homeGoals} - {f.awayGoals}
+                    <span style={{fontSize:8,color:"rgba(255,255,255,0.5)",marginLeft:4}}>{f.minute}'</span>
+                  </span>
+                  <span style={{fontFamily:MONO,fontSize:10,color:"white",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{f.away}</span>
+                </div>
+              )) : (
+                <div style={{fontFamily:MONO,fontSize:11,color:"rgba(255,255,255,0.5)",textAlign:"center"}}>
+                  <div>Aucun match en direct</div>
+                  <div style={{fontSize:9,color:"#F0B429",marginTop:4}}>{new Date().toLocaleDateString("fr-FR")}</div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -255,9 +295,21 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
             src={videos[videoIdx]}
             autoPlay muted loop={false} playsInline
             style={{width:"100%",height:"100%",objectFit:"cover",display:"block",position:"absolute",top:0,left:0,zIndex:1,pointerEvents:"none"}}
-            onEnded={()=>setVideoIdx(i=>(i+1)%videos.length)}
+            onPlay={()=>setVideoPlaying(true)}
+            onEnded={()=>{setVideoPlaying(false);setVideoIdx(i=>(i+1)%videos.length);}}
             onError={e=>{e.target.style.display="none";}}
           />
+          {latestGoal&&Date.now()-latestGoal.timestamp<30000&&(
+            <div style={{position:"absolute",inset:0,zIndex:20,background:"rgba(200,16,46,0.9)",
+              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+              animation:"screenFlash 0.3s ease 3"}}>
+              <div style={{fontFamily:MONO,fontSize:48,color:"white",fontWeight:900}}>⚽ BUT !</div>
+              <div style={{fontFamily:MONO,fontSize:18,color:"white",marginTop:8,textAlign:"center",padding:"0 12px"}}>
+                {latestGoal.home} {latestGoal.homeGoals} - {latestGoal.awayGoals} {latestGoal.away}
+              </div>
+              <div style={{fontFamily:MONO,fontSize:14,color:"#F0B429",marginTop:6}}>{latestGoal.minute}'</div>
+            </div>
+          )}
           <div style={{position:"absolute",bottom:0,left:0,right:0,height:80,background:"linear-gradient(to top,rgba(0,0,0,0.85),transparent)",zIndex:2}}/>
           <div style={{position:"absolute",bottom:12,left:14,zIndex:3}}>
             <div style={{fontFamily:"monospace",fontSize:12,fontWeight:700,color:"white",letterSpacing:2,marginBottom:4}}>
