@@ -431,8 +431,10 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
       </div>
 
       {/* ── LED BOARD ── */}
-      <LEDBoard days={countdown.d} hours={countdown.h} minutes={countdown.m} seconds={countdown.s}
-        teamCode={(()=>{const r=TEAM_ISO[selectedTeam?.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})()}/>
+      <div style={{touchAction:"pan-y"}}>
+        <LEDBoard days={countdown.d} hours={countdown.h} minutes={countdown.m} seconds={countdown.s}
+          teamCode={(()=>{const r=TEAM_ISO[selectedTeam?.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})()}/>
+      </div>
 
       {/* ── MAIN CONTENT ── */}
       <div style={{maxWidth:1280,margin:"0 auto",padding:isDesk?"40px 32px":"20px 16px"}}>

@@ -9,9 +9,9 @@ export default function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,us
     if(!window.L){const l=document.createElement("link");l.rel="stylesheet";l.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";document.head.appendChild(l);const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";s.onload=()=>go();document.head.appendChild(s);}else go();
     function go(){
       if(!ref.current||mR.current)return;
-      const m=window.L.map(ref.current,{zoomControl:false,scrollWheelZoom:false,attributionControl:false}).setView([32.5,-6.5],5.5);
-      m.on("click",()=>m.scrollWheelZoom.enable());
-      m.on("mouseout",()=>m.scrollWheelZoom.disable());
+      const m=window.L.map(ref.current,{zoomControl:false,attributionControl:false,tap:false,dragging:false,touchZoom:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false}).setView([32.5,-6.5],5.5);
+      const mapContainer=m.getContainer();
+      mapContainer.style.touchAction='pan-y';
       window.L.control.zoom({position:"bottomright"}).addTo(m);
       window.L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{attribution:"©OSM ©CartoDB",maxZoom:19,subdomains:"abcd"}).addTo(m);
       // Stadium markers — pin style
@@ -82,5 +82,9 @@ export default function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,us
     userDotRef.current=window.L.marker([userCoords.lat,userCoords.lng],{icon:ic}).addTo(mR.current);
     userDotRef.current.bindPopup("📍 Vous êtes ici");
   },[userCoords]);
-  return <div ref={ref} style={{width:"100%",height:height||300,borderRadius:20,overflow:"hidden",border:`1px solid ${C.bdr}`,boxShadow:"0 2px 16px rgba(0,0,0,0.10)"}}/>;
+  return(
+    <div style={{overflow:"hidden",borderRadius:20,touchAction:"pan-x pan-y",border:`1px solid ${C.bdr}`,boxShadow:"0 2px 16px rgba(0,0,0,0.10)"}}>
+      <div ref={ref} style={{width:"100%",height:height||300,touchAction:"pan-y"}}/>
+    </div>
+  );
 }

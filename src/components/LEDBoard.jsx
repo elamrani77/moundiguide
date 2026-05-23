@@ -92,7 +92,7 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode}){
   const fadeIn = { animation:"slotFade 0.4s ease both" };
 
   return(
-    <div style={{background:"#020204",width:"100%",padding:0,overflow:"hidden",position:"relative",transition:"all 0.8s ease"}}>
+    <div style={{background:"#020204",width:"100%",padding:0,overflow:"hidden",position:"relative",transition:"all 0.8s ease",touchAction:"pan-y",pointerEvents:"none"}}>
 
       {/* Ambient light blobs */}
       <div style={{position:"absolute",top:"10%",left:"5%",width:300,height:300,background:tc.primary,opacity:0.10,filter:"blur(80px)",borderRadius:"50%",pointerEvents:"none",zIndex:0}}/>
@@ -115,7 +115,7 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode}){
       {/* Layout indicator — top-right of board */}
       <div style={{position:"absolute",top:40,right:16,zIndex:5,display:"flex",gap:1,
         background:"rgba(0,0,0,0.6)",borderRadius:7,padding:"3px 4px",
-        border:`1px solid ${alpha(tc.accent,0.2)}`}}>
+        border:`1px solid ${alpha(tc.accent,0.2)}`,pointerEvents:"auto"}}>
         {LAYOUTS.map(m=>(
           <LayoutIcon key={m} mode={m} active={layoutMode===m} activeColor={tc.accent} onClick={()=>pickLayout(m)}/>
         ))}
@@ -131,6 +131,7 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode}){
         position:"relative",
         zIndex:1,
         transition:"grid-template-columns 0.6s ease",
+        touchAction:"pan-y",
       }}>
 
         {/* SCREEN 1 — COUNTDOWN (hidden in full mode) */}
@@ -209,7 +210,7 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode}){
             key={videoIdx}
             src={videos[videoIdx]}
             autoPlay muted loop={false} playsInline
-            style={{width:"100%",height:"100%",objectFit:"cover",display:"block",position:"absolute",top:0,left:0,zIndex:1}}
+            style={{width:"100%",height:"100%",objectFit:"cover",display:"block",position:"absolute",top:0,left:0,zIndex:1,pointerEvents:"none"}}
             onEnded={()=>setVideoIdx(i=>(i+1)%videos.length)}
             onError={e=>{e.target.style.display="none";}}
           />

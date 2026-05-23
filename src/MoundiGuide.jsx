@@ -82,7 +82,7 @@ export default function MoundiGuide(){
   return(
     <>
     {splash&&<Splash onDone={()=>setSplash(false)}/>}
-    <div style={{minHeight:"100vh",width:"100%",...bgStyle,fontFamily:F}}>
+    <div style={{minHeight:"100vh",width:"100%",...bgStyle,fontFamily:F,overflowX:"hidden",overflowY:"auto"}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;600&display=swap');
         *{font-family:'Inter',system-ui,sans-serif}
