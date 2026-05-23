@@ -123,22 +123,46 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
         </div>
       )}
 
-      {/* Mobile compact countdown */}
+      {/* Mobile: full-width video + countdown strip */}
       {!isDesk&&(
-        <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:16,padding:"10px 16px",background:"#020204"}}>
-          {[
-            {v:String(days).padStart(4,"0"),l:"J"},
-            {v:String(hours).padStart(2,"0"),l:"H"},
-            {v:String(minutes).padStart(2,"0"),l:"M"},
-            {v:String(seconds).padStart(2,"0"),l:"S"},
-          ].map(({v,l},i)=>(
-            <div key={l} style={{display:"flex",alignItems:"baseline",gap:2}}>
-              <span style={{fontFamily:MONO,fontSize:20,fontWeight:700,color:tc.accent}}>{v}</span>
-              <span style={{fontFamily:MONO,fontSize:10,color:"rgba(255,255,255,0.5)",marginLeft:1}}>{l}</span>
-              {i<3&&<span style={{fontFamily:MONO,fontSize:16,color:tc.accent,opacity:0.5,marginLeft:4}}>·</span>}
+        <>
+          {/* Video screen — full width, no border-radius */}
+          <div style={{position:"relative",width:"100%",height:200,background:"#000",overflow:"hidden"}}>
+            <Scanline/>
+            <video
+              key={videoIdx}
+              src={videos[videoIdx]}
+              autoPlay muted loop={false} playsInline
+              style={{width:"100%",height:"100%",objectFit:"cover",display:"block",position:"absolute",top:0,left:0,zIndex:1,pointerEvents:"none"}}
+              onEnded={()=>setVideoIdx(i=>(i+1)%videos.length)}
+              onError={e=>{e.target.style.display="none";}}
+            />
+            <div style={{position:"absolute",bottom:0,left:0,right:0,height:60,background:"linear-gradient(to top,rgba(0,0,0,0.85),transparent)",zIndex:2}}/>
+            <div style={{position:"absolute",bottom:10,left:12,zIndex:3}}>
+              <div style={{fontFamily:"monospace",fontSize:11,fontWeight:700,color:"white",letterSpacing:2}}>
+                🏆 FIFA WORLD CUP 2030
+              </div>
             </div>
-          ))}
-        </div>
+            <div style={{position:"absolute",top:8,right:8,zIndex:3,background:tc.primary,borderRadius:4,padding:"3px 8px",color:"white",fontSize:9,fontWeight:700,letterSpacing:3,fontFamily:"monospace",animation:"screenFlash 1.5s ease-in-out infinite"}}>
+              ● LIVE
+            </div>
+          </div>
+          {/* Countdown strip */}
+          <div style={{height:44,background:"#07091A",display:"flex",justifyContent:"center",alignItems:"center",gap:16}}>
+            {[
+              {v:String(days).padStart(4,"0"),l:"J"},
+              {v:String(hours).padStart(2,"0"),l:"H"},
+              {v:String(minutes).padStart(2,"0"),l:"M"},
+              {v:String(seconds).padStart(2,"0"),l:"S"},
+            ].map(({v,l},i)=>(
+              <div key={l} style={{display:"flex",alignItems:"baseline",gap:2}}>
+                <span style={{fontFamily:MONO,fontSize:16,fontWeight:700,color:tc.accent}}>{v}</span>
+                <span style={{fontFamily:MONO,fontSize:9,color:"rgba(255,255,255,0.45)",marginLeft:1}}>{l}</span>
+                {i<3&&<span style={{fontFamily:MONO,fontSize:14,color:tc.accent,opacity:0.4,marginLeft:3}}>·</span>}
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* SCREENS GRID — desktop only */}

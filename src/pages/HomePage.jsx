@@ -498,8 +498,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               </div>
             </div>
             {/* POI Search + Géolocalisation */}
-            <div style={{display:"flex",gap:8,marginBottom:geoToast?4:14,alignItems:"center"}}>
-              <div style={{flex:1,display:"flex",alignItems:"center",background:C.fld,border:`1.5px solid ${C.bdr}`,borderRadius:999,padding:"0 16px",boxShadow:"inset 0 1px 3px rgba(0,0,0,0.05)",transition:"box-shadow .2s"}}>
+            <div style={{display:"flex",flexDirection:isDesk?"row":"column",gap:8,marginBottom:geoToast?4:14,alignItems:isDesk?"center":"stretch"}}>
+              <div style={{flex:1,display:"flex",alignItems:"center",background:C.fld,border:`1.5px solid ${C.bdr}`,borderRadius:999,padding:"0 16px",boxShadow:"inset 0 1px 3px rgba(0,0,0,0.05)",transition:"box-shadow .2s",width:isDesk?"auto":"100%"}}>
                 <span style={{fontSize:14,marginRight:8,color:C.mut,flexShrink:0,lineHeight:1}}>🔍</span>
                 <input value={poiSearch} onChange={e=>setPoiSearch(e.target.value)} placeholder="Rechercher un POI, une ville..."
                   style={{flex:1,padding:"11px 0",border:"none",background:"transparent",color:C.str,fontSize:12,fontFamily:font,outline:"none"}}/>
@@ -508,14 +508,15 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               <button onClick={handleGeolocate} disabled={geoLoading}
                 style={{padding:"11px 16px",borderRadius:999,border:"none",
                   background:userCoords?"linear-gradient(135deg,#00823C,#005A2A)":"linear-gradient(135deg,#1A56DB,#0F3DAA)",
-                  color:"#FFF",fontFamily:font,fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,
+                  color:"#FFF",fontFamily:font,fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",
+                  width:isDesk?"auto":"100%",display:"flex",alignItems:"center",justifyContent:"center",
                   boxShadow:userCoords?"0 3px 14px rgba(0,130,60,0.45)":"0 3px 14px rgba(26,86,219,0.35)",transition:"all .2s"}}>
                 {geoLoading?"⏳ ...":"📍 Près de moi"}
               </button>
             </div>
             {geoToast&&<div style={{fontFamily:font,fontSize:10,color:BR.red,marginBottom:12}}>{geoToast}</div>}
             {/* POI Category filter pills */}
-            <div style={{display:"flex",gap:6,overflowX:"auto",whiteSpace:"nowrap",flexWrap:"nowrap",marginBottom:16,paddingBottom:4,scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
+            <div className="pills-row" style={{display:"flex",flexWrap:"nowrap",overflowX:"auto",overflowY:"visible",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",gap:8,marginBottom:16,paddingBottom:4}}>
               {[
                 {id:"all",    icon:"🗺️",label:"Tout",    count:filteredPois.length,  color:"#1A56DB"},
                 ...POI_CATS.map(c=>({...c,count:POIS.filter(p=>p.category===c.id).length})),

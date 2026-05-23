@@ -112,6 +112,7 @@ export default function MoundiGuide(){
         @keyframes particleBurst{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(3)}}
         *{box-sizing:border-box;margin:0;padding:0}
         ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:${C.sc};border-radius:4px}
+        .pills-row::-webkit-scrollbar{display:none}
         input:focus{border-color:${ac}88!important}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
         input[type=number]{-moz-appearance:textfield}
