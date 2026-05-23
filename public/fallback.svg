@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
-  <rect width="600" height="400" fill="#1a1a2e"/>
-  <rect x="0" y="0" width="600" height="6" fill="#E41C3A"/>
-  <rect x="0" y="394" width="600" height="6" fill="#00913F"/>
-  <text x="300" y="185" font-family="system-ui,sans-serif" font-size="64" text-anchor="middle" fill="#E41C3A">⚽</text>
-  <text x="300" y="240" font-family="system-ui,sans-serif" font-size="18" text-anchor="middle" fill="rgba(255,255,255,0.5)">MoundiGuide</text>
-  <text x="300" y="268" font-family="system-ui,sans-serif" font-size="13" text-anchor="middle" fill="rgba(255,255,255,0.3)">FIFA World Cup 2030</text>
-</svg>
