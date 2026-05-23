@@ -399,13 +399,13 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             <button onClick={()=>setPage("schedule")}
               style={{padding:"13px 28px",borderRadius:12,background:`linear-gradient(135deg,${ac},${ac}BB)`,
                 border:"none",cursor:"pointer",fontFamily:font,fontWeight:600,fontSize:15,color:"#FFF",
-                boxShadow:`0 8px 24px ${ac}55`,transition:"all .2s"}}>
+                boxShadow:`0 8px 24px ${ac}55`,transition:"all .2s",width:isDesk?"auto":"100%"}}>
               📅 {T.heroBtn1}
             </button>
             <button onClick={()=>setPage("ticket")}
               style={{padding:"13px 28px",borderRadius:12,background:"rgba(255,255,255,0.12)",
                 border:"1px solid rgba(255,255,255,0.35)",backdropFilter:"blur(8px)",
-                cursor:"pointer",fontFamily:font,fontWeight:600,fontSize:15,color:"#FFF",transition:"all .2s"}}>
+                cursor:"pointer",fontFamily:font,fontWeight:600,fontSize:15,color:"#FFF",transition:"all .2s",width:isDesk?"auto":"100%"}}>
               🎟️ {T.heroBtn2}
             </button>
           </div>
@@ -433,7 +433,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
       {/* ── LED BOARD ── */}
       <div style={{touchAction:"pan-y"}}>
         <LEDBoard days={countdown.d} hours={countdown.h} minutes={countdown.m} seconds={countdown.s}
-          teamCode={(()=>{const r=TEAM_ISO[selectedTeam?.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})()}/>
+          teamCode={(()=>{const r=TEAM_ISO[selectedTeam?.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})()}
+          isDesk={isDesk}/>
       </div>
 
       {/* ── MAIN CONTENT ── */}
@@ -514,7 +515,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             </div>
             {geoToast&&<div style={{fontFamily:font,fontSize:10,color:BR.red,marginBottom:12}}>{geoToast}</div>}
             {/* POI Category filter pills */}
-            <div style={{display:"flex",gap:6,overflowX:"auto",marginBottom:16,paddingBottom:4,scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
+            <div style={{display:"flex",gap:6,overflowX:"auto",whiteSpace:"nowrap",flexWrap:"nowrap",marginBottom:16,paddingBottom:4,scrollbarWidth:"none",WebkitOverflowScrolling:"touch"}}>
               {[
                 {id:"all",    icon:"🗺️",label:"Tout",    count:filteredPois.length,  color:"#1A56DB"},
                 ...POI_CATS.map(c=>({...c,count:POIS.filter(p=>p.category===c.id).length})),
@@ -859,6 +860,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             >
               🗓️ Road to 2030
             </motion.div>
+            {isDesk ? (
             <div style={{overflowX:"auto",paddingBottom:8}}>
               <div style={{minWidth:580,position:"relative",height:170}}>
                 {/* Gray base track */}
@@ -892,7 +894,6 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                       transition={{duration:0.35,delay:0.4+i*0.1,ease:"backOut"}}
                       style={{position:"absolute",left:`${pct}%`,top:"50%",transform:"translate(-50%,-50%)",zIndex:2}}
                     >
-                      {/* Dot */}
                       <div style={{
                         width:ev.status==="current"?18:12,height:ev.status==="current"?18:12,
                         borderRadius:"50%",background:dotFill,border:`2px solid ${dotColor}`,
@@ -900,14 +901,13 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                                   ev.status==="done"?`particleBurst 0.4s ease ${0.4+i*0.1}s both`:undefined,
                         transform:"translate(-50%,-50%)",position:"absolute",top:"50%",left:"50%",
                       }}/>
-                      {/* Label */}
                       <div style={{
                         position:"absolute",
                         ...(above?{bottom:18}:{top:18}),
                         left:"50%",transform:"translateX(-50%)",
                         textAlign:"center",width:72,
                       }}>
-                        <div style={{fontFamily:font,fontSize:isDesk?10:8.5,fontWeight:ev.status==="current"?700:ev.status==="done"?600:400,color:ev.status==="current"?BR.gold:ev.status==="done"?C.str:C.mut,lineHeight:1.3}}>{ev.label}</div>
+                        <div style={{fontFamily:font,fontSize:10,fontWeight:ev.status==="current"?700:ev.status==="done"?600:400,color:ev.status==="current"?BR.gold:ev.status==="done"?C.str:C.mut,lineHeight:1.3}}>{ev.label}</div>
                         <div style={{fontFamily:font,fontSize:7.5,color:C.mut,marginTop:1}}>{ev.date}</div>
                       </div>
                     </motion.div>
@@ -915,6 +915,41 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                 })}
               </div>
             </div>
+            ) : (
+            <div style={{display:"flex",flexDirection:"column",position:"relative",paddingLeft:28}}>
+              <div style={{position:"absolute",left:8,top:6,bottom:6,width:2,background:C.bdr}}/>
+              {[
+                {date:"Dec 2022",  label:"FIFA Announcement",    status:"done"},
+                {date:"Feb 2024",  label:"Host Cities",          status:"done"},
+                {date:"Jun 2024",  label:"Construction",         status:"done"},
+                {date:"Jan 2029",  label:"Ticket Sales Open",    status:"current"},
+                {date:"Mar 2030",  label:"Qualification",        status:"future"},
+                {date:"Jun 14",    label:"Opening Ceremony",     status:"future"},
+                {date:"Jun 15",    label:"First Match",          status:"future"},
+                {date:"Jul 13",    label:"Final 🏆",             status:"future"},
+              ].map((ev,i)=>{
+                const dotColor=ev.status==="done"?BR.check:ev.status==="current"?BR.gold:C.bdr;
+                const dotFill=ev.status==="done"?BR.check:ev.status==="current"?BR.gold:"transparent";
+                return(
+                  <motion.div key={i}
+                    initial={{opacity:0,x:-10}}
+                    animate={timelineInView?{opacity:1,x:0}:{opacity:0,x:-10}}
+                    transition={{duration:0.35,delay:0.1+i*0.07,ease:"easeOut"}}
+                    style={{display:"flex",alignItems:"flex-start",gap:12,padding:"7px 0",position:"relative"}}
+                  >
+                    <div style={{position:"absolute",left:-20,top:13,width:12,height:12,borderRadius:"50%",
+                      background:dotFill,border:`2px solid ${dotColor}`,
+                      animation:ev.status==="current"?"goldRing 1.8s ease-out infinite":undefined}}/>
+                    <div>
+                      <div style={{fontFamily:font,fontSize:12,fontWeight:ev.status==="current"?700:ev.status==="done"?600:400,
+                        color:ev.status==="current"?BR.gold:ev.status==="done"?C.str:C.mut,lineHeight:1.3}}>{ev.label}</div>
+                      <div style={{fontFamily:font,fontSize:10,color:C.mut,marginTop:1}}>{ev.date}</div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+            )}
           </div>
         </div>
 

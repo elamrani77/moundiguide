@@ -47,7 +47,7 @@ function LayoutIcon({ mode, active, activeColor, onClick }) {
   );
 }
 
-export default function LEDBoard({days,hours,minutes,seconds,teamCode}){
+export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
   const [slot,setSlot]=useState(0);
   const [layoutMode,setLayoutMode]=useState("split3");
   const [userPicked,setUserPicked]=useState(false);
@@ -112,18 +112,38 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode}){
         </div>
       </div>
 
-      {/* Layout indicator — top-right of board */}
-      <div style={{position:"absolute",top:40,right:16,zIndex:5,display:"flex",gap:1,
-        background:"rgba(0,0,0,0.6)",borderRadius:7,padding:"3px 4px",
-        border:`1px solid ${alpha(tc.accent,0.2)}`,pointerEvents:"auto"}}>
-        {LAYOUTS.map(m=>(
-          <LayoutIcon key={m} mode={m} active={layoutMode===m} activeColor={tc.accent} onClick={()=>pickLayout(m)}/>
-        ))}
-      </div>
+      {/* Layout indicator — desktop only */}
+      {isDesk&&(
+        <div style={{position:"absolute",top:40,right:16,zIndex:5,display:"flex",gap:1,
+          background:"rgba(0,0,0,0.6)",borderRadius:7,padding:"3px 4px",
+          border:`1px solid ${alpha(tc.accent,0.2)}`,pointerEvents:"auto"}}>
+          {LAYOUTS.map(m=>(
+            <LayoutIcon key={m} mode={m} active={layoutMode===m} activeColor={tc.accent} onClick={()=>pickLayout(m)}/>
+          ))}
+        </div>
+      )}
 
-      {/* SCREENS GRID */}
+      {/* Mobile compact countdown */}
+      {!isDesk&&(
+        <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:16,padding:"10px 16px",background:"#020204"}}>
+          {[
+            {v:String(days).padStart(4,"0"),l:"J"},
+            {v:String(hours).padStart(2,"0"),l:"H"},
+            {v:String(minutes).padStart(2,"0"),l:"M"},
+            {v:String(seconds).padStart(2,"0"),l:"S"},
+          ].map(({v,l},i)=>(
+            <div key={l} style={{display:"flex",alignItems:"baseline",gap:2}}>
+              <span style={{fontFamily:MONO,fontSize:20,fontWeight:700,color:tc.accent}}>{v}</span>
+              <span style={{fontFamily:MONO,fontSize:10,color:"rgba(255,255,255,0.5)",marginLeft:1}}>{l}</span>
+              {i<3&&<span style={{fontFamily:MONO,fontSize:16,color:tc.accent,opacity:0.5,marginLeft:4}}>·</span>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* SCREENS GRID — desktop only */}
       <div style={{
-        display:"grid",
+        display:isDesk?"grid":"none",
         gridTemplateColumns:gridCols,
         gap:12,
         padding:"12px 16px",
