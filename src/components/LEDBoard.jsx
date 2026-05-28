@@ -296,7 +296,7 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
             autoPlay muted loop={false} playsInline
             style={{width:"100%",height:"100%",objectFit:"cover",display:"block",position:"absolute",top:0,left:0,zIndex:1,pointerEvents:"none"}}
             onPlay={()=>setVideoPlaying(true)}
-            onEnded={()=>{setVideoPlaying(false);setVideoIdx(i=>(i+1)%videos.length);}}
+            onLoadedMetadata={handleVideoMeta}
             onError={e=>{e.target.style.display="none";}}
           />
           {latestGoal&&Date.now()-latestGoal.timestamp<30000&&(
