@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useLiveScores } from "../hooks/useLiveScores";
 
 const videos = ["/wc2026-intro.mp4", "/pepsi-football.mp4", "/adidas_com.mp4"];
 
@@ -48,7 +47,7 @@ function LayoutIcon({ mode, active, activeColor, onClick }) {
   );
 }
 
-export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
+export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk,fixtures=[],latestGoal}){
   const [slot,setSlot]=useState(0);
   const [layoutMode,setLayoutMode]=useState("split3");
   const [userPicked,setUserPicked]=useState(false);
@@ -57,7 +56,6 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk}){
   const resumeRef=useRef(null);
   const videoTimerRef=useRef(null);
 
-  const { fixtures, latestGoal } = useLiveScores(60000);
   const tc = TEAM_COLORS[teamCode] || TEAM_COLORS.DEFAULT;
   const tickerPrefix = fixtures.length > 0
     ? fixtures.slice(0,3).map(f=>`⚽ ${f.home} ${f.homeGoals}-${f.awayGoals} ${f.away} ${f.minute}'`).join(' · ') + ' · '

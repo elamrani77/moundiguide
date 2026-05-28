@@ -12,6 +12,7 @@ import {
 import LEDBoard from "../components/LEDBoard.jsx";
 import Weather from "../components/Weather.jsx";
 import SMap from "../components/SMap.jsx";
+import { useLiveScores } from "../hooks/useLiveScores";
 
 // ── md renderer ──
 function md(t){if(!t)return t;return t.split("\n").map((l,i)=>{let c=l.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");if(l.startsWith("- ")||l.startsWith("• "))return<div key={i} style={{paddingLeft:12,marginBottom:2}} dangerouslySetInnerHTML={{__html:"• "+c.slice(2)}}/>;if(l.trim()==="")return<div key={i} style={{height:6}}/>;return<div key={i} dangerouslySetInnerHTML={{__html:c}}/>;});}
@@ -150,9 +151,17 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
   const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const teamData = selectedTeam ? TEAM_DATA[selectedTeam.t] : null;
   const heroTeamCode = selectedTeam ? (()=>{const r=TEAM_ISO[selectedTeam.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})() : null;
-  // Hero players image fade-in
-  const [heroImgVisible,setHeroImgVisible]=useState(false);
-  useEffect(()=>{const t=setTimeout(()=>setHeroImgVisible(true),400);return()=>clearTimeout(t);},[]);
+  // Hero players image fade-in — once on load, once on team change
+  const playerAnimatedRef=useRef(false);
+  const [playerVisible,setPlayerVisible]=useState(false);
+  useEffect(()=>{const t=setTimeout(()=>setPlayerVisible(true),400);return()=>clearTimeout(t);},[]);
+  useEffect(()=>{
+    if(!selectedTeam?.t)return;
+    playerAnimatedRef.current=false;
+    setPlayerVisible(false);
+    const t=setTimeout(()=>{setPlayerVisible(true);playerAnimatedRef.current=true;},100);
+    return()=>clearTimeout(t);
+  },[selectedTeam?.t]);
 
   // Player reveal
   const [showReveal,setShowReveal]=useState(false);
@@ -233,6 +242,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
     window.__poiGo=(id)=>{const p=POIS.find(x=>x.id===id);if(!p)return;const uc=userCoordsRef.current;const url=uc?`https://www.google.com/maps/dir/${uc.lat},${uc.lng}/${p.lat},${p.lng}`:`https://www.google.com/maps?q=${p.lat},${p.lng}`;window.open(url,"_blank","noopener");};
     return()=>{delete window.__poiAsk;delete window.__poiFav;delete window.__poiGo;};
   },[send]);
+
+  const { fixtures, latestGoal } = useLiveScores(300000);
 
   // Countdown to June 15, 2030 18:00 UTC
   const KICKOFF=new Date("2030-06-15T18:00:00Z").getTime();
@@ -320,27 +331,29 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             pointerEvents:"none",zIndex:1,
             maskImage:"linear-gradient(to right, transparent 0%, black 20%, black 100%)",
             WebkitMaskImage:"linear-gradient(to right, transparent 0%, black 20%, black 100%)",
-            opacity:heroImgVisible?1:0,transition:"opacity 1.2s ease-out 0.4s"}}>
-            <img src={PLAYERS_IMG[TEAM_ISO[selectedTeam?.t]?.toUpperCase()] || "/players-ma.png"} alt="" aria-hidden="true"
+            opacity:playerVisible?1:0,transform:playerVisible?"translateY(0)":"translateY(30px)",transition:"opacity 0.8s ease,transform 0.8s ease"}}>
+            <img src={PLAYERS_IMG[TEAM_ISO[selectedTeam?.t]?.toUpperCase()]||PLAYERS_IMG[selectedTeam?.iso?.toUpperCase()]||PLAYERS_IMG[selectedTeam?.code?.toUpperCase()]||PLAYERS_IMG[selectedTeam?.t?.toUpperCase()]||"/players-ma.png"} alt="" aria-hidden="true"
               style={{width:"100%",height:"100%",objectFit:"cover",objectPosition:"center 10%",display:"block"}}
               onError={e=>{e.target.parentElement.style.display="none";}}/>
           </div>
         )}
 
         {/* Hero content */}
-        <div style={{position:"absolute",bottom:0,left:0,right:0,padding:isDesk?"48px 64px":"32px 24px",zIndex:2,maxWidth:560}}>
+        <div style={{position:"absolute",left:isDesk?40:16,top:"50%",transform:"translateY(-50%)",zIndex:2,maxWidth:lang==="ar"&&isDesk?480:isDesk?560:"90%",direction:"ltr"}}>
           {/* Badge */}
-          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(240,180,41,0.15)",backdropFilter:"blur(8px)",border:"1px solid rgba(240,180,41,0.35)",borderRadius:24,padding:"5px 14px",marginBottom:16}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(240,180,41,0.15)",backdropFilter:"blur(8px)",border:"1px solid rgba(240,180,41,0.35)",borderRadius:24,padding:"5px 14px",marginBottom:16,flexDirection:lang==="ar"?"row-reverse":"row"}}>
             <span>⚽</span>
             <span style={{fontFamily:font,fontSize:11,fontWeight:600,color:BR.gold,letterSpacing:2,textTransform:"uppercase"}}>{T.heroBadge}</span>
           </div>
 
           {/* Welcome text — team mode */}
           {teamData&&(
-            <div style={{marginBottom:12}}>
+            <div style={{marginBottom:12,direction:lang==="ar"?"rtl":"ltr",textAlign:lang==="ar"?"right":"left"}}>
               <span style={{fontFamily:font,fontSize:isDesk?22:17,fontWeight:700,color:"rgba(255,255,255,0.92)",
                 textShadow:`0 0 24px ${teamData.colors[0]}CC`}}>
-                {(WELCOME_FAN[lang]||WELCOME_FAN.en)(teamData.flag,teamData.name||selectedTeam.t)}
+                {lang==="ar"
+                  ?`!أهلاً مشجع ${teamData.flag} ${heroTeamCode}`
+                  :(WELCOME_FAN[lang]||WELCOME_FAN.en)(teamData.flag,teamData.name||selectedTeam.t)}
               </span>
             </div>
           )}
@@ -352,14 +365,16 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             variants={{hidden:{},visible:{transition:{staggerChildren:0.14,delayChildren:0.15}}}}
             style={{fontFamily:"'Outfit',sans-serif",fontSize:isDesk?64:38,fontWeight:900,lineHeight:1.08,marginBottom:14,letterSpacing:-1}}
           >
-            <motion.span
-              variants={{hidden:{opacity:0,y:40},visible:{opacity:1,y:0,transition:{duration:0.75,ease:[0.25,0.46,0.45,0.94]}}}}
-              style={{display:"inline-block",color:BR.gold}}
-            >Yalla</motion.span>
-            <motion.span
-              variants={{hidden:{opacity:0,y:40},visible:{opacity:1,y:0,transition:{duration:0.75,ease:[0.25,0.46,0.45,0.94]}}}}
-              style={{display:"inline-block",color:"#FFF"}}
-            >&nbsp;Vamos</motion.span>
+            <span style={{direction:"ltr",display:"inline-block"}}>
+              <motion.span
+                variants={{hidden:{opacity:0,y:40},visible:{opacity:1,y:0,transition:{duration:0.75,ease:[0.25,0.46,0.45,0.94]}}}}
+                style={{display:"inline-block",color:BR.gold}}
+              >Yalla</motion.span>
+              <motion.span
+                variants={{hidden:{opacity:0,y:40},visible:{opacity:1,y:0,transition:{duration:0.75,ease:[0.25,0.46,0.45,0.94]}}}}
+                style={{display:"inline-block",color:"#FFF"}}
+              >&nbsp;Vamos</motion.span>
+            </span>
             <br/>
             <motion.span
               variants={{hidden:{opacity:0,y:40},visible:{opacity:1,y:0,transition:{duration:0.75,ease:[0.25,0.46,0.45,0.94]}}}}
@@ -368,13 +383,13 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           </motion.div>
 
           {/* Subtitle */}
-          <p style={{fontFamily:font,fontSize:isDesk?17:14,color:"rgba(255,255,255,0.82)",marginBottom:teamData?14:28,lineHeight:1.6,maxWidth:480}}>
+          <p style={{fontFamily:font,fontSize:isDesk?17:14,color:"rgba(255,255,255,0.82)",marginBottom:teamData?14:28,lineHeight:1.6,maxWidth:480,direction:lang==="ar"?"rtl":"ltr",textAlign:lang==="ar"?"right":"left"}}>
             {T.heroSub}
           </p>
 
           {/* Star players strip — team mode */}
           {teamData&&heroTeamCode&&PLAYERS[heroTeamCode]&&(
-            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:24,flexWrap:"wrap"}}>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:24,flexWrap:"wrap",direction:lang==="ar"?"rtl":"ltr",textAlign:lang==="ar"?"right":"left"}}>
               <span style={{fontSize:14}}>⭐</span>
               {[PLAYERS[heroTeamCode].p1,PLAYERS[heroTeamCode].p2,PLAYERS[heroTeamCode].p3].map((s,i,arr)=>(
                 <span key={i} style={{fontFamily:font,fontSize:isDesk?14:12,fontWeight:600,color:"rgba(255,255,255,0.88)",
@@ -386,7 +401,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           )}
 
           {/* Flags */}
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:32}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:32,position:"relative",zIndex:3,direction:lang==="ar"?"rtl":"ltr"}}>
             {["🇲🇦","🇪🇸","🇵🇹"].map((f,i)=>(
               <span key={i} style={{fontSize:28,filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.4))"}}>{f}</span>
             ))}
@@ -395,7 +410,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           </div>
 
           {/* CTA buttons */}
-          <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+          <div style={{display:"flex",gap:12,flexWrap:"wrap",flexDirection:lang==="ar"?"row-reverse":"row"}}>
             <button onClick={()=>setPage("schedule")}
               style={{padding:"13px 28px",borderRadius:12,background:`linear-gradient(135deg,${ac},${ac}BB)`,
                 border:"none",cursor:"pointer",fontFamily:font,fontWeight:600,fontSize:15,color:"#FFF",
@@ -434,7 +449,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
       <div style={{touchAction:"pan-y"}}>
         <LEDBoard days={countdown.d} hours={countdown.h} minutes={countdown.m} seconds={countdown.s}
           teamCode={(()=>{const r=TEAM_ISO[selectedTeam?.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})()}
-          isDesk={isDesk}/>
+          isDesk={isDesk} fixtures={fixtures} latestGoal={latestGoal}/>
       </div>
 
       {/* ── MAIN CONTENT ── */}
@@ -446,25 +461,25 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             initial={{opacity:0,y:24}}
             animate={citiesInView?{opacity:1,y:0}:{opacity:0,y:24}}
             transition={{duration:0.6,ease:[0.25,0.46,0.45,0.94]}}
-            style={{textAlign:"center",marginBottom:28}}
+            style={{textAlign:lang==="ar"?"right":"center",direction:lang==="ar"?"rtl":"ltr",marginBottom:28}}
           >
             <div style={{fontFamily:font,fontSize:isDesk?32:24,fontWeight:800,color:C.str}}>🇲🇦 {T.secCities}</div>
             <div style={{fontFamily:font,fontSize:13,color:C.mut,marginTop:6}}>{T.secCitiesSub}</div>
           </motion.div>
-          <div
-            style={{position:"relative",overflow:"hidden",
-              maskImage:"linear-gradient(90deg,transparent 0%,black 12%,black 88%,transparent 100%)",
-              WebkitMaskImage:"linear-gradient(90deg,transparent 0%,black 12%,black 88%,transparent 100%)"}}
+          <div dir="ltr"
+            style={{position:"relative",overflow:"hidden",width:"100%",direction:"ltr",
+              maskImage:"linear-gradient(90deg,transparent 0%,black 8%,black 92%,transparent 100%)",
+              WebkitMaskImage:"linear-gradient(90deg,transparent 0%,black 8%,black 92%,transparent 100%)"}}
             onMouseEnter={()=>{if(cityTrackRef.current)cityTrackRef.current.style.animationPlayState="paused";}}
             onMouseLeave={()=>{if(cityTrackRef.current)cityTrackRef.current.style.animationPlayState="running";}}
           >
-            <div ref={cityTrackRef}
-              style={{display:"flex",gap:16,width:"max-content",
-                animation:"scrollCities 25s linear infinite"}}
+            <div ref={cityTrackRef} className="cities-scroll-inner"
+              style={{display:"flex",gap:isDesk?16:10,width:"max-content",
+                animation:`scrollCities ${isDesk?25:18}s linear infinite`}}
             >
               {[...CITIES,...CITIES].map((city,i)=>(
                 <div key={i}
-                  style={{width:280,height:380,borderRadius:16,overflow:"hidden",
+                  style={{width:isDesk?280:160,height:isDesk?380:220,borderRadius:16,overflow:"hidden",
                     flexShrink:0,position:"relative",cursor:"pointer",
                     boxShadow:"0 2px 12px rgba(0,0,0,0.06)",
                     transition:"transform 0.3s ease"}}
@@ -476,9 +491,9 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                     onError={e=>{e.target.style.display="none";}}/>
                   <div style={{position:"absolute",inset:0,
                     background:"linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 55%)"}}/>
-                  <div style={{position:"absolute",bottom:20,left:20}}>
-                    <div style={{fontFamily:font,fontSize:18,fontWeight:700,color:"#FFF"}}>{city.flag} {city.city}</div>
-                    <div style={{fontFamily:font,fontSize:10,color:"rgba(255,255,255,0.6)",marginTop:4,
+                  <div style={{position:"absolute",bottom:isDesk?20:12,left:isDesk?20:12,direction:"ltr",textAlign:"left"}}>
+                    <div style={{fontFamily:font,fontSize:isDesk?18:13,fontWeight:700,color:"#FFF"}}>{city.flag} {city.city}</div>
+                    <div style={{fontFamily:font,fontSize:isDesk?10:9,color:"rgba(255,255,255,0.6)",marginTop:4,
                       letterSpacing:2,textTransform:"uppercase"}}>{T.villeHote}</div>
                   </div>
                 </div>

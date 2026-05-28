@@ -1,11 +1,18 @@
 const API_SPORTS_KEY = import.meta.env.VITE_FOOTBALL_API_KEY;
 const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY;
 
+const cache = { data: null, timestamp: 0 };
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 // PRIMARY: api-sports.io
 async function getLiveFromApiSports() {
   const res = await fetch("https://v3.football.api-sports.io/fixtures?live=all", {
     headers: { "x-apisports-key": API_SPORTS_KEY }
   });
+  if (res.status === 429) {
+    console.warn("Rate limit hit, using cached data");
+    return cache.data || [];
+  }
   const data = await res.json();
   if (data.errors && Object.keys(data.errors).length > 0) throw new Error("API Sports error");
   return (data.response || []).map(f => ({
@@ -31,6 +38,10 @@ async function getLiveFromRapidApi() {
       "x-rapidapi-key": RAPIDAPI_KEY
     }
   });
+  if (res.status === 429) {
+    console.warn("Rate limit hit on RapidAPI, using cached data");
+    return cache.data || [];
+  }
   const data = await res.json();
   const matches = data.response?.live || [];
   return matches.map(f => ({
@@ -50,17 +61,27 @@ async function getLiveFromRapidApi() {
 
 // MAIN: try primary, fallback to secondary
 export async function getLiveFixtures() {
+  if (cache.data && Date.now() - cache.timestamp < CACHE_TTL) {
+    return cache.data;
+  }
   try {
     const results = await getLiveFromApiSports();
-    if (results.length >= 0) return results;
+    if (results.length >= 0) {
+      cache.data = results;
+      cache.timestamp = Date.now();
+      return results;
+    }
     throw new Error("Empty");
   } catch (e) {
     console.warn("API Sports failed, trying RapidAPI:", e.message);
     try {
-      return await getLiveFromRapidApi();
+      const results = await getLiveFromRapidApi();
+      cache.data = results;
+      cache.timestamp = Date.now();
+      return results;
     } catch (e2) {
       console.error("Both APIs failed:", e2.message);
-      return [];
+      return cache.data || [];
     }
   }
 }

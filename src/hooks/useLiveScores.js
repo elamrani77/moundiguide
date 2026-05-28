@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { getLiveFixtures } from "../services/footballApi";
 
-export function useLiveScores(pollInterval = 60000) {
+export function useLiveScores(pollInterval = 300000) {
   const [fixtures, setFixtures] = useState([]);
   const [latestGoal, setLatestGoal] = useState(null);
   const [loading, setLoading] = useState(true);

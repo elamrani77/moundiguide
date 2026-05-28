@@ -46,36 +46,23 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
             {/* Divider */}
             <div style={{width:1,height:20,background:"#E5E7EB"}}/>
 
-            {/* Team badge */}
-            {(()=>{
-              if(selectedTeam){const tc=TEAM_DATA[selectedTeam.t]?.colors[0]||TEAM_ACCENT[selectedTeam.t]||BR.red;return(
-                <button onClick={onPickTeam} title="Change team"
-                  style={{background:`${tc}12`,border:`1px solid ${tc}`,
-                    borderRadius:20,padding:"4px 10px",cursor:"pointer",display:"flex",alignItems:"center",gap:5,transition:"all .2s",
-                    boxShadow:`0 0 0 2px ${tc}22`}}>
-                  <span style={{fontSize:16}}>{selectedTeam.f}</span>
-                  <span style={{fontFamily:F,fontSize:11,color:tc,fontWeight:600}}>{selectedTeam.t}</span>
-                </button>
-              );}
-              return(
-                <button onClick={onPickTeam} title="Choose your team"
-                  style={{background:"none",border:`1px solid ${C.bdr}`,
-                    borderRadius:20,padding:"4px 10px",cursor:"pointer",display:"flex",alignItems:"center",gap:5,transition:"all .2s"}}>
-                  <span style={{fontSize:14}}>⚽</span>
-                  <span style={{fontFamily:F,fontSize:11,color:linkColor}}>Team</span>
-                </button>
-              );
-            })()}
-
-            {/* Language */}
-            <button onClick={e=>{e.stopPropagation();setShowLang(p=>!p);}}
-              style={{background:"none",border:`1px solid ${C.bdr}`,
-                borderRadius:20,padding:"5px 12px",cursor:"pointer",fontFamily:F,fontSize:12,
-                color:linkColor,display:"flex",alignItems:"center",gap:5,transition:"all .2s"}}>
-              <span style={{fontSize:14}}>{curLang.flag}</span>
-              <span>{curLang.label}</span>
-              <span style={{opacity:.5,fontSize:8}}>▼</span>
-            </button>
+            {/* Team + Language buttons */}
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <button onClick={onPickTeam}
+                style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
+                  padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
+                  fontFamily:F,fontSize:13,fontWeight:600,color:BR.red,transition:"all .2s"}}>
+                <span>{selectedTeam?selectedTeam.f:"🌍"}</span>
+                <span>{selectedTeam?selectedTeam.t:"Team"}</span>
+              </button>
+              <button onClick={e=>{e.stopPropagation();setShowLang(p=>!p);}}
+                style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
+                  padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
+                  fontFamily:F,fontSize:13,fontWeight:600,color:linkColor,transition:"all .2s"}}>
+                <span>{curLang.label}</span>
+                <span style={{opacity:.5,fontSize:10}}>▼</span>
+              </button>
+            </div>
           </div>
         ):(
           /* Mobile: hamburger */
@@ -110,7 +97,7 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
             <button onClick={()=>setShowLang(p=>!p)}
               style={{flex:1,padding:10,borderRadius:10,border:`1px solid ${C.bdr}`,
                 background:C.card,color:C.str,cursor:"pointer",fontFamily:F,fontSize:13}}>
-              {curLang.flag} {curLang.label}
+              {curLang.label}
             </button>
           </div>
         </div>
