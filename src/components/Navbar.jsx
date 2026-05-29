@@ -1,10 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TRANSLATIONS, BR, TEAM_DATA, TEAM_ACCENT, TEAM_ISO, F } from "../constants.js";
 import MoundiLogo from "./MoundiLogo.jsx";
 
 function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam, setShowTeamProfile}){
   const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(()=>{
+    if(!selectedTeam)return;
+    const iso=(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase();
+    const link=document.createElement("link");
+    link.rel="preload";link.as="image";
+    link.href=`https://flagcdn.com/24x18/${iso}.png`;
+    document.head.appendChild(link);
+    return()=>{if(document.head.contains(link))document.head.removeChild(link);};
+  },[selectedTeam?.t]);
   const [notifGranted,setNotifGranted]=useState(
     typeof Notification!=="undefined"&&Notification.permission==="granted"
   );

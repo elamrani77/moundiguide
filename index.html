@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://flagcdn.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://basemaps.cartocdn.com" />
+    <link rel="dns-prefetch" href="https://v3.football.api-sports.io" />
+
+    <!-- Preload critical assets -->
+    <link rel="preload" as="image" href="/logo.png" />
+    <link rel="preload" as="image" href="/players-default.png" />
     <meta name="theme-color" content="#C41E3A" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -10,28 +21,38 @@
     <meta name="apple-mobile-web-app-title" content="MoundiGuide" />
     <meta name="description" content="Assistant IA multilingue pour la Coupe du Monde FIFA 2030 - Maroc, Espagne, Portugal" />
 
-    <!-- Open Graph / WhatsApp / Facebook -->
+    <!-- Open Graph / WhatsApp / Facebook / LinkedIn -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://moundiguide.vercel.app/" />
     <meta property="og:title" content="MoundiGuide — Coupe du Monde FIFA 2030" />
-    <meta property="og:description" content="Votre guide ultime pour la Coupe du Monde FIFA 2030 au Maroc, Espagne et Portugal. Carte interactive, météo, billets, IA multilingue." />
+    <meta property="og:description" content="Votre guide ultime pour la Coupe du Monde FIFA 2030 au Maroc, Espagne et Portugal. Carte interactive, météo live, billets, chatbot IA multilingue." />
     <meta property="og:image" content="https://moundiguide.vercel.app/players-default.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MoundiGuide - Joueurs Maroc, Espagne, Portugal" />
     <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="ar_MA" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta property="og:locale:alternate" content="pt_PT" />
     <meta property="og:site_name" content="MoundiGuide" />
 
-    <!-- Twitter / X Card -->
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@moundiguide" />
     <meta name="twitter:url" content="https://moundiguide.vercel.app/" />
     <meta name="twitter:title" content="MoundiGuide — Coupe du Monde FIFA 2030" />
     <meta name="twitter:description" content="Votre guide ultime pour la Coupe du Monde FIFA 2030 au Maroc, Espagne et Portugal." />
     <meta name="twitter:image" content="https://moundiguide.vercel.app/players-default.png" />
 
-    <!-- SEO -->
-    <meta name="keywords" content="Coupe du Monde 2030, FIFA World Cup 2030, Maroc, Espagne, Portugal, billets, stades, guide supporter" />
+    <!-- WhatsApp specific -->
+    <meta property="og:image:type" content="image/png" />
+
+    <!-- Additional SEO -->
+    <meta name="keywords" content="Coupe du Monde 2030, FIFA World Cup 2030, Maroc, Espagne, Portugal, billets, stades, guide supporter, Mondial 2030, كأس العالم 2030" />
     <meta name="author" content="MoundiGuide" />
     <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
     <link rel="canonical" href="https://moundiguide.vercel.app/" />
 
     <!-- Vercel Speed Insights -->

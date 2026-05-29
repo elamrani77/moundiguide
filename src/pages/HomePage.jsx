@@ -195,6 +195,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           <img
             src={heroImg}
             alt={`Joueurs de ${selectedTeam?.t||"l'équipe hôte"}`}
+            width="800" height="600"
             fetchpriority="high"
             decoding="async"
             style={{
@@ -392,7 +393,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                 >
                   <img src={city.img} alt={city.city}
                     loading="lazy" decoding="async"
-                    style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}
+                    width={isDesk?280:160} height={isDesk?380:220}
+                    style={{width:"100%",height:"100%",objectFit:"cover",display:"block",aspectRatio:"auto"}}
                     onError={e=>{e.target.style.display="none";}}/>
                   <div style={{position:"absolute",inset:0,
                     background:"linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 55%)"}}/>
@@ -736,6 +738,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                   }}>
                     <img src={p.img} alt={p.city}
                       loading="lazy" decoding="async"
+                      width={isDesk?134:84} height={isDesk?118:85}
                       onError={e=>{e.target.src="/fallback.svg";}}
                       style={{width:"100%",height:isDesk?118:85,objectFit:"cover",display:"block"}}
                     />
