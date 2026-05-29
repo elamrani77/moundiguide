@@ -18,7 +18,7 @@ function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoic
   const font = Fprop || F;
   const { track } = useAnalytics();
   if(!chatOpen) return(
-    <button onClick={()=>{setChatOpen(true);track("chat_opened");}}
+    <button onClick={()=>{setChatOpen(true);track("chat_opened");}} aria-label="Ouvrir le chat IA"
       style={{position:"fixed",bottom:28,right:28,width:58,height:58,borderRadius:"50%",
         background:"linear-gradient(135deg,#C8102E,#00913F)",border:"none",cursor:"pointer",
         display:"flex",alignItems:"center",justifyContent:"center",
@@ -61,7 +61,7 @@ function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoic
               <div style={{fontFamily:font,fontSize:9,color:BR.green}}>● En ligne</div>
             </div>
           </div>
-          <button onClick={()=>setChatOpen(false)} style={{background:"none",border:"none",cursor:"pointer",color:C.mut,display:"flex",alignItems:"center"}}><X size={18}/></button>
+          <button onClick={()=>setChatOpen(false)} aria-label="Fermer le chat" style={{background:"none",border:"none",cursor:"pointer",color:C.mut,display:"flex",alignItems:"center"}}><X size={18}/></button>
         </div>
 
         {/* Messages */}
@@ -98,9 +98,9 @@ function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoic
         <div style={{padding:"8px 12px",paddingBottom:"env(safe-area-inset-bottom, 8px)",flexShrink:0}}>
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
             <button onClick={toggleVoice} style={{width:34,height:34,borderRadius:10,border:`1px solid ${listening?BR.red:C.bdr}`,background:listening?`${BR.red}22`:C.card,cursor:"pointer",fontSize:13,color:listening?BR.red:C.mut}}>🎤</button>
-            <input id="chat-input" name="chat-input" ref={inpRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();track("chat_message_sent",{lang});send();}}} placeholder={PLACEHOLDERS[lang]} dir={isRTL?"rtl":"ltr"}
+            <input id="chat-input" name="chat-input" ref={inpRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();track("chat_message_sent",{lang});send();}}} placeholder={PLACEHOLDERS[lang]} dir={isRTL?"rtl":"ltr"} aria-label="Tapez votre message"
               style={{flex:1,padding:"8px 12px",background:C.fld,border:`1px solid ${C.bdr}`,borderRadius:10,color:C.str,fontSize:12,fontFamily:font,outline:"none"}}/>
-            <button onClick={()=>{track("chat_message_sent",{lang});send();}} disabled={!input.trim()||loading}
+            <button onClick={()=>{track("chat_message_sent",{lang});send();}} disabled={!input.trim()||loading} aria-label="Envoyer le message"
               style={{width:34,height:34,borderRadius:10,background:input.trim()&&!loading?`linear-gradient(135deg,${BR.red},${BR.green})`:C.card,border:"none",cursor:input.trim()&&!loading?"pointer":"not-allowed",fontSize:14,color:input.trim()&&!loading?"white":C.mut}}>
               {loading?<div style={{width:12,height:12,border:`2px solid ${C.bdr}`,borderTopColor:ac,borderRadius:"50%",animation:"sp .6s linear infinite",margin:"auto"}}/>:"➤"}
             </button>

@@ -53,8 +53,19 @@ function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk,fixtures=[],latest
   const [userPicked,setUserPicked]=useState(false);
   const [videoIdx,setVideoIdx]=useState(0);
   const [videoPlaying,setVideoPlaying]=useState(true);
+  const [videoLoaded,setVideoLoaded]=useState(false);
   const resumeRef=useRef(null);
   const videoTimerRef=useRef(null);
+
+  useEffect(()=>{
+    const observer=new IntersectionObserver(
+      ([entry])=>{if(entry.isIntersecting)setVideoLoaded(true);},
+      {threshold:0.1}
+    );
+    const el=document.getElementById("led-video-section");
+    if(el)observer.observe(el);
+    return()=>observer.disconnect();
+  },[]);
 
   const tc = TEAM_COLORS[teamCode] || TEAM_COLORS.DEFAULT;
   const tickerPrefix = fixtures.length > 0
@@ -109,7 +120,7 @@ function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk,fixtures=[],latest
   const fadeIn = { animation:"slotFade 0.4s ease both" };
 
   return(
-    <div style={{background:"#020204",width:"100%",padding:0,overflow:"hidden",position:"relative",transition:"all 0.8s ease",touchAction:"pan-y",pointerEvents:"none"}}>
+    <div id="led-video-section" style={{background:"#020204",width:"100%",padding:0,overflow:"hidden",position:"relative",transition:"all 0.8s ease",touchAction:"pan-y",pointerEvents:"none"}}>
 
       {/* Ambient light blobs */}
       <div style={{position:"absolute",top:"10%",left:"5%",width:300,height:300,background:tc.primary,opacity:0.10,filter:"blur(80px)",borderRadius:"50%",pointerEvents:"none",zIndex:0}}/>
@@ -148,8 +159,8 @@ function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk,fixtures=[],latest
             <Scanline/>
             <video
               key={videoIdx}
-              src={videos[videoIdx]}
-              autoPlay muted loop={false} playsInline
+              src={videoLoaded?videos[videoIdx]:undefined}
+              autoPlay muted loop={false} playsInline preload="none"
               style={{width:"100%",height:"100%",objectFit:"cover",display:"block",position:"absolute",top:0,left:0,zIndex:1,pointerEvents:"none"}}
               onPlay={()=>setVideoPlaying(true)}
               onLoadedMetadata={handleVideoMeta}

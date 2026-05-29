@@ -194,7 +194,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
         {isDesk&&(
           <img
             src={heroImg}
-            alt="players"
+            alt={`Joueurs de ${selectedTeam?.t||"l'équipe hôte"}`}
             fetchpriority="high"
             decoding="async"
             style={{
@@ -272,14 +272,17 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
 
           {/* Flags */}
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:32,position:"relative",zIndex:3,direction:lang==="ar"?"rtl":"ltr"}}>
-            {["ma","es","pt"].map(code=>(
-              <img key={code}
-                src={`https://flagcdn.com/24x18/${code}.png`}
-                alt={code.toUpperCase()}
-                style={{width:24,height:18,borderRadius:2,objectFit:"cover",
-                  filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.4))",cursor:"default"}}
-                onError={e=>{e.target.style.display="none";}}/>
-            ))}
+            {["ma","es","pt"].map(code=>{
+              const names={ma:"Maroc",es:"Espagne",pt:"Portugal"};
+              return(
+                <img key={code}
+                  src={`https://flagcdn.com/24x18/${code}.png`}
+                  alt={`Drapeau ${names[code]}`}
+                  style={{width:24,height:18,borderRadius:2,objectFit:"cover",
+                    filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.4))",cursor:"default"}}
+                  onError={e=>{e.target.style.display="none";}}/>
+              );
+            })}
             <div style={{width:1,height:24,background:"rgba(255,255,255,0.3)",marginLeft:4}}/>
             <span style={{fontFamily:font,fontSize:12,color:"rgba(255,255,255,0.7)"}}>{T.heroFlags}</span>
           </div>
@@ -287,12 +290,14 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           {/* CTA buttons */}
           <div style={{display:"flex",gap:12,flexWrap:"wrap",flexDirection:lang==="ar"?"row-reverse":"row"}}>
             <button onClick={()=>{setPage("schedule");track("cta_click",{button:"calendrier"});}}
+              aria-label={T.heroBtn1}
               style={{padding:"13px 28px",borderRadius:12,background:`linear-gradient(135deg,${ac},${ac}BB)`,
                 border:"none",cursor:"pointer",fontFamily:font,fontWeight:600,fontSize:15,color:"#FFF",
                 boxShadow:`0 8px 24px ${ac}55`,transition:"all .2s",width:isDesk?"auto":"100%"}}>
               📅 {T.heroBtn1}
             </button>
             <button onClick={()=>{setPage("ticket");track("cta_click",{button:"billets"});}}
+              aria-label={T.heroBtn2}
               style={{padding:"13px 28px",borderRadius:12,background:"rgba(255,255,255,0.12)",
                 border:"1px solid rgba(255,255,255,0.35)",backdropFilter:"blur(8px)",
                 cursor:"pointer",fontFamily:font,fontWeight:600,fontSize:15,color:"#FFF",transition:"all .2s",width:isDesk?"auto":"100%"}}>

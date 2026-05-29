@@ -65,6 +65,7 @@ function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLan
             {/* Team + Language buttons */}
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <button onClick={onPickTeam}
+                aria-label={`Changer d'équipe - ${selectedTeam?.t||"Sélectionner une équipe"}`}
                 style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
                   padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
                   fontFamily:F,fontSize:13,fontWeight:600,color:BR.red,transition:"all .2s"}}>
@@ -77,6 +78,7 @@ function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLan
               </button>
               {selectedTeam&&(
                 <button onClick={()=>setShowTeamProfile(true)}
+                  aria-label="Voir le profil de l'équipe"
                   style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid #E5E7EB",
                     background:"white",fontSize:12,cursor:"pointer",marginLeft:4,
                     display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
@@ -84,12 +86,14 @@ function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLan
                 </button>
               )}
               <button onClick={handleNotifBell} title="Activer les alertes matchs"
+                aria-label="Activer les notifications"
                 style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid #E5E7EB",
                   background:"white",fontSize:14,cursor:"pointer",
                   display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                 {notifGranted?"🔔":"🔕"}
               </button>
               <button onClick={e=>{e.stopPropagation();setShowLang(p=>!p);}}
+                aria-label={`Changer de langue - ${curLang?.label}`}
                 style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
                   padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
                   fontFamily:F,fontSize:13,fontWeight:600,color:linkColor,transition:"all .2s"}}>
@@ -102,12 +106,13 @@ function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLan
           /* Mobile right side: bell + flag + hamburger */
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             {/* Bell */}
-            <button onClick={handleNotifBell}
+            <button onClick={handleNotifBell} aria-label="Activer les notifications"
               style={{background:"none",border:"none",cursor:"pointer",fontSize:18,lineHeight:1,padding:2}}>
               {notifGranted?"🔔":"🔕"}
             </button>
             {/* Team flag → opens picker */}
             <button onClick={onPickTeam}
+              aria-label={`Changer d'équipe - ${selectedTeam?.t||"Sélectionner une équipe"}`}
               style={{background:"none",border:"none",cursor:"pointer",lineHeight:1,display:"flex",alignItems:"center",padding:2}}>
               {selectedTeam
                 ?<img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
@@ -117,6 +122,7 @@ function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLan
             </button>
             {/* Hamburger */}
             <button onClick={()=>setMenuOpen(p=>!p)}
+              aria-label={menuOpen?"Fermer le menu":"Ouvrir le menu"}
               style={{background:"none",border:`1px solid ${C.bdr}`,
                 borderRadius:8,width:36,height:36,cursor:"pointer",color:linkColor,fontSize:18,
                 display:"flex",alignItems:"center",justifyContent:"center"}}>
