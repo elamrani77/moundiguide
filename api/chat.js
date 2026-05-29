@@ -40,10 +40,11 @@ If asked about live scores or real-time data, explain the user can check via the
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
+  console.error("API Key exists:", !!apiKey);
+  if (!apiKey) return res.status(500).json({ content: [{ type: "text", text: "⚠️ Erreur: GEMINI_API_KEY not configured" }] });
   try {
     const { lang, messages, selectedTeam } = req.body;
-    if (!messages || !Array.isArray(messages)) return res.status(400).json({ error: "Missing messages" });
+    if (!messages || !Array.isArray(messages)) return res.status(400).json({ content: [{ type: "text", text: "⚠️ Erreur: Missing messages" }] });
 
     let systemPrompt = BASE_SYSTEM_PROMPT;
     if (selectedTeam) {
@@ -54,11 +55,20 @@ export default async function handler(req, res) {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system_instruction: { parts: [{ text: systemPrompt }] }, contents: geminiContents, generationConfig: { maxOutputTokens: 300, temperature: 0.7 } }) }
+        body: JSON.stringify({ system_instruction: { parts: [{ text: systemPrompt }] }, contents: geminiContents, generationConfig: { maxOutputTokens: 2048, temperature: 0.7 } }) }
     );
-    const data = await response.json();
-    if (!response.ok) return res.status(response.status).json({ error: data.error?.message || "API error" });
+    const raw = await response.text();
+    let data;
+    try { data = JSON.parse(raw); } catch { data = {}; }
+    if (!response.ok) {
+      const errMsg = data.error?.message || `HTTP ${response.status}`;
+      console.error("Gemini API error:", response.status, errMsg);
+      return res.status(200).json({ content: [{ type: "text", text: `⚠️ Erreur API: ${errMsg}` }] });
+    }
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Désolé, réessayez.";
     return res.status(200).json({ content: [{ type: "text", text }] });
-  } catch (error) { return res.status(500).json({ error: error.message }); }
+  } catch (error) {
+    console.error("Error details:", error.message, error.status);
+    return res.status(200).json({ content: [{ type: "text", text: `⚠️ Erreur: ${error.message}` }] });
+  }
 }

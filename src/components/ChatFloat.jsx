@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { Sparkles, X } from "lucide-react";
 import { BR, PLACEHOLDERS, F } from "../constants.js";
 import { useAnalytics } from "../hooks/useAnalytics.js";
@@ -17,6 +17,10 @@ const SUGGESTIONS={
 function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoice,chatOpen,setChatOpen,isRTL,ac,F: Fprop,endRef,inpRef,isDesk,selectedTeam}){
   const font = Fprop || F;
   const { track } = useAnalytics();
+  const messagesEndRef = useRef(null);
+  useEffect(()=>{
+    messagesEndRef.current?.scrollIntoView({behavior:"smooth"});
+  },[msgs]);
   if(!chatOpen) return(
     <button onClick={()=>{setChatOpen(true);track("chat_opened");}} aria-label="Ouvrir le chat IA"
       style={{position:"fixed",bottom:28,right:28,width:58,height:58,borderRadius:"50%",
@@ -65,7 +69,8 @@ function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoic
         </div>
 
         {/* Messages */}
-        <div style={{flex:1,overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"12px 16px",display:"flex",flexDirection:"column",gap:8}}>
+        <div style={{flex:1,overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"12px 16px",
+          display:"flex",flexDirection:"column",gap:12,justifyContent:"flex-start"}}>
           {msgs.map((m,i)=>(
             <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",direction:isRTL?"rtl":"ltr"}}>
               {m.role==="assistant"&&<div style={{width:24,height:24,borderRadius:"50%",flexShrink:0,background:`linear-gradient(135deg,${BR.red},${BR.green})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,marginRight:6,marginTop:2}}>⚽</div>}
@@ -75,7 +80,7 @@ function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoic
             </div>
           ))}
           {loading&&<div style={{display:"flex",gap:6,padding:"6px 10px"}}>{[0,.15,.3].map((d,i)=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:ac,animation:`dp 1s ease-in-out infinite`,animationDelay:`${d}s`}}/>)}</div>}
-          <div ref={endRef}/>
+          <div ref={messagesEndRef}/>
         </div>
 
         {/* Suggestion chips — hidden once conversation starts */}

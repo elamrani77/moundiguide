@@ -66,7 +66,7 @@ export default function MoundiGuide(){
   const send=useCallback(async(text)=>{
     const t=text||input.trim();if(!t||loading)return;setInput("");setChatOpen(true);
     const nm=[...msgs,{role:"user",content:t}];setMsgs(nm);setLoading(true);
-    try{const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lang,messages:nm.map(m=>({role:m.role,content:m.content})),selectedTeam:selectedTeam?.t||null})});const d=await r.json();setMsgs(p=>[...p,{role:"assistant",content:d.content?.[0]?.text||d.error||"⚠️ Erreur"}]);}
+    try{const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lang,messages:nm.map(m=>({role:m.role,content:m.content})),selectedTeam:selectedTeam?.t||null})});const d=await r.json();const text=d.content?.[0]?.text||d.content||d.error||"⚠️ Erreur";setMsgs(p=>[...p,{role:"assistant",content:text}]);}
     catch{setMsgs(p=>[...p,{role:"assistant",content:"⚠️ Hors-ligne"}]);}
     finally{setLoading(false);inpRef.current?.focus();}
   },[input,loading,msgs,lang,selectedTeam]);

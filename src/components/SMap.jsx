@@ -11,9 +11,9 @@ function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,userCoords,height
     if(!window.L){const l=document.createElement("link");l.rel="stylesheet";l.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";document.head.appendChild(l);const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";s.onload=()=>go();document.head.appendChild(s);}else go();
     function go(){
       if(!ref.current||mR.current)return;
-      const m=window.L.map(ref.current,{zoomControl:false,attributionControl:false,tap:false,dragging:false,touchZoom:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false}).setView([32.5,-6.5],5.5);
+      const m=window.L.map(ref.current,{zoomControl:false,attributionControl:false,tap:true,tapTolerance:15,dragging:true,touchZoom:true,scrollWheelZoom:false,doubleClickZoom:true,boxZoom:false,keyboard:false}).setView([32.5,-6.5],5.5);
       const mapContainer=m.getContainer();
-      mapContainer.style.touchAction='pan-y';
+      mapContainer.style.touchAction='pan-x';
       window.L.control.zoom({position:"bottomright"}).addTo(m);
       window.L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{attribution:"©OSM ©CartoDB",maxZoom:19,subdomains:"abcd"}).addTo(m);
       // Stadium markers — pin style
@@ -86,7 +86,7 @@ function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,userCoords,height
   },[userCoords]);
   return(
     <div style={{overflow:"hidden",borderRadius:20,touchAction:"pan-x pan-y",border:`1px solid ${C.bdr}`,boxShadow:"0 2px 16px rgba(0,0,0,0.10)"}}>
-      <div ref={ref} style={{width:"100%",height:height||300,touchAction:"pan-y"}}/>
+      <div ref={ref} style={{width:"100%",height:height||300,touchAction:"pan-x"}}/>
     </div>
   );
 }
