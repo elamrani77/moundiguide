@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const videos = ["/wc2026-intro.mp4", "/pepsi-football.mp4", "/adidas_com.mp4"];
 
@@ -47,7 +47,7 @@ function LayoutIcon({ mode, active, activeColor, onClick }) {
   );
 }
 
-export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk,fixtures=[],latestGoal}){
+function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk,fixtures=[],latestGoal}){
   const [slot,setSlot]=useState(0);
   const [layoutMode,setLayoutMode]=useState("split3");
   const [userPicked,setUserPicked]=useState(false);
@@ -340,3 +340,5 @@ export default function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk,fix
     </div>
   );
 }
+
+export default React.memo(LEDBoard);

@@ -37,6 +37,9 @@ if (typeof window !== 'undefined') {
   }, 2000);
 }
 
+import { inject } from "@vercel/analytics";
+inject();
+
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import Lenis from "@studio-freight/lenis";

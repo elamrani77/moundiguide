@@ -9,6 +9,7 @@ import {
   WELCOME_FAN, WELCOME, STADIUMS, CITIES, POIS, POI_CATS, NEWS,
   CURRENCIES, INFO_ITEMS, DARIJA, haversine, normalize, formatDist, F
 } from "../constants.js";
+import { useAnalytics } from "../hooks/useAnalytics.js";
 import LEDBoard from "../components/LEDBoard.jsx";
 import Weather from "../components/Weather.jsx";
 import SMap from "../components/SMap.jsx";
@@ -19,6 +20,7 @@ function md(t){if(!t)return t;return t.split("\n").map((l,i)=>{let c=l.replace(/
 
 export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selectedTeam}){
   const font = Fprop || F;
+  const { track } = useAnalytics();
   const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const teamData = selectedTeam ? TEAM_DATA[selectedTeam.t] : null;
   const heroTeamCode = selectedTeam ? (()=>{const r=TEAM_ISO[selectedTeam.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})() : null;
@@ -86,7 +88,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
   // Search
   const [poiSearch,setPoiSearch]=useState("");
   const [debouncedSearch,setDebouncedSearch]=useState("");
-  useEffect(()=>{const t=setTimeout(()=>setDebouncedSearch(poiSearch),200);return()=>clearTimeout(t);},[poiSearch]);
+  useEffect(()=>{const t=setTimeout(()=>setDebouncedSearch(poiSearch),300);return()=>clearTimeout(t);},[poiSearch]);
   // Favorites
   const [favorites,setFavorites]=useState(()=>{try{return JSON.parse(localStorage.getItem("moundiguide_favs")||"[]");}catch{return [];}});
   const [showFavsOnly,setShowFavsOnly]=useState(false);
@@ -193,6 +195,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           <img
             src={heroImg}
             alt="players"
+            fetchpriority="high"
+            decoding="async"
             style={{
               position:"absolute",right:0,bottom:0,
               height:"92%",width:"65%",
@@ -282,13 +286,13 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
 
           {/* CTA buttons */}
           <div style={{display:"flex",gap:12,flexWrap:"wrap",flexDirection:lang==="ar"?"row-reverse":"row"}}>
-            <button onClick={()=>setPage("schedule")}
+            <button onClick={()=>{setPage("schedule");track("cta_click",{button:"calendrier"});}}
               style={{padding:"13px 28px",borderRadius:12,background:`linear-gradient(135deg,${ac},${ac}BB)`,
                 border:"none",cursor:"pointer",fontFamily:font,fontWeight:600,fontSize:15,color:"#FFF",
                 boxShadow:`0 8px 24px ${ac}55`,transition:"all .2s",width:isDesk?"auto":"100%"}}>
               📅 {T.heroBtn1}
             </button>
-            <button onClick={()=>setPage("ticket")}
+            <button onClick={()=>{setPage("ticket");track("cta_click",{button:"billets"});}}
               style={{padding:"13px 28px",borderRadius:12,background:"rgba(255,255,255,0.12)",
                 border:"1px solid rgba(255,255,255,0.35)",backdropFilter:"blur(8px)",
                 cursor:"pointer",fontFamily:font,fontWeight:600,fontSize:15,color:"#FFF",transition:"all .2s",width:isDesk?"auto":"100%"}}>
@@ -382,6 +386,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                   onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}
                 >
                   <img src={city.img} alt={city.city}
+                    loading="lazy" decoding="async"
                     style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}
                     onError={e=>{e.target.style.display="none";}}/>
                   <div style={{position:"absolute",inset:0,
@@ -450,8 +455,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               <div style={{marginTop:12,borderRadius:14,overflow:"hidden",border:`1px solid ${C.bdr}`,animation:"slideDown .25s ease"}}>
                 {/* Header image */}
                 <div style={{position:"relative",height:110}}>
-                  <img src="/stadium-night.png" alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={e=>{e.target.style.display="none";}}/>
-                  <img src="/stadium-aerial.png" alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none";}}/>
+                  <img src="/stadium-night.png" alt="" loading="lazy" decoding="async" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={e=>{e.target.style.display="none";}}/>
+                  <img src="/stadium-aerial.png" alt="" loading="lazy" decoding="async" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none";}}/>
                   <div style={{position:"absolute",inset:0,background:"linear-gradient(to bottom,transparent 40%,rgba(0,0,0,0.8))"}}/>
                   <button onClick={()=>setSelectedStadium(null)} style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.55)",border:"none",borderRadius:6,color:"#FFF",width:24,height:24,cursor:"pointer",fontSize:13,lineHeight:1}}>✕</button>
                   <div style={{position:"absolute",bottom:8,left:12}}>
@@ -725,6 +730,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                     boxShadow:"0 6px 22px rgba(0,0,0,0.42)",position:"relative",
                   }}>
                     <img src={p.img} alt={p.city}
+                      loading="lazy" decoding="async"
                       onError={e=>{e.target.src="/fallback.svg";}}
                       style={{width:"100%",height:isDesk?118:85,objectFit:"cover",display:"block"}}
                     />

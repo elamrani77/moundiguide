@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { STADIUMS } from "../constants.js";
 
-export default function Weather({C,city}){
+function Weather({C,city}){
   const[w,setW]=useState(null);
   useEffect(()=>{const s=STADIUMS.find(st=>st.city===city);if(!s)return;fetch(`https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lng}&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto`).then(r=>r.json()).then(d=>setW(d.current)).catch(()=>{});},[city]);
   if(!w)return null;
@@ -19,3 +19,5 @@ export default function Weather({C,city}){
     </div>
   );
 }
+
+export default React.memo(Weather);

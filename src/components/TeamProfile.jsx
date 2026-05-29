@@ -1,6 +1,13 @@
+import { useEffect } from "react";
 import { TEAM_DATA, TEAM_ISO, PLAYERS, PLAYERS_IMG, BR, F } from "../constants.js";
+import { useAnalytics } from "../hooks/useAnalytics.js";
 
 export default function TeamProfile({selectedTeam, showTeamProfile, setShowTeamProfile, isDesk, setPage}){
+  const { track } = useAnalytics();
+  useEffect(()=>{
+    if(showTeamProfile&&selectedTeam?.t) track("team_profile_viewed",{team:selectedTeam.t});
+  },[showTeamProfile,selectedTeam?.t]);
+
   if(!selectedTeam) return null;
 
   const teamData = TEAM_DATA[selectedTeam.t];

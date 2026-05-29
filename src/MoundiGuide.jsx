@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 
 import {
@@ -8,13 +8,16 @@ import { C as makeTheme } from "./theme.js";
 import Splash from "./components/Splash.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ChatFloat from "./components/ChatFloat.jsx";
-import TeamProfile from "./components/TeamProfile.jsx";
-import Footer from "./components/Footer.jsx";
 import HomePage from "./pages/HomePage.jsx";
-import TicketPage from "./pages/TicketPage.jsx";
-import SchedulePage from "./pages/SchedulePage.jsx";
+import { useAnalytics } from "./hooks/useAnalytics.js";
+
+const TicketPage   = lazy(() => import("./pages/TicketPage.jsx"));
+const SchedulePage = lazy(() => import("./pages/SchedulePage.jsx"));
+const TeamProfile  = lazy(() => import("./components/TeamProfile.jsx"));
+const Footer       = lazy(() => import("./components/Footer.jsx"));
 
 export default function MoundiGuide(){
+  const { track } = useAnalytics();
   const[splash,setSplash]=useState(true);
   const[page,setPage]=useState("home");
   const[lang,setLang]=useState(()=>localStorage.getItem("lang")||"fr");
@@ -137,7 +140,7 @@ export default function MoundiGuide(){
           <div onClick={e=>e.stopPropagation()} style={{background:"rgba(255,255,255,0.99)",border:`1px solid ${C.bdr}`,borderRadius:20,padding:"16px 10px",minWidth:230,boxShadow:C.sh,animation:"popIn .2s ease"}}>
             <div style={{fontFamily:F,fontSize:10,fontWeight:600,color:C.mut,textAlign:"center",padding:"4px 0 12px",letterSpacing:2,textTransform:"uppercase"}}>{(TRANSLATIONS[lang]||TRANSLATIONS.en).langLabel}</div>
             {LANGUAGES.map(l=>(
-              <button key={l.code} onClick={()=>{setLang(l.code);setShowLang(false);}}
+              <button key={l.code} onClick={()=>{setLang(l.code);setShowLang(false);track("language_changed",{lang:l.code});}}
                 style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"10px 18px",background:lang===l.code?`${BR.red}10`:"transparent",border:"none",cursor:"pointer",color:lang===l.code?ac:C.txt,fontSize:13,fontFamily:F,borderRadius:10,fontWeight:lang===l.code?600:400,transition:"all .15s"}}>
                 <span style={{fontSize:20}}>{l.flag}</span><span>{l.label}</span>
                 {lang===l.code&&<span style={{marginLeft:"auto",color:ac}}>✓</span>}
@@ -169,7 +172,7 @@ export default function MoundiGuide(){
                   const tColor=td.colors[0];
                   return(
                     <button key={name}
-                      onClick={()=>{setSelectedTeam({t:name,f:td.flag});setShowTeamPicker(false);setHoveredTeam(null);}}
+                      onClick={()=>{setSelectedTeam({t:name,f:td.flag});setShowTeamPicker(false);setHoveredTeam(null);track("team_selected",{team:name});}}
                       onMouseEnter={()=>setHoveredTeam(name)}
                       onMouseLeave={()=>setHoveredTeam(null)}
                       style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"10px 4px",borderRadius:12,
@@ -211,14 +214,18 @@ export default function MoundiGuide(){
       {/* Page content */}
       <div style={{overflowX:"hidden",direction:lang==="ar"?"rtl":"ltr"}}>
         {!splash&&page==="home"    &&<HomePage    C={C} ac={ac} F={F} lang={lang} send={send} setPage={setPage} isDesk={isDesk} selectedTeam={selectedTeam}/>}
-        {!splash&&page==="ticket"  &&<TicketPage  C={C} F={F} isDesk={isDesk} lang={lang}/>}
-        {!splash&&page==="schedule"&&<SchedulePage C={C} ac={ac} F={F} send={send} isDesk={isDesk} lang={lang} selectedTeam={selectedTeam}/>}
-        {!splash&&<Footer C={C} F={F} setPage={setPage} lang={lang}/>}
+        <Suspense fallback={<div style={{minHeight:400}}/>}>
+          {!splash&&page==="ticket"  &&<TicketPage  C={C} F={F} isDesk={isDesk} lang={lang}/>}
+          {!splash&&page==="schedule"&&<SchedulePage C={C} ac={ac} F={F} send={send} isDesk={isDesk} lang={lang} selectedTeam={selectedTeam}/>}
+          {!splash&&<Footer C={C} F={F} setPage={setPage} lang={lang}/>}
+        </Suspense>
       </div>
 
       {/* Team Profile drawer */}
-      <TeamProfile selectedTeam={selectedTeam} showTeamProfile={showTeamProfile}
-        setShowTeamProfile={setShowTeamProfile} isDesk={isDesk} setPage={setPage}/>
+      <Suspense fallback={null}>
+        <TeamProfile selectedTeam={selectedTeam} showTeamProfile={showTeamProfile}
+          setShowTeamProfile={setShowTeamProfile} isDesk={isDesk} setPage={setPage}/>
+      </Suspense>
 
       {/* Floating AI Chat */}
       <ChatFloat C={C} lang={lang} msgs={msgs} input={input} setInput={setInput}

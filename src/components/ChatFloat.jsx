@@ -1,5 +1,7 @@
+import React from "react";
 import { Sparkles, X } from "lucide-react";
 import { BR, PLACEHOLDERS, F } from "../constants.js";
+import { useAnalytics } from "../hooks/useAnalytics.js";
 
 function md(t){if(!t)return t;return t.split("\n").map((l,i)=>{let c=l.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");if(l.startsWith("- ")||l.startsWith("• "))return<div key={i} style={{paddingLeft:12,marginBottom:2}} dangerouslySetInnerHTML={{__html:"• "+c.slice(2)}}/>;if(l.trim()==="")return<div key={i} style={{height:6}}/>;return<div key={i} dangerouslySetInnerHTML={{__html:c}}/>;});}
 
@@ -12,10 +14,11 @@ const SUGGESTIONS={
   zh:["🏟️ 体育场","🎟️ 门票","🗺️ 主办城市","💱 兑换MAD"],
 };
 
-export default function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoice,chatOpen,setChatOpen,isRTL,ac,F: Fprop,endRef,inpRef,isDesk,selectedTeam}){
+function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoice,chatOpen,setChatOpen,isRTL,ac,F: Fprop,endRef,inpRef,isDesk,selectedTeam}){
   const font = Fprop || F;
+  const { track } = useAnalytics();
   if(!chatOpen) return(
-    <button onClick={()=>setChatOpen(true)}
+    <button onClick={()=>{setChatOpen(true);track("chat_opened");}}
       style={{position:"fixed",bottom:28,right:28,width:58,height:58,borderRadius:"50%",
         background:"linear-gradient(135deg,#C8102E,#00913F)",border:"none",cursor:"pointer",
         display:"flex",alignItems:"center",justifyContent:"center",
@@ -95,9 +98,9 @@ export default function ChatFloat({C,lang,msgs,input,setInput,loading,send,liste
         <div style={{padding:"8px 12px",paddingBottom:"env(safe-area-inset-bottom, 8px)",flexShrink:0}}>
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
             <button onClick={toggleVoice} style={{width:34,height:34,borderRadius:10,border:`1px solid ${listening?BR.red:C.bdr}`,background:listening?`${BR.red}22`:C.card,cursor:"pointer",fontSize:13,color:listening?BR.red:C.mut}}>🎤</button>
-            <input id="chat-input" name="chat-input" ref={inpRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();send();}}} placeholder={PLACEHOLDERS[lang]} dir={isRTL?"rtl":"ltr"}
+            <input id="chat-input" name="chat-input" ref={inpRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();track("chat_message_sent",{lang});send();}}} placeholder={PLACEHOLDERS[lang]} dir={isRTL?"rtl":"ltr"}
               style={{flex:1,padding:"8px 12px",background:C.fld,border:`1px solid ${C.bdr}`,borderRadius:10,color:C.str,fontSize:12,fontFamily:font,outline:"none"}}/>
-            <button onClick={()=>send()} disabled={!input.trim()||loading}
+            <button onClick={()=>{track("chat_message_sent",{lang});send();}} disabled={!input.trim()||loading}
               style={{width:34,height:34,borderRadius:10,background:input.trim()&&!loading?`linear-gradient(135deg,${BR.red},${BR.green})`:C.card,border:"none",cursor:input.trim()&&!loading?"pointer":"not-allowed",fontSize:14,color:input.trim()&&!loading?"white":C.mut}}>
               {loading?<div style={{width:12,height:12,border:`2px solid ${C.bdr}`,borderTopColor:ac,borderRadius:"50%",animation:"sp .6s linear infinite",margin:"auto"}}/>:"➤"}
             </button>
@@ -107,3 +110,5 @@ export default function ChatFloat({C,lang,msgs,input,setInput,loading,send,liste
     </>
   );
 }
+
+export default React.memo(ChatFloat);

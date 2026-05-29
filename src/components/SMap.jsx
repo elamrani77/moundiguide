@@ -1,8 +1,10 @@
-import { useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { BR, STADIUMS, POIS, POI_CATS } from "../constants.js";
+import { useAnalytics } from "../hooks/useAnalytics.js";
 
-export default function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,userCoords,height}){
+function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,userCoords,height}){
   const ref=useRef(null);const mR=useRef(null);
+  const { track } = useAnalytics();
   const poiLayersRef=useRef({});const markersRef=useRef({});
   useEffect(()=>{
     if(mR.current)return;
@@ -43,7 +45,7 @@ export default function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,us
           `</div></div></div>`;
         const mk=window.L.marker([poi.lat,poi.lng],{icon:ic});
         mk.bindPopup(popup,{maxWidth:240});
-        mk.on("click",()=>onPoiSelect&&onPoiSelect(poi));
+        mk.on("click",()=>{track("poi_click",{category:poi.category,city:poi.city});onPoiSelect&&onPoiSelect(poi);});
         mk.addTo(layers[poi.category]);
         markersRef.current[poi.id]=mk;
       });
@@ -88,3 +90,5 @@ export default function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,us
     </div>
   );
 }
+
+export default React.memo(SMap);

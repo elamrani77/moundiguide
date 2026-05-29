@@ -1,7 +1,8 @@
+import React from "react";
 import { TRANSLATIONS, BR, F } from "../constants.js";
 import MoundiLogo from "./MoundiLogo.jsx";
 
-export default function Footer({C,F: Fprop,setPage,lang}){
+function Footer({C,F: Fprop,setPage,lang}){
   const font = Fprop || F;
   const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
   return(
@@ -43,3 +44,5 @@ export default function Footer({C,F: Fprop,setPage,lang}){
     </footer>
   );
 }
+
+export default React.memo(Footer);

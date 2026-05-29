@@ -1,9 +1,9 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { TRANSLATIONS, BR, TEAM_DATA, TEAM_ACCENT, TEAM_ISO, F } from "../constants.js";
 import MoundiLogo from "./MoundiLogo.jsx";
 
-export default function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam, setShowTeamProfile}){
+function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam, setShowTeamProfile}){
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifGranted,setNotifGranted]=useState(
     typeof Notification!=="undefined"&&Notification.permission==="granted"
@@ -174,3 +174,5 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
     </motion.nav>
   );
 }
+
+export default React.memo(Navbar);
