@@ -200,7 +200,7 @@ export const TEAM_PLAYERS=Object.fromEntries(
 );
 
 export const PLAYERS={
-  MA:{p1:"Brahim Díaz",n1:10,p2:"Achraf Hakimi",n2:2,p3:"Yassine Bounou (Bono)",n3:1},
+  MA:{p1:"Achraf Hakimi",n1:2,p2:"Yassine Bounou",n2:1,p3:"Sofyan Amrabat",n3:4},
   ES:{p1:"Pedri",n1:8,p2:"Rodri",n2:16,p3:"Lamine Yamal",n3:19},
   PT:{p1:"Cristiano Ronaldo",n1:7,p2:"Bruno Fernandes",n2:8,p3:"Rúben Dias",n3:4},
   FR:{p1:"Kylian Mbappé",n1:10,p2:"Antoine Griezmann",n2:7,p3:"Aurélien Tchouaméni",n3:8},
