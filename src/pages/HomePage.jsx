@@ -5,7 +5,7 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 import {
-  TRANSLATIONS, BR, TEAM_DATA, TEAM_PLAYERS, PLAYERS_IMG, TEAM_ISO, PLAYERS,
+  TRANSLATIONS, BR, TEAM_DATA, PLAYERS_IMG, TEAM_ISO, PLAYERS,
   WELCOME_FAN, WELCOME, STADIUMS, CITIES, POIS, POI_CATS, NEWS,
   CURRENCIES, INFO_ITEMS, DARIJA, haversine, normalize, formatDist, F
 } from "../constants.js";
@@ -17,165 +17,12 @@ import { useLiveScores } from "../hooks/useLiveScores";
 // ── md renderer ──
 function md(t){if(!t)return t;return t.split("\n").map((l,i)=>{let c=l.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");if(l.startsWith("- ")||l.startsWith("• "))return<div key={i} style={{paddingLeft:12,marginBottom:2}} dangerouslySetInnerHTML={{__html:"• "+c.slice(2)}}/>;if(l.trim()==="")return<div key={i} style={{height:6}}/>;return<div key={i} dangerouslySetInnerHTML={{__html:c}}/>;});}
 
-// ── PlayerReveal — TV broadcast animation ──
-function PlayerReveal({teamData,teamName,isDesk,onDone}){
-  const[phase,setPhase]=useState(0);
-  const players=TEAM_PLAYERS[teamName]||[];
-  const primary=teamData.colors[0];
-  const secondary=teamData.colors[1]||primary;
-  const photoSize=isDesk?120:80;
-  const pDur=isDesk?1000:700;
-  const font="'Outfit',sans-serif";
-  const hex="polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)";
-
-  useEffect(()=>{
-    const ts=[
-      setTimeout(()=>setPhase(1),300),
-      setTimeout(()=>setPhase(2),300+pDur),
-      setTimeout(()=>setPhase(3),300+pDur*2),
-      setTimeout(()=>setPhase(4),300+pDur*3),
-      setTimeout(()=>setPhase(5),300+pDur*3+700),
-    ];
-    const done=setTimeout(()=>onDone?.(),300+pDur*3+700+500);
-    return()=>{ts.forEach(clearTimeout);clearTimeout(done);};
-  },[]);
-
-  const fromLeft=[true,false,true];
-  const pHex=primary.replace("#","");
-
-  return(
-    <motion.div
-      initial={{opacity:1}}
-      animate={{opacity:phase>=5?0:1}}
-      transition={{duration:0.5,ease:"easeIn"}}
-      style={{position:"absolute",inset:0,zIndex:20,overflow:"hidden",
-        background:"rgba(0,0,0,0.90)",display:"flex",flexDirection:"column",
-        alignItems:"center",justifyContent:"center"}}
-    >
-      <style>{`
-        @keyframes pr_scan{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-        @keyframes pr_shine{0%{left:-80%}100%{left:160%}}
-        @keyframes pr_num{from{opacity:0;transform:scale(1.5)}to{opacity:0.13;transform:scale(1)}}
-        @keyframes pr_type{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0% 0 0)}}
-        @keyframes pr_flag{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
-        @keyframes pr_glow{0%,100%{text-shadow:0 0 8px rgba(255,255,255,0.25)}50%{text-shadow:0 0 28px rgba(255,255,255,0.95),0 0 48px #${pHex}CC}}
-        @keyframes pr_shimmer{0%{left:-110%}100%{left:110%}}
-      `}</style>
-
-      {/* Scan line */}
-      <div style={{position:"absolute",top:"50%",left:0,right:0,height:2,
-        background:`linear-gradient(90deg,transparent,${primary},${primary},transparent)`,
-        transformOrigin:"left center",animation:"pr_scan 0.28s ease-out both"}}/>
-
-      {/* Players */}
-      <div style={{display:"flex",flexDirection:isDesk?"row":"column",
-        gap:isDesk?44:18,alignItems:"center",justifyContent:"center",
-        padding:isDesk?"0 56px":"0 20px",width:"100%",position:"relative",zIndex:2}}>
-        {players.map((player,idx)=>{
-          if(phase<idx+1)return null;
-          const goLeft=fromLeft[idx];
-          return(
-            <motion.div key={idx}
-              initial={{x:goLeft?-140:140,opacity:0,filter:"blur(8px)"}}
-              animate={{x:0,opacity:1,filter:"blur(0px)"}}
-              transition={{duration:0.5,ease:[0.25,0.46,0.45,0.94]}}
-              style={{display:"flex",flexDirection:"row",alignItems:"center",gap:isDesk?18:12}}
-            >
-              {/* Hexagon photo */}
-              <div style={{position:"relative",width:photoSize,height:photoSize,flexShrink:0}}>
-                <img src={player.img} alt={player.name}
-                  style={{width:photoSize,height:photoSize,objectFit:"cover",
-                    clipPath:hex,display:"block",border:`2px solid ${primary}`}}
-                  onError={e=>{e.target.src=`https://ui-avatars.com/api/?name=${player.name.replace(/ /g,"+")}&size=200&background=${pHex}&color=fff&bold=true`;}}
-                />
-                <div style={{position:"absolute",inset:0,clipPath:hex,overflow:"hidden",pointerEvents:"none"}}>
-                  <div style={{position:"absolute",top:0,bottom:0,width:"65%",
-                    background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.45),transparent)",
-                    animation:"pr_shine 0.55s 0.08s ease-out both"}}/>
-                </div>
-              </div>
-              {/* Text */}
-              <div style={{position:"relative",minWidth:isDesk?160:110}}>
-                <div style={{position:"absolute",top:isDesk?-26:-16,left:isDesk?-8:-5,
-                  fontFamily:font,fontSize:isDesk?68:44,fontWeight:900,color:"#FFF",
-                  lineHeight:1,zIndex:0,userSelect:"none",
-                  animation:"pr_num 0.4s 0.18s ease-out forwards",opacity:0}}>
-                  {player.number}
-                </div>
-                <div style={{position:"relative",zIndex:1,display:"inline-block",
-                  padding:"2px 8px",borderRadius:4,marginBottom:6,
-                  background:secondary,fontFamily:font,fontSize:9,fontWeight:700,
-                  color:"#FFF",letterSpacing:1.5,textTransform:"uppercase"}}>
-                  {player.pos}
-                </div>
-                <div style={{position:"relative",zIndex:1,overflow:"hidden",whiteSpace:"nowrap"}}>
-                  <div style={{fontFamily:font,fontSize:isDesk?18:13,fontWeight:800,color:"#FFF",
-                    textShadow:`0 0 20px ${primary}CC`,letterSpacing:0.4,
-                    animation:"pr_type 0.55s 0.1s steps(22,end) both"}}>
-                    {player.name}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* Phase 4+: Flag pulse + Team name + shimmer */}
-      {phase>=4&&(
-        <>
-          <motion.div initial={{opacity:0,y:-16}} animate={{opacity:1,y:0}} transition={{duration:0.35}}
-            style={{position:"absolute",top:isDesk?"14%":"8%",fontSize:isDesk?58:40,lineHeight:1,
-              animation:"pr_flag 1.1s ease-in-out infinite",zIndex:3}}>
-            {teamData.flag}
-          </motion.div>
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.35,delay:0.18}}
-            style={{position:"absolute",bottom:isDesk?"14%":"8%",fontFamily:font,
-              fontSize:isDesk?20:14,fontWeight:800,color:"#FFF",letterSpacing:5,
-              textTransform:"uppercase",animation:"pr_glow 1.4s ease-in-out infinite",zIndex:3}}>
-            {teamName}
-          </motion.div>
-          <div style={{position:"absolute",inset:0,overflow:"hidden",pointerEvents:"none",zIndex:1}}>
-            <div style={{position:"absolute",top:0,bottom:0,width:"35%",
-              background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent)",
-              animation:"pr_shimmer 0.9s ease-out both"}}/>
-          </div>
-        </>
-      )}
-    </motion.div>
-  );
-}
-
 export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selectedTeam}){
   const font = Fprop || F;
   const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const teamData = selectedTeam ? TEAM_DATA[selectedTeam.t] : null;
   const heroTeamCode = selectedTeam ? (()=>{const r=TEAM_ISO[selectedTeam.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})() : null;
-  // Hero players image fade-in — once on load, once on team change
-  const playerAnimatedRef=useRef(false);
-  const [playerVisible,setPlayerVisible]=useState(false);
-  useEffect(()=>{const t=setTimeout(()=>setPlayerVisible(true),400);return()=>clearTimeout(t);},[]);
-  useEffect(()=>{
-    if(!selectedTeam?.t)return;
-    playerAnimatedRef.current=false;
-    setPlayerVisible(false);
-    const t=setTimeout(()=>{setPlayerVisible(true);playerAnimatedRef.current=true;},100);
-    return()=>clearTimeout(t);
-  },[selectedTeam?.t]);
 
-  // Player reveal
-  const [showReveal,setShowReveal]=useState(false);
-  const prevTeamRef2=useRef(null);
-  useEffect(()=>{
-    if(!selectedTeam||!teamData)return;
-    const key=`playerRevealPlayed_${selectedTeam.t}`;
-    const prevKey=prevTeamRef2.current;
-    prevTeamRef2.current=key;
-    if(prevKey!==key||!sessionStorage.getItem(key)){
-      setShowReveal(true);
-      sessionStorage.setItem(key,"1");
-    }
-  },[selectedTeam?.t]);
   const[weatherCity,setWeatherCity]=useState("Casablanca");
   const[rt,sR]=useState(null);
   const[amt,sA]=useState("100");const[cur,sCur]=useState("EUR");
@@ -279,28 +126,6 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
 
       {/* ── HERO ── */}
       <div style={{position:"relative",height:"100vh",minHeight:560,overflow:"hidden",marginTop:0,paddingTop:0}}>
-        {/* Player reveal overlay */}
-        {showReveal&&teamData&&(
-          <PlayerReveal
-            teamData={teamData}
-            teamName={selectedTeam.t}
-            isDesk={isDesk}
-            onDone={()=>setShowReveal(false)}
-          />
-        )}
-        {/* Replay button — shows when no reveal is active and team is selected */}
-        {!showReveal&&teamData&&(
-          <button onClick={()=>setShowReveal(true)}
-            style={{position:"absolute",bottom:72,right:isDesk?44:20,zIndex:10,
-              background:"rgba(0,0,0,0.45)",backdropFilter:"blur(8px)",
-              border:`1px solid ${teamData.colors[0]}55`,borderRadius:20,
-              padding:"5px 12px",cursor:"pointer",
-              fontFamily:"'Outfit',sans-serif",fontSize:10,fontWeight:600,
-              color:"rgba(255,255,255,0.65)",display:"flex",alignItems:"center",gap:4,
-              transition:"all .2s"}}>
-            ▶ Squad
-          </button>
-        )}
         {/* Background: team gradient OR stadium image */}
         {teamData
           ?<div style={{position:"absolute",inset:0,background:teamData.heroGradient}}/>
@@ -325,17 +150,20 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           }} onError={e=>{e.target.style.display="none";}}/>
         )}
 
-        {/* Players image — desktop only, right 55%, fade-in with left mask */}
+        {/* Players image — desktop only */}
         {isDesk&&(
-          <div style={{position:"absolute",right:0,bottom:0,top:"auto",width:"65%",height:"92%",
-            pointerEvents:"none",zIndex:1,
-            maskImage:"linear-gradient(to right, transparent 0%, black 20%, black 100%)",
-            WebkitMaskImage:"linear-gradient(to right, transparent 0%, black 20%, black 100%)",
-            opacity:playerVisible?1:0,transform:playerVisible?"translateY(0)":"translateY(30px)",transition:"opacity 0.8s ease,transform 0.8s ease"}}>
-            <img src={PLAYERS_IMG[TEAM_ISO[selectedTeam?.t]?.toUpperCase()]||PLAYERS_IMG[selectedTeam?.iso?.toUpperCase()]||PLAYERS_IMG[selectedTeam?.code?.toUpperCase()]||PLAYERS_IMG[selectedTeam?.t?.toUpperCase()]||"/players-ma.png"} alt="" aria-hidden="true"
-              style={{width:"100%",height:"100%",objectFit:"cover",objectPosition:"center 10%",display:"block"}}
-              onError={e=>{e.target.parentElement.style.display="none";}}/>
-          </div>
+          <img
+            src={PLAYERS_IMG[TEAM_ISO[selectedTeam?.t]?.toUpperCase()]||"/players-ma.png"}
+            alt="players"
+            style={{
+              position:"absolute",right:0,bottom:0,
+              height:"92%",width:"65%",
+              objectFit:"cover",objectPosition:"center 10%",
+              WebkitMaskImage:"linear-gradient(to right, transparent 0%, black 20%, black 100%)",
+              maskImage:"linear-gradient(to right, transparent 0%, black 20%, black 100%)",
+              pointerEvents:"none",zIndex:1,
+            }}
+          />
         )}
 
         {/* Hero content */}
@@ -352,7 +180,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               <span style={{fontFamily:font,fontSize:isDesk?22:17,fontWeight:700,color:"rgba(255,255,255,0.92)",
                 textShadow:`0 0 24px ${teamData.colors[0]}CC`}}>
                 {lang==="ar"
-                  ?`!أهلاً مشجع ${teamData.flag} ${heroTeamCode}`
+                  ?`!أهلاً مشجع ${teamData.flag} ${teamData.name||selectedTeam.t}`
                   :(WELCOME_FAN[lang]||WELCOME_FAN.en)(teamData.flag,teamData.name||selectedTeam.t)}
               </span>
             </div>

@@ -25,7 +25,7 @@ export default function MoundiGuide(){
   const[isDesk,setIsDesk]=useState(typeof window!=="undefined"&&window.innerWidth>=768);
   const[chatOpen,setChatOpen]=useState(false);
   const[scrolled,setScrolled]=useState(false);
-  const[selectedTeam,setSelectedTeam]=useState(()=>{try{const s=localStorage.getItem("userTeam");if(!s||s==="neutral")return null;return JSON.parse(s);}catch{return null;}});
+  const[selectedTeam,setSelectedTeam]=useState(()=>{try{const s=localStorage.getItem("userTeam");if(!s||s==="neutral")return null;const saved=JSON.parse(s);return{t:saved.t,f:TEAM_DATA[saved.t]?.flag||saved.f};}catch{return null;}});
   const[showTeamPicker,setShowTeamPicker]=useState(false);
   const[hoveredTeam,setHoveredTeam]=useState(null);
   const hasShownPicker=useRef(false);
