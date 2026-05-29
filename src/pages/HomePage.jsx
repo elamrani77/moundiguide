@@ -128,17 +128,15 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
 
       {/* ── HERO ── */}
       <div style={{position:"relative",height:"100vh",minHeight:560,overflow:"hidden",marginTop:0,paddingTop:0}}>
-        {/* Background: team gradient OR stadium image */}
-        {teamData
-          ?<div style={{position:"absolute",inset:0,background:teamData.heroGradient}}/>
-          :<img src="/stadium-night.png" alt="Stadium Night"
-            style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",objectPosition:"center"}}
-            onError={e=>{e.target.style.display="none";}}/>
-        }
+        {/* Background: team gradient OR dark gradient */}
+        <div style={{position:"absolute",inset:0,background:teamData
+          ?teamData.heroGradient
+          :"linear-gradient(135deg,#1a0005 0%,#07091A 60%,#0a1a0a 100%)"}}/>
         {/* Dark overlay */}
         <div style={{position:"absolute",inset:0,background:teamData
           ?"linear-gradient(to bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.82))"
-          :"linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(18,20,20,0.95))"}}/>
+          :"rgba(0,0,0,0.55)",zIndex:0}}/>
+
 
 
         {/* Trophy — floating right side */}
@@ -232,8 +230,13 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
 
           {/* Flags */}
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:32,position:"relative",zIndex:3,direction:lang==="ar"?"rtl":"ltr"}}>
-            {["🇲🇦","🇪🇸","🇵🇹"].map((f,i)=>(
-              <span key={i} style={{fontSize:28,filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.4))"}}>{f}</span>
+            {["ma","es","pt"].map(code=>(
+              <img key={code}
+                src={`https://flagcdn.com/24x18/${code}.png`}
+                alt={code.toUpperCase()}
+                style={{width:24,height:18,borderRadius:2,objectFit:"cover",
+                  filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.4))",cursor:"default"}}
+                onError={e=>{e.target.style.display="none";}}/>
             ))}
             <div style={{width:1,height:24,background:"rgba(255,255,255,0.3)",marginLeft:4}}/>
             <span style={{fontFamily:font,fontSize:12,color:"rgba(255,255,255,0.7)"}}>{T.heroFlags}</span>
