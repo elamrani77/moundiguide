@@ -8,6 +8,7 @@ import { C as makeTheme } from "./theme.js";
 import Splash from "./components/Splash.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ChatFloat from "./components/ChatFloat.jsx";
+import TeamProfile from "./components/TeamProfile.jsx";
 import Footer from "./components/Footer.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import TicketPage from "./pages/TicketPage.jsx";
@@ -27,6 +28,7 @@ export default function MoundiGuide(){
   const[scrolled,setScrolled]=useState(false);
   const[selectedTeam,setSelectedTeam]=useState(()=>{try{const s=localStorage.getItem("userTeam");if(!s||s==="neutral")return null;const saved=JSON.parse(s);return{t:saved.t,f:TEAM_DATA[saved.t]?.flag||saved.f};}catch{return null;}});
   const[showTeamPicker,setShowTeamPicker]=useState(false);
+  const[showTeamProfile,setShowTeamProfile]=useState(false);
   const[hoveredTeam,setHoveredTeam]=useState(null);
   const hasShownPicker=useRef(false);
   const endRef=useRef(null);const inpRef=useRef(null);const recRef=useRef(null);
@@ -61,10 +63,10 @@ export default function MoundiGuide(){
   const send=useCallback(async(text)=>{
     const t=text||input.trim();if(!t||loading)return;setInput("");setChatOpen(true);
     const nm=[...msgs,{role:"user",content:t}];setMsgs(nm);setLoading(true);
-    try{const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lang,messages:nm.map(m=>({role:m.role,content:m.content}))})});const d=await r.json();setMsgs(p=>[...p,{role:"assistant",content:d.content?.[0]?.text||d.error||"⚠️ Erreur"}]);}
+    try{const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lang,messages:nm.map(m=>({role:m.role,content:m.content})),selectedTeam:selectedTeam?.t||null})});const d=await r.json();setMsgs(p=>[...p,{role:"assistant",content:d.content?.[0]?.text||d.error||"⚠️ Erreur"}]);}
     catch{setMsgs(p=>[...p,{role:"assistant",content:"⚠️ Hors-ligne"}]);}
     finally{setLoading(false);inpRef.current?.focus();}
-  },[input,loading,msgs,lang]);
+  },[input,loading,msgs,lang,selectedTeam]);
 
   const toggleVoice=()=>{
     if(listening){if(recRef.current)recRef.current.stop();setListening(false);return;}
@@ -126,7 +128,8 @@ export default function MoundiGuide(){
       {/* Navbar — always on top */}
       <Navbar page={page} setPage={setPage} scrolled={scrolled} C={C}
         lang={lang} curLang={curLang} showLang={showLang} setShowLang={setShowLang}
-        isDesk={isDesk} selectedTeam={selectedTeam} onPickTeam={()=>setShowTeamPicker(true)}/>
+        isDesk={isDesk} selectedTeam={selectedTeam} onPickTeam={()=>setShowTeamPicker(true)}
+        setShowTeamProfile={setShowTeamProfile}/>
 
       {/* Language overlay */}
       {showLang&&(
@@ -213,11 +216,15 @@ export default function MoundiGuide(){
         {!splash&&<Footer C={C} F={F} setPage={setPage} lang={lang}/>}
       </div>
 
+      {/* Team Profile drawer */}
+      <TeamProfile selectedTeam={selectedTeam} showTeamProfile={showTeamProfile}
+        setShowTeamProfile={setShowTeamProfile} isDesk={isDesk} setPage={setPage}/>
+
       {/* Floating AI Chat */}
       <ChatFloat C={C} lang={lang} msgs={msgs} input={input} setInput={setInput}
         loading={loading} send={send} listening={listening} toggleVoice={toggleVoice}
         chatOpen={chatOpen} setChatOpen={setChatOpen} isRTL={isRTL} ac={ac} F={F}
-        endRef={endRef} inpRef={inpRef} isDesk={isDesk}/>
+        endRef={endRef} inpRef={inpRef} isDesk={isDesk} selectedTeam={selectedTeam}/>
     </div>
     </>
   );

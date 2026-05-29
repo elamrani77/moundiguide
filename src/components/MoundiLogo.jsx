@@ -1,6 +1,6 @@
 import { BR } from "../constants.js";
 
-export default function MoundiLogo({size=36, showText=true, textColor="#111"}){
+export default function MoundiLogo({size=36, showText=true, textColor="#111", showSubtitle=true, textSize=18}){
   return(
     <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
       <img src="/logo.png" alt="Moundi Guide" style={{height:size,width:size,objectFit:"contain"}}
@@ -17,12 +17,12 @@ export default function MoundiLogo({size=36, showText=true, textColor="#111"}){
       </svg>
       {showText&&(
         <div style={{lineHeight:1}}>
-          <div style={{fontFamily:"'Outfit',sans-serif",fontWeight:700,fontSize:18,color:textColor,letterSpacing:0.3}}>
+          <div style={{fontFamily:"'Outfit',sans-serif",fontWeight:700,fontSize:textSize,color:textColor,letterSpacing:0.3}}>
             Moundi Guide
           </div>
-          <div style={{fontFamily:"'Outfit',sans-serif",fontSize:8,color:"rgba(120,120,120,0.9)",letterSpacing:2,textTransform:"uppercase",marginTop:2}}>
+          {showSubtitle&&<div style={{fontFamily:"'Outfit',sans-serif",fontSize:8,color:"rgba(120,120,120,0.9)",letterSpacing:2,textTransform:"uppercase",marginTop:2,whiteSpace:"nowrap"}}>
             Unity · Community · Innovation
-          </div>
+          </div>}
         </div>
       )}
     </div>

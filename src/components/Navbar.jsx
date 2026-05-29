@@ -3,8 +3,24 @@ import { motion } from "framer-motion";
 import { TRANSLATIONS, BR, TEAM_DATA, TEAM_ACCENT, TEAM_ISO, F } from "../constants.js";
 import MoundiLogo from "./MoundiLogo.jsx";
 
-export default function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam}){
+export default function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam, setShowTeamProfile}){
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifGranted,setNotifGranted]=useState(
+    typeof Notification!=="undefined"&&Notification.permission==="granted"
+  );
+  async function handleNotifBell(){
+    if(notifGranted)return;
+    if(!("Notification" in window))return;
+    const perm=await Notification.requestPermission();
+    if(perm==="granted"){
+      setNotifGranted(true);
+      localStorage.setItem("moundiNotif","true");
+      new Notification("MoundiGuide 🏆",{
+        body:"Notifications activées ! Vous recevrez des alertes avant les matchs.",
+        icon:"/logo.png",badge:"/logo.png",
+      });
+    }
+  }
   const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const navBg = "#FFFFFF";
   const linkColor = "#374151";
@@ -29,11 +45,11 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
       transition={{duration:0.6,ease:"easeOut"}}
       style={{position:"fixed",top:0,left:0,right:0,zIndex:1000,background:navBg,backdropFilter:"blur(12px)",
       borderBottom:"1px solid #E5E7EB",padding:"0 24px"}}>
-      <div style={{maxWidth:1280,margin:"0 auto",height:68,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div style={{maxWidth:1280,margin:"0 auto",height:isDesk?64:52,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
 
-        {/* Logo — Bug 2 fix: size 52px desktop / 44px mobile */}
-        <div onClick={()=>setPage("home")}>
-          <MoundiLogo size={isDesk?52:44} textColor={BR.red}/>
+        {/* Logo */}
+        <div onClick={()=>setPage("home")} style={{cursor:"pointer"}}>
+          <MoundiLogo size={isDesk?52:32} textColor={BR.red} showSubtitle={isDesk} textSize={isDesk?18:15}/>
         </div>
 
         {/* Desktop nav */}
@@ -59,6 +75,20 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
                   :<span style={{fontSize:18}}>🌍</span>}
                 <span>{selectedTeam?.t||"Team"}</span>
               </button>
+              {selectedTeam&&(
+                <button onClick={()=>setShowTeamProfile(true)}
+                  style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid #E5E7EB",
+                    background:"white",fontSize:12,cursor:"pointer",marginLeft:4,
+                    display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  ℹ
+                </button>
+              )}
+              <button onClick={handleNotifBell} title="Activer les alertes matchs"
+                style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid #E5E7EB",
+                  background:"white",fontSize:14,cursor:"pointer",
+                  display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                {notifGranted?"🔔":"🔕"}
+              </button>
               <button onClick={e=>{e.stopPropagation();setShowLang(p=>!p);}}
                 style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
                   padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
@@ -69,15 +99,23 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
             </div>
           </div>
         ):(
-          /* Mobile: hamburger */
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <button onClick={onPickTeam} style={{background:"none",border:"none",cursor:"pointer",lineHeight:1,display:"flex",alignItems:"center"}} title="Choose team">
+          /* Mobile right side: bell + flag + hamburger */
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            {/* Bell */}
+            <button onClick={handleNotifBell}
+              style={{background:"none",border:"none",cursor:"pointer",fontSize:18,lineHeight:1,padding:2}}>
+              {notifGranted?"🔔":"🔕"}
+            </button>
+            {/* Team flag → opens picker */}
+            <button onClick={onPickTeam}
+              style={{background:"none",border:"none",cursor:"pointer",lineHeight:1,display:"flex",alignItems:"center",padding:2}}>
               {selectedTeam
                 ?<img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
-                  alt={selectedTeam.t} style={{width:24,height:18,borderRadius:2,objectFit:"cover"}}
+                  alt={selectedTeam.t} style={{width:24,height:18,borderRadius:3,objectFit:"cover"}}
                   onError={e=>{e.target.style.display="none";}}/>
-                :<span style={{fontSize:20}}>🌍</span>}
+                :<span style={{fontSize:18}}>🌍</span>}
             </button>
+            {/* Hamburger */}
             <button onClick={()=>setMenuOpen(p=>!p)}
               style={{background:"none",border:`1px solid ${C.bdr}`,
                 borderRadius:8,width:36,height:36,cursor:"pointer",color:linkColor,fontSize:18,
@@ -91,7 +129,28 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
       {/* Mobile dropdown menu */}
       {!isDesk&&menuOpen&&(
         <div style={{background:"rgba(255,255,255,0.99)",
-          borderTop:`1px solid ${C.bdr}`,padding:"16px 24px 20px",animation:"slideDown .2s ease"}}>
+          borderTop:`1px solid ${C.bdr}`,padding:"12px 20px 20px",animation:"slideDown .2s ease"}}>
+
+          {/* Team row at top */}
+          {selectedTeam&&(
+            <div style={{display:"flex",gap:8,marginBottom:8,paddingBottom:8,borderBottom:`1px solid ${C.bdr}`}}>
+              <button onClick={()=>{onPickTeam();setMenuOpen(false);}}
+                style={{flex:1,display:"flex",alignItems:"center",gap:10,padding:"10px 14px",
+                  background:C.fld,border:`1px solid ${C.bdr}`,borderRadius:10,cursor:"pointer"}}>
+                <img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
+                  alt={selectedTeam.t} style={{width:24,height:18,borderRadius:3,objectFit:"cover"}}
+                  onError={e=>{e.target.style.display="none";}}/>
+                <span style={{fontFamily:F,fontSize:14,fontWeight:600,color:C.str}}>{selectedTeam.t}</span>
+              </button>
+              <button onClick={()=>{setShowTeamProfile(true);setMenuOpen(false);}}
+                style={{padding:"10px 14px",background:C.fld,border:`1px solid ${C.bdr}`,
+                  borderRadius:10,cursor:"pointer",fontFamily:F,fontSize:12,color:C.mut,whiteSpace:"nowrap"}}>
+                👤 Profil
+              </button>
+            </div>
+          )}
+
+          {/* Nav links */}
           {[{id:"home",label:T.mobileHome},{id:"ticket",label:T.mobileTick},{id:"schedule",label:T.mobileSch}].map(({id,label})=>(
             <button key={id} onClick={()=>{setPage(id);setMenuOpen(false);}}
               style={{display:"block",width:"100%",textAlign:"left",background:page===id?`${BR.red}11`:"none",
@@ -101,7 +160,9 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
               {label}
             </button>
           ))}
-          <div style={{display:"flex",gap:10,marginTop:12,paddingTop:12,borderTop:`1px solid ${C.bdr}`}}>
+
+          {/* Language selector */}
+          <div style={{display:"flex",gap:10,marginTop:8,paddingTop:12,borderTop:`1px solid ${C.bdr}`}}>
             <button onClick={()=>setShowLang(p=>!p)}
               style={{flex:1,padding:10,borderRadius:10,border:`1px solid ${C.bdr}`,
                 background:C.card,color:C.str,cursor:"pointer",fontFamily:F,fontSize:13}}>

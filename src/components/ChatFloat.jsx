@@ -3,7 +3,16 @@ import { BR, PLACEHOLDERS, F } from "../constants.js";
 
 function md(t){if(!t)return t;return t.split("\n").map((l,i)=>{let c=l.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");if(l.startsWith("- ")||l.startsWith("• "))return<div key={i} style={{paddingLeft:12,marginBottom:2}} dangerouslySetInnerHTML={{__html:"• "+c.slice(2)}}/>;if(l.trim()==="")return<div key={i} style={{height:6}}/>;return<div key={i} dangerouslySetInnerHTML={{__html:c}}/>;});}
 
-export default function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoice,chatOpen,setChatOpen,isRTL,ac,F: Fprop,endRef,inpRef,isDesk}){
+const SUGGESTIONS={
+  fr:["🏟️ Les stades","🎟️ Billets","🗺️ Villes hôtes","💱 Convertir MAD"],
+  en:["🏟️ Stadiums","🎟️ Tickets","🗺️ Host cities","💱 Convert MAD"],
+  ar:["🏟️ الملاعب","🎟️ التذاكر","🗺️ المدن المضيفة","💱 تحويل الدرهم"],
+  es:["🏟️ Estadios","🎟️ Entradas","🗺️ Ciudades","💱 Convertir MAD"],
+  pt:["🏟️ Estádios","🎟️ Bilhetes","🗺️ Cidades","💱 Converter MAD"],
+  zh:["🏟️ 体育场","🎟️ 门票","🗺️ 主办城市","💱 兑换MAD"],
+};
+
+export default function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoice,chatOpen,setChatOpen,isRTL,ac,F: Fprop,endRef,inpRef,isDesk,selectedTeam}){
   const font = Fprop || F;
   if(!chatOpen) return(
     <button onClick={()=>setChatOpen(true)}
@@ -66,12 +75,21 @@ export default function ChatFloat({C,lang,msgs,input,setInput,loading,send,liste
           <div ref={endRef}/>
         </div>
 
-        {/* Quick topics */}
-        <div style={{padding:"5px 10px",display:"flex",gap:4,overflowX:"auto",scrollbarWidth:"none",borderTop:`1px solid ${C.bdr}`,flexShrink:0}}>
-          {(({fr:["🏟️ Stades","🚇 Transport","🍜 Restaurants","🏨 Hôtels","☀️ Météo"],en:["🏟️ Stadiums","🍜 Food","🏨 Hotels","☀️ Weather"]})[lang]||[]).map((t,i)=>(
-            <button key={i} onClick={()=>send(t)} style={{whiteSpace:"nowrap",padding:"3px 9px",background:C.card,border:`1px solid ${C.bdr}`,borderRadius:20,color:C.mut,fontSize:10,cursor:"pointer",fontFamily:font,flexShrink:0}}>{t}</button>
-          ))}
-        </div>
+        {/* Suggestion chips — hidden once conversation starts */}
+        {msgs.length<=1&&(
+          <div style={{padding:"8px 10px",display:"flex",gap:6,overflowX:"auto",scrollbarWidth:"none",
+            borderTop:`1px solid ${C.bdr}`,flexShrink:0,flexWrap:"wrap"}}>
+            {(SUGGESTIONS[lang]||SUGGESTIONS.fr).map((s,i)=>(
+              <button key={i} onClick={()=>send(s)}
+                style={{whiteSpace:"nowrap",padding:"5px 12px",background:"white",
+                  border:"1px solid #E5E7EB",borderRadius:999,
+                  color:C.str,fontSize:12,cursor:"pointer",fontFamily:font,flexShrink:0,
+                  transition:"border-color .15s"}}>
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Input */}
         <div style={{padding:"8px 12px",paddingBottom:"env(safe-area-inset-bottom, 8px)",flexShrink:0}}>

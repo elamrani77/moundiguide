@@ -33,6 +33,35 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
     return()=>window.removeEventListener("beforeinstallprompt",handler);
   },[]);
 
+  const [notifEnabled,setNotifEnabled]=useState(localStorage.getItem("moundiNotif")==="true");
+  const [notifDismissed,setNotifDismissed]=useState(localStorage.getItem("moundiNotifDismissed")==="true");
+
+  async function requestNotifications(){
+    if(!("Notification" in window))return;
+    const permission=await Notification.requestPermission();
+    if(permission==="granted"){
+      setNotifEnabled(true);
+      localStorage.setItem("moundiNotif","true");
+      new Notification("MoundiGuide 🏆",{
+        body:"Notifications activées ! Vous recevrez des alertes avant les matchs.",
+        icon:"/logo.png",badge:"/logo.png",
+      });
+    }
+  }
+
+  function scheduleMatchNotification(matchTime,homeTeam,awayTeam){
+    const timeUntilMatch=new Date(matchTime)-Date.now();
+    const oneHourBefore=timeUntilMatch-3600000;
+    if(oneHourBefore>0){
+      setTimeout(()=>{
+        new Notification("Match dans 1h ! 🏟️",{
+          body:`${homeTeam} vs ${awayTeam} — Préparez-vous !`,
+          icon:"/logo.png",tag:`match-${homeTeam}-${awayTeam}`,
+        });
+      },oneHourBefore);
+    }
+  }
+
   const[weatherCity,setWeatherCity]=useState("Casablanca");
   const[rt,sR]=useState(null);
   const[amt,sA]=useState("100");const[cur,sCur]=useState("EUR");
@@ -135,15 +164,16 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
     <div style={{minHeight:"100vh",background:"transparent"}}>
 
       {/* ── HERO ── */}
-      <div style={{position:"relative",height:"100vh",minHeight:560,overflow:"hidden",marginTop:0,paddingTop:0}}>
-        {/* Background: team gradient OR dark gradient */}
-        <div style={{position:"absolute",inset:0,background:teamData
-          ?teamData.heroGradient
-          :"linear-gradient(135deg,#1a0005 0%,#07091A 60%,#0a1a0a 100%)"}}/>
+      <div style={{position:"relative",height:"100vh",minHeight:560,overflow:"hidden",marginTop:0,paddingTop:0,
+        background:"linear-gradient(135deg,#1a0005 0%,#07091A 55%,#001a0a 100%)"}}>
+        {/* Background: team gradient layered on top of dark base */}
+        {teamData&&<div style={{position:"absolute",inset:0,background:teamData.heroGradient,zIndex:0}}/>}
         {/* Dark overlay */}
-        <div style={{position:"absolute",inset:0,background:teamData
-          ?"linear-gradient(to bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.82))"
-          :"rgba(0,0,0,0.55)",zIndex:0}}/>
+        <div style={{position:"absolute",inset:0,
+          background:teamData
+            ?"linear-gradient(to bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.82))"
+            :"rgba(0,0,0,0.55)",
+          zIndex:1}}/>
 
 
 
@@ -154,7 +184,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             height:isDesk?320:200,objectFit:"contain",
             animation:"floatTrophy 3s ease-in-out infinite",
             filter:"drop-shadow(0 0 40px rgba(240,180,41,0.45))",
-            pointerEvents:"none",zIndex:2,
+            pointerEvents:"none",zIndex:3,
           }} onError={e=>{e.target.style.display="none";}}/>
         )}
 
@@ -169,13 +199,13 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               objectFit:"cover",objectPosition:"center 10%",
               WebkitMaskImage:"linear-gradient(to right, transparent 0%, black 20%, black 100%)",
               maskImage:"linear-gradient(to right, transparent 0%, black 20%, black 100%)",
-              pointerEvents:"none",zIndex:1,
+              pointerEvents:"none",zIndex:2,
             }}
           />
         )}
 
         {/* Hero content */}
-        <div style={{position:"absolute",left:isDesk?40:16,top:"50%",transform:"translateY(-50%)",zIndex:2,maxWidth:lang==="ar"&&isDesk?480:isDesk?560:"90%",direction:"ltr"}}>
+        <div style={{position:"absolute",left:isDesk?40:16,top:"50%",transform:"translateY(-50%)",zIndex:3,maxWidth:lang==="ar"&&isDesk?480:isDesk?560:"90%",direction:"ltr"}}>
           {/* Badge */}
           <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(240,180,41,0.15)",backdropFilter:"blur(8px)",border:"1px solid rgba(240,180,41,0.35)",borderRadius:24,padding:"5px 14px",marginBottom:16,flexDirection:lang==="ar"?"row-reverse":"row"}}>
             <span>⚽</span>

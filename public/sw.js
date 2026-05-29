@@ -24,11 +24,14 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET") return;
-
   const url = e.request.url;
 
-  // Skip caching for videos, API calls, and external resources
+  // Skip non-http requests entirely
+  if (!url.startsWith("http")) return;
+
+  if (e.request.method !== "GET") return;
+
+  // Skip videos, APIs, external resources
   if (
     url.includes(".mp4") ||
     url.includes(".webm") ||
@@ -36,10 +39,8 @@ self.addEventListener("fetch", e => {
     url.includes("rapidapi") ||
     url.includes("openweathermap") ||
     url.includes("flagcdn") ||
-    url.startsWith("chrome-extension")
-  ) {
-    return;
-  }
+    url.includes("chrome-extension")
+  ) return;
 
   e.respondWith(
     caches.match(e.request).then(cached => {
@@ -52,4 +53,21 @@ self.addEventListener("fetch", e => {
       }).catch(() => caches.match("/"));
     })
   );
+});
+
+self.addEventListener("push", e => {
+  const data = e.data?.json() || {};
+  e.waitUntil(
+    self.registration.showNotification(data.title || "MoundiGuide 🏆", {
+      body: data.body || "Notification MoundiGuide",
+      icon: "/logo.png",
+      badge: "/logo.png",
+      data: { url: data.url || "/" },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  e.waitUntil(clients.openWindow(e.notification.data?.url || "/"));
 });
