@@ -3,13 +3,8 @@ const STATIC_ASSETS = [
   "/",
   "/index.html",
   "/logo.png",
-  "/players-default.png",
-  "/players-ma.png",
-  "/players-pt.png",
-  "/players-ar.png",
-  "/players-fr.png",
-  "/players-en.webp",
   "/manifest.json",
+  "/players-default.png",
 ];
 
 self.addEventListener("install", e => {
@@ -30,11 +25,27 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+
+  const url = e.request.url;
+
+  // Skip caching for videos, API calls, and external resources
+  if (
+    url.includes(".mp4") ||
+    url.includes(".webm") ||
+    url.includes("api-sports") ||
+    url.includes("rapidapi") ||
+    url.includes("openweathermap") ||
+    url.includes("flagcdn") ||
+    url.startsWith("chrome-extension")
+  ) {
+    return;
+  }
+
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(res => {
-        if (!res || res.status !== 200) return res;
+        if (!res || res.status !== 200 || res.type === "opaque") return res;
         const clone = res.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         return res;

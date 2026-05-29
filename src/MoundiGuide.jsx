@@ -217,7 +217,7 @@ export default function MoundiGuide(){
       <ChatFloat C={C} lang={lang} msgs={msgs} input={input} setInput={setInput}
         loading={loading} send={send} listening={listening} toggleVoice={toggleVoice}
         chatOpen={chatOpen} setChatOpen={setChatOpen} isRTL={isRTL} ac={ac} F={F}
-        endRef={endRef} inpRef={inpRef}/>
+        endRef={endRef} inpRef={inpRef} isDesk={isDesk}/>
     </div>
     </>
   );
