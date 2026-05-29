@@ -22,6 +22,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
   const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const teamData = selectedTeam ? TEAM_DATA[selectedTeam.t] : null;
   const heroTeamCode = selectedTeam ? (()=>{const r=TEAM_ISO[selectedTeam.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})() : null;
+  const teamCode = selectedTeam ? (TEAM_ISO[selectedTeam?.t]?.toUpperCase()||"MA") : null;
+  const heroImg = teamCode ? (PLAYERS_IMG[teamCode]||"/players-ma.png") : "/players-default.png";
 
   const[weatherCity,setWeatherCity]=useState("Casablanca");
   const[rt,sR]=useState(null);
@@ -153,7 +155,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
         {/* Players image — desktop only */}
         {isDesk&&(
           <img
-            src={PLAYERS_IMG[TEAM_ISO[selectedTeam?.t]?.toUpperCase()]||"/players-ma.png"}
+            src={heroImg}
             alt="players"
             style={{
               position:"absolute",right:0,bottom:0,

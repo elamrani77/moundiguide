@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { TRANSLATIONS, BR, TEAM_DATA, TEAM_ACCENT, F } from "../constants.js";
+import { TRANSLATIONS, BR, TEAM_DATA, TEAM_ACCENT, TEAM_ISO, F } from "../constants.js";
 import MoundiLogo from "./MoundiLogo.jsx";
 
 export default function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam}){
@@ -52,8 +52,12 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
                 style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
                   padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
                   fontFamily:F,fontSize:13,fontWeight:600,color:BR.red,transition:"all .2s"}}>
-                <span>{selectedTeam?selectedTeam.f:"🌍"}</span>
-                <span>{selectedTeam?selectedTeam.t:"Team"}</span>
+                {selectedTeam
+                  ?<img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
+                    alt={selectedTeam.t} style={{width:24,height:18,borderRadius:2,objectFit:"cover"}}
+                    onError={e=>{e.target.style.display="none";}}/>
+                  :<span style={{fontSize:18}}>🌍</span>}
+                <span>{selectedTeam?.t||"Team"}</span>
               </button>
               <button onClick={e=>{e.stopPropagation();setShowLang(p=>!p);}}
                 style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
@@ -67,8 +71,12 @@ export default function Navbar({page, setPage, scrolled, C, lang, curLang, showL
         ):(
           /* Mobile: hamburger */
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <button onClick={onPickTeam} style={{background:"none",border:"none",cursor:"pointer",fontSize:20,lineHeight:1}} title="Choose team">
-              {selectedTeam?selectedTeam.f:"⚽"}
+            <button onClick={onPickTeam} style={{background:"none",border:"none",cursor:"pointer",lineHeight:1,display:"flex",alignItems:"center"}} title="Choose team">
+              {selectedTeam
+                ?<img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
+                  alt={selectedTeam.t} style={{width:24,height:18,borderRadius:2,objectFit:"cover"}}
+                  onError={e=>{e.target.style.display="none";}}/>
+                :<span style={{fontSize:20}}>🌍</span>}
             </button>
             <button onClick={()=>setMenuOpen(p=>!p)}
               style={{background:"none",border:`1px solid ${C.bdr}`,
