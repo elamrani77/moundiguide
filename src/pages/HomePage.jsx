@@ -25,6 +25,14 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
   const teamCode = selectedTeam ? (TEAM_ISO[selectedTeam?.t]?.toUpperCase()||"MA") : null;
   const heroImg = teamCode ? (PLAYERS_IMG[teamCode]||"/players-ma.png") : "/players-default.png";
 
+  const [installPrompt,setInstallPrompt]=useState(null);
+  const [showInstall,setShowInstall]=useState(false);
+  useEffect(()=>{
+    const handler=e=>{e.preventDefault();setInstallPrompt(e);setShowInstall(true);};
+    window.addEventListener("beforeinstallprompt",handler);
+    return()=>window.removeEventListener("beforeinstallprompt",handler);
+  },[]);
+
   const[weatherCity,setWeatherCity]=useState("Casablanca");
   const[rt,sR]=useState(null);
   const[amt,sA]=useState("100");const[cur,sCur]=useState("EUR");
@@ -257,6 +265,30 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               🎟️ {T.heroBtn2}
             </button>
           </div>
+
+          {/* PWA install banner */}
+          {showInstall&&(
+            <div style={{display:"flex",alignItems:"center",gap:10,
+              background:"rgba(255,255,255,0.1)",borderRadius:12,
+              padding:"10px 16px",marginTop:12,backdropFilter:"blur(8px)",
+              border:"1px solid rgba(255,255,255,0.2)",maxWidth:340}}>
+              <span style={{fontSize:24}}>📲</span>
+              <div style={{flex:1}}>
+                <div style={{color:"white",fontSize:13,fontWeight:600}}>Installer MoundiGuide</div>
+                <div style={{color:"rgba(255,255,255,0.7)",fontSize:11}}>Accès rapide depuis l'écran d'accueil</div>
+              </div>
+              <button
+                onClick={()=>{installPrompt.prompt();setShowInstall(false);}}
+                style={{background:"#C8102E",color:"white",border:"none",borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer"}}>
+                Installer
+              </button>
+              <button
+                onClick={()=>setShowInstall(false)}
+                style={{background:"transparent",border:"none",color:"rgba(255,255,255,0.6)",cursor:"pointer",fontSize:16}}>
+                ✕
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Scroll indicator */}
