@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import { motion, useInView } from "framer-motion";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
-gsap.registerPlugin(ScrollTrigger);
 
 import {
   TRANSLATIONS, BR, TEAM_DATA, PLAYERS_IMG, TEAM_ISO, PLAYERS,
@@ -12,8 +11,9 @@ import {
 import { useAnalytics } from "../hooks/useAnalytics.js";
 import LEDBoard from "../components/LEDBoard.jsx";
 import Weather from "../components/Weather.jsx";
-import SMap from "../components/SMap.jsx";
 import { useLiveScores } from "../hooks/useLiveScores";
+
+const SMap = lazy(() => import("../components/SMap.jsx"));
 
 // ── md renderer ──
 function md(t){if(!t)return t;return t.split("\n").map((l,i)=>{let c=l.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");if(l.startsWith("- ")||l.startsWith("• "))return<div key={i} style={{paddingLeft:12,marginBottom:2}} dangerouslySetInnerHTML={{__html:"• "+c.slice(2)}}/>;if(l.trim()==="")return<div key={i} style={{height:6}}/>;return<div key={i} dangerouslySetInnerHTML={{__html:c}}/>;});}
@@ -153,6 +153,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
   // GSAP ScrollTrigger for timeline line
   useEffect(()=>{
     if(!timelineLineRef.current||!timelineRef.current)return;
+    gsap.registerPlugin(ScrollTrigger);
     const ctx=gsap.context(()=>{
       gsap.fromTo(timelineLineRef.current,{scaleX:0},{scaleX:1,duration:1.4,ease:"power2.out",transformOrigin:"left center",
         scrollTrigger:{trigger:timelineRef.current,start:"top 80%",toggleActions:"play none none reverse"}});
@@ -450,13 +451,15 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               </select>
               <div style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",pointerEvents:"none",color:"#6B7280",fontSize:12}}>▾</div>
             </div>
-            <SMap C={C}
-              onSelect={s=>{send(`Parle-moi du stade de ${s.city}`);setSelectedStadium(s);setSelectedPoi(null);}}
-              onPoiSelect={poi=>{setSelectedPoi(poi);setSelectedStadium(null);setMapFlyTarget({lat:poi.lat,lng:poi.lng,id:poi.id,ts:Date.now()});}}
-              activeCategory={poiCategory}
-              flyTarget={mapFlyTarget}
-              userCoords={userCoords}
-              height={(selectedStadium||selectedPoi)?300:500}/>
+            <Suspense fallback={<div style={{height:(selectedStadium||selectedPoi)?300:500,background:"#F3F4F6",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",color:"#9CA3AF",fontSize:13}}>🗺️ Chargement de la carte…</div>}>
+              <SMap C={C}
+                onSelect={s=>{send(`Parle-moi du stade de ${s.city}`);setSelectedStadium(s);setSelectedPoi(null);}}
+                onPoiSelect={poi=>{setSelectedPoi(poi);setSelectedStadium(null);setMapFlyTarget({lat:poi.lat,lng:poi.lng,id:poi.id,ts:Date.now()});}}
+                activeCategory={poiCategory}
+                flyTarget={mapFlyTarget}
+                userCoords={userCoords}
+                height={(selectedStadium||selectedPoi)?300:500}/>
+            </Suspense>
             {/* Stadium info panel */}
             {selectedStadium&&(
               <div style={{marginTop:12,borderRadius:14,overflow:"hidden",border:`1px solid ${C.bdr}`,animation:"slideDown .25s ease"}}>

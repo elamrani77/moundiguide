@@ -7,7 +7,6 @@ import {
 import { C as makeTheme } from "./theme.js";
 import Splash from "./components/Splash.jsx";
 import Navbar from "./components/Navbar.jsx";
-import ChatFloat from "./components/ChatFloat.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import { useAnalytics } from "./hooks/useAnalytics.js";
 
@@ -15,6 +14,7 @@ const TicketPage   = lazy(() => import("./pages/TicketPage.jsx"));
 const SchedulePage = lazy(() => import("./pages/SchedulePage.jsx"));
 const TeamProfile  = lazy(() => import("./components/TeamProfile.jsx"));
 const Footer       = lazy(() => import("./components/Footer.jsx"));
+const ChatFloat    = lazy(() => import("./components/ChatFloat.jsx"));
 
 export default function MoundiGuide(){
   const { track } = useAnalytics();
@@ -228,10 +228,12 @@ export default function MoundiGuide(){
       </Suspense>
 
       {/* Floating AI Chat */}
-      <ChatFloat C={C} lang={lang} msgs={msgs} input={input} setInput={setInput}
-        loading={loading} send={send} listening={listening} toggleVoice={toggleVoice}
-        chatOpen={chatOpen} setChatOpen={setChatOpen} isRTL={isRTL} ac={ac} F={F}
-        endRef={endRef} inpRef={inpRef} isDesk={isDesk} selectedTeam={selectedTeam}/>
+      <Suspense fallback={null}>
+        <ChatFloat C={C} lang={lang} msgs={msgs} input={input} setInput={setInput}
+          loading={loading} send={send} listening={listening} toggleVoice={toggleVoice}
+          chatOpen={chatOpen} setChatOpen={setChatOpen} isRTL={isRTL} ac={ac} F={F}
+          endRef={endRef} inpRef={inpRef} isDesk={isDesk} selectedTeam={selectedTeam}/>
+      </Suspense>
     </div>
     </>
   );
