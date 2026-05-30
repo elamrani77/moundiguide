@@ -74,6 +74,19 @@
       body { overflow: auto !important; overflow-x: hidden !important; }
       html { overflow: auto !important; }
       #root { overflow: visible !important; }
+
+      /* Custom scrollbar — WebKit (Chrome, Safari, Edge) */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #121414; }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #C41E3A, #F5A623);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #E8223F, #F7B731);
+      }
+      /* Firefox */
+      * { scrollbar-width: thin; scrollbar-color: #C41E3A #121414; }
     </style>
   </head>
   <body>

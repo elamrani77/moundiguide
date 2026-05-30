@@ -32,13 +32,25 @@ export default function MoundiGuide(){
   const[selectedTeam,setSelectedTeam]=useState(()=>{try{const s=localStorage.getItem("userTeam");if(!s||s==="neutral")return null;const saved=JSON.parse(s);return{t:saved.t,f:TEAM_DATA[saved.t]?.flag||saved.f};}catch{return null;}});
   const[showTeamPicker,setShowTeamPicker]=useState(false);
   const[showTeamProfile,setShowTeamProfile]=useState(false);
+  const[scrollProgress,setScrollProgress]=useState(0);
+  const[showBackTop,setShowBackTop]=useState(false);
   const[hoveredTeam,setHoveredTeam]=useState(null);
   const hasShownPicker=useRef(false);
   const endRef=useRef(null);const inpRef=useRef(null);const recRef=useRef(null);
 
   useEffect(()=>{const h=()=>setIsDesk(window.innerWidth>=768);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
   useEffect(()=>{setScrolled(false);window.scrollTo(0,0);},[page]);
-  useEffect(()=>{const h=()=>setScrolled(window.scrollY>60);window.addEventListener("scroll",h,{passive:true});return()=>window.removeEventListener("scroll",h);},[]);
+  useEffect(()=>{
+    const h=()=>{
+      const top=window.scrollY;
+      setScrolled(top>60);
+      setShowBackTop(top>300);
+      const docH=document.documentElement.scrollHeight-window.innerHeight;
+      setScrollProgress(docH>0?(top/docH)*100:0);
+    };
+    window.addEventListener("scroll",h,{passive:true});
+    return()=>window.removeEventListener("scroll",h);
+  },[]);
   // Persist lang, selectedTeam
   useEffect(()=>{localStorage.setItem("lang",lang);},[lang]);
   useEffect(()=>{if(selectedTeam)localStorage.setItem("userTeam",JSON.stringify(selectedTeam));else localStorage.setItem("userTeam","neutral");},[selectedTeam]);
@@ -83,11 +95,30 @@ export default function MoundiGuide(){
 
   const curLang=LANGUAGES.find(l=>l.code===lang);
   const bgStyle={background:"#F4F5F7"};
+  const scrollToTop=()=>window.scrollTo({top:0,behavior:"smooth"});
 
   return(
     <>
     {splash&&<Splash onDone={()=>setSplash(false)}/>}
     <div style={{minHeight:"100vh",width:"100%",...bgStyle,fontFamily:F,overflowX:"hidden",overflowY:"auto"}}>
+
+      {/* Scroll progress bar */}
+      <div style={{position:"fixed",top:0,left:0,width:`${scrollProgress}%`,height:"3px",
+        background:"linear-gradient(90deg,#C41E3A,#F5A623)",zIndex:9999,
+        transition:"width 0.1s ease",pointerEvents:"none"}}/>
+
+      {/* Back to top button */}
+      {showBackTop&&(
+        <button onClick={scrollToTop} aria-label="Retour en haut"
+          style={{position:"fixed",bottom:"90px",right:"20px",width:"44px",height:"44px",
+            borderRadius:"50%",background:"rgba(196,30,58,0.9)",backdropFilter:"blur(8px)",
+            border:"1px solid rgba(255,255,255,0.2)",color:"#fff",fontSize:"20px",cursor:"pointer",
+            display:"flex",alignItems:"center",justifyContent:"center",zIndex:999,
+            boxShadow:"0 4px 12px rgba(0,0,0,0.3)",transition:"opacity 0.3s ease"}}>
+          ↑
+        </button>
+      )}
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;600&display=swap');
         *{font-family:'Inter',system-ui,sans-serif}
