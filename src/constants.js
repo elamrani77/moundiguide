@@ -146,6 +146,17 @@ export const PLAYERS_IMG={
   AR:"/players-ar.png",
   FR:"/players-fr.png",
   EN:"/players-en.webp",
+  DE:"/players-de.png",
+  IT:"/players-it.png",
+  NL:"/players-nl.png",
+  BE:"/players-be.png",
+  HR:"/players-hr.png",
+  US:"/players-us.png",
+  MX:"/players-mx.png",
+  JP:"/players-jp.png",
+  SN:"/players-sn.png",
+  
+
 };
 export const TEAM_ISO={
   "Morocco":"ma","Spain":"es","Portugal":"pt","France":"fr","Argentina":"ar",
