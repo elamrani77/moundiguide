@@ -82,3 +82,6 @@ Never change keys inside the TRANSLATIONS object. Add new keys only when explici
 ## Deploy
 - git push to main → Vercel auto-deploys
 - Environment vars set in Vercel dashboard (never in frontend code)
+
+## Skills
+- .claude/skills/ui-ux-pro-max/SKILL.md
