@@ -98,7 +98,7 @@ function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,userCoords,height
       {/* Toggle button */}
       <button
         onClick={()=>setDragEnabled(p=>!p)}
-        style={{position:"absolute",bottom:12,left:12,zIndex:1001,
+        style={{position:"absolute",bottom:12,right:12,zIndex:1001,
           background:"rgba(255,255,255,0.92)",border:"1px solid #D1D5DB",
           borderRadius:8,padding:"5px 10px",fontSize:11,fontWeight:600,
           cursor:"pointer",color:"#374151",boxShadow:"0 2px 8px rgba(0,0,0,0.15)",
