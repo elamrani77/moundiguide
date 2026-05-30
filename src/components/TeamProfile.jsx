@@ -14,7 +14,7 @@ export default function TeamProfile({selectedTeam, showTeamProfile, setShowTeamP
   const isoRaw = TEAM_ISO[selectedTeam.t] || "ma";
   const teamCode = isoRaw.startsWith("gb-") ? isoRaw.slice(3,5).toUpperCase() : isoRaw.slice(0,2).toUpperCase();
   const players = PLAYERS[teamCode];
-  const heroImg = PLAYERS_IMG[teamCode];
+  const heroImg = PLAYERS_IMG[teamCode] || "/players-default.png";
   const primaryColor = teamData?.colors[0] || BR.red;
   const secondColor = teamData?.colors[1] || "#1a1a1a";
   const flagSrc = `https://flagcdn.com/48x36/${isoRaw.toLowerCase()}.png`;
@@ -81,14 +81,13 @@ export default function TeamProfile({selectedTeam, showTeamProfile, setShowTeamP
         </div>
 
         {/* ── PLAYERS IMAGE ── */}
-        {heroImg&&(
-          <div style={{padding:"16px 16px 0",flexShrink:0}}>
-            <img src={heroImg} alt={selectedTeam.t}
-              style={{width:"100%",height:200,objectFit:"cover",objectPosition:"center 10%",
-                borderRadius:12,display:"block"}}
-              onError={e=>{e.target.style.display="none";}}/>
-          </div>
-        )}
+        <div style={{padding:"16px 16px 0",flexShrink:0}}>
+          <img src={heroImg} alt={selectedTeam.t}
+            width="400" height="200"
+            style={{width:"100%",height:200,objectFit:"cover",objectPosition:"center 10%",
+              borderRadius:12,display:"block"}}
+            onError={e=>{e.target.onerror=null;e.target.src="/players-default.png";}}/>
+        </div>
 
         {/* ── STAR PLAYERS ── */}
         {players&&(

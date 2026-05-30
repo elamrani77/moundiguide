@@ -167,6 +167,7 @@ export const PLAYERS_IMG={
   UY:"/players-uy.png",
   CO:"/players-co.png",
   IT:"/players-it.png",
+  default:"/players-default.png",
 };
 export const TEAM_ISO={
   "Morocco":"ma","Spain":"es","Portugal":"pt","France":"fr","Argentina":"ar",
