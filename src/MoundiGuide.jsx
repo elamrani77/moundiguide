@@ -32,7 +32,6 @@ export default function MoundiGuide(){
   const[selectedTeam,setSelectedTeam]=useState(()=>{try{const s=localStorage.getItem("userTeam");if(!s||s==="neutral")return null;const saved=JSON.parse(s);return{t:saved.t,f:TEAM_DATA[saved.t]?.flag||saved.f};}catch{return null;}});
   const[showTeamPicker,setShowTeamPicker]=useState(false);
   const[showTeamProfile,setShowTeamProfile]=useState(false);
-  const[scrollProgress,setScrollProgress]=useState(0);
   const[showBackTop,setShowBackTop]=useState(false);
   const[hoveredTeam,setHoveredTeam]=useState(null);
   const hasShownPicker=useRef(false);
@@ -45,8 +44,6 @@ export default function MoundiGuide(){
       const top=window.scrollY;
       setScrolled(top>60);
       setShowBackTop(top>300);
-      const docH=document.documentElement.scrollHeight-window.innerHeight;
-      setScrollProgress(docH>0?(top/docH)*100:0);
     };
     window.addEventListener("scroll",h,{passive:true});
     return()=>window.removeEventListener("scroll",h);
@@ -101,11 +98,6 @@ export default function MoundiGuide(){
     <>
     {splash&&<Splash onDone={()=>setSplash(false)}/>}
     <div style={{minHeight:"100vh",width:"100%",...bgStyle,fontFamily:F,overflowX:"hidden",overflowY:"auto"}}>
-
-      {/* Scroll progress bar */}
-      <div style={{position:"fixed",top:0,left:0,width:`${scrollProgress}%`,height:"3px",
-        background:"linear-gradient(90deg,#C41E3A,#F5A623)",zIndex:9999,
-        transition:"width 0.1s ease",pointerEvents:"none"}}/>
 
       {/* Back to top button */}
       {showBackTop&&(
