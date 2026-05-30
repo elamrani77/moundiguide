@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { BR, STADIUMS, POIS, POI_CATS } from "../constants.js";
 import { useAnalytics } from "../hooks/useAnalytics.js";
 
@@ -87,9 +87,24 @@ function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,userCoords,height
     userDotRef.current=window.L.marker([userCoords.lat,userCoords.lng],{icon:ic}).addTo(mR.current);
     userDotRef.current.bindPopup("📍 Vous êtes ici");
   },[userCoords]);
+  const [dragEnabled,setDragEnabled]=useState(false);
   return(
-    <div style={{overflow:"hidden",borderRadius:20,border:`1px solid ${C.bdr}`,boxShadow:"0 2px 16px rgba(0,0,0,0.10)"}}>
-      <div ref={ref} style={{width:"100%",height:height||300,touchAction:"none"}}/>
+    <div style={{overflow:"hidden",borderRadius:20,border:`1px solid ${C.bdr}`,boxShadow:"0 2px 16px rgba(0,0,0,0.10)",position:"relative"}}>
+      <div ref={ref} style={{width:"100%",height:height||300,touchAction:dragEnabled?"none":"pan-y"}}/>
+      {/* Drag-lock overlay: blocks touch when scroll-safe, removed when drag enabled */}
+      {!dragEnabled&&(
+        <div style={{position:"absolute",inset:0,zIndex:1000,background:"transparent"}}/>
+      )}
+      {/* Toggle button */}
+      <button
+        onClick={()=>setDragEnabled(p=>!p)}
+        style={{position:"absolute",bottom:10,right:10,zIndex:1001,
+          background:"rgba(255,255,255,0.92)",border:"1px solid #D1D5DB",
+          borderRadius:8,padding:"5px 10px",fontSize:11,fontWeight:600,
+          cursor:"pointer",color:"#374151",boxShadow:"0 2px 8px rgba(0,0,0,0.15)",
+          backdropFilter:"blur(4px)",lineHeight:1.4,whiteSpace:"nowrap"}}>
+        {dragEnabled?"✅ Actif — tap pour quitter":"🖐 Déplacer"}
+      </button>
     </div>
   );
 }
