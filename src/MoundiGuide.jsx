@@ -9,12 +9,15 @@ import Splash from "./components/Splash.jsx";
 import Navbar from "./components/Navbar.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import { useAnalytics } from "./hooks/useAnalytics.js";
+import { supabase } from "./supabase.js";
 
 const TicketPage   = lazy(() => import("./pages/TicketPage.jsx"));
 const SchedulePage = lazy(() => import("./pages/SchedulePage.jsx"));
 const TeamProfile  = lazy(() => import("./components/TeamProfile.jsx"));
 const Footer       = lazy(() => import("./components/Footer.jsx"));
 const ChatFloat    = lazy(() => import("./components/ChatFloat.jsx"));
+const LoginPage    = lazy(() => import("./pages/LoginPage.jsx"));
+const ProfilePage  = lazy(() => import("./pages/ProfilePage.jsx"));
 
 export default function MoundiGuide(){
   const { track } = useAnalytics();
@@ -34,9 +37,17 @@ export default function MoundiGuide(){
   const[showTeamProfile,setShowTeamProfile]=useState(false);
   const[showBackTop,setShowBackTop]=useState(false);
   const[hoveredTeam,setHoveredTeam]=useState(null);
+  const[user,setUser]=useState(null);
+  const[authLoading,setAuthLoading]=useState(true);
+  const[skipAuth,setSkipAuth]=useState(false);
   const hasShownPicker=useRef(false);
   const endRef=useRef(null);const inpRef=useRef(null);const recRef=useRef(null);
 
+  useEffect(()=>{
+    supabase.auth.getSession().then(({data:{session}})=>{setUser(session?.user??null);setAuthLoading(false);});
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{setUser(session?.user??null);});
+    return()=>subscription.unsubscribe();
+  },[]);
   useEffect(()=>{const h=()=>setIsDesk(window.innerWidth>=768);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
   useEffect(()=>{setScrolled(false);window.scrollTo(0,0);},[page]);
   useEffect(()=>{
@@ -93,6 +104,21 @@ export default function MoundiGuide(){
   const curLang=LANGUAGES.find(l=>l.code===lang);
   const bgStyle={background:"#F4F5F7"};
   const scrollToTop=()=>window.scrollTo({top:0,behavior:"smooth"});
+
+  // Auth gating
+  if(authLoading&&!skipAuth) return <Splash onDone={()=>{}}/>;
+  if(!user&&!skipAuth) return(
+    <Suspense fallback={<Splash onDone={()=>{}}/>}>
+      <LoginPage lang={lang} onSkip={()=>{setSkipAuth(true);setPage("home");}}/>
+    </Suspense>
+  );
+  if(page==="profile") return(
+    <Suspense fallback={<Splash onDone={()=>{}}/>}>
+      <ProfilePage user={user} lang={lang} isDesk={isDesk}
+        onSave={()=>setPage("home")}
+        onLogout={()=>{setUser(null);setSkipAuth(false);setPage("home");}}/>
+    </Suspense>
+  );
 
   return(
     <>
@@ -159,6 +185,17 @@ export default function MoundiGuide(){
         lang={lang} curLang={curLang} showLang={showLang} setShowLang={setShowLang}
         isDesk={isDesk} selectedTeam={selectedTeam} onPickTeam={()=>setShowTeamPicker(true)}
         setShowTeamProfile={setShowTeamProfile}/>
+      {/* Profile avatar button */}
+      {user&&(
+        <button onClick={()=>setPage("profile")} title={user.email}
+          style={{position:"fixed",top:isDesk?16:10,right:isDesk?180:120,zIndex:1001,
+            width:32,height:32,borderRadius:"50%",border:"none",cursor:"pointer",
+            background:"#C41E3A",color:"#FFF",fontWeight:700,fontSize:13,fontFamily:F,
+            display:"flex",alignItems:"center",justifyContent:"center",
+            boxShadow:"0 2px 8px rgba(196,30,58,0.5)"}}>
+          {user.email?.[0]?.toUpperCase()||"U"}
+        </button>
+      )}
 
       {/* Language overlay */}
       {showLang&&(
