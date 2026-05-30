@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
-import { motion } from "framer-motion";
 
 import {
   LANGUAGES, TRANSLATIONS, BR, TEAM_DATA, TEAM_ACCENT, TEAM_ISO, WELCOME, F
 } from "./constants.js";
 import { C as makeTheme } from "./theme.js";
-import Splash from "./components/Splash.jsx";
 import Navbar from "./components/Navbar.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import { useAnalytics } from "./hooks/useAnalytics.js";
@@ -18,10 +16,10 @@ const Footer       = lazy(() => import("./components/Footer.jsx"));
 const ChatFloat    = lazy(() => import("./components/ChatFloat.jsx"));
 const LoginPage    = lazy(() => import("./pages/LoginPage.jsx"));
 const ProfilePage  = lazy(() => import("./pages/ProfilePage.jsx"));
+const SetupPage    = lazy(() => import("./pages/SetupPage.jsx"));
 
 export default function MoundiGuide(){
   const { track } = useAnalytics();
-  const[splash,setSplash]=useState(true);
   const[page,setPage]=useState("home");
   const[lang,setLang]=useState(()=>localStorage.getItem("lang")||"fr");
   const[msgs,setMsgs]=useState([]);
@@ -34,19 +32,45 @@ export default function MoundiGuide(){
   const[scrolled,setScrolled]=useState(false);
   const[selectedTeam,setSelectedTeam]=useState(()=>{try{const s=localStorage.getItem("userTeam");if(!s||s==="neutral")return null;const saved=JSON.parse(s);return{t:saved.t,f:TEAM_DATA[saved.t]?.flag||saved.f};}catch{return null;}});
   const[showTeamPicker,setShowTeamPicker]=useState(false);
-  const[showTeamProfile,setShowTeamProfile]=useState(false);
+  const[showTeamSheet,setShowTeamSheet]=useState(false);
   const[showBackTop,setShowBackTop]=useState(false);
   const[hoveredTeam,setHoveredTeam]=useState(null);
   const[user,setUser]=useState(null);
+  const[userAvatar,setUserAvatar]=useState(()=>localStorage.getItem("moundiguide_avatar")||null);
   const[authLoading,setAuthLoading]=useState(true);
   const[skipAuth,setSkipAuth]=useState(false);
   const hasShownPicker=useRef(false);
   const endRef=useRef(null);const inpRef=useRef(null);const recRef=useRef(null);
 
   useEffect(()=>{
-    supabase.auth.getSession().then(({data:{session}})=>{setUser(session?.user??null);setAuthLoading(false);});
-    const {data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{setUser(session?.user??null);});
-    return()=>subscription.unsubscribe();
+    const timeout=setTimeout(()=>setAuthLoading(false),3000);
+    supabase.auth.getSession().then(({data:{session}})=>{
+      clearTimeout(timeout);
+      const u=session?.user??null;
+      setUser(u);
+      setAuthLoading(false);
+      if(u){
+        supabase.from("profiles").select("avatar_url,favorite_team").eq("id",u.id).single()
+          .then(({data})=>{
+            if(data?.avatar_url) setUserAvatar(data.avatar_url);
+            if(data?.favorite_team&&!localStorage.getItem("moundiguide_setup_done"))
+              localStorage.setItem("moundiguide_setup_done","true");
+          });
+      }
+    }).catch(()=>{clearTimeout(timeout);setAuthLoading(false);});
+    const {data:{subscription}}=supabase.auth.onAuthStateChange(async(_,session)=>{
+      const u=session?.user??null;
+      setUser(u);
+      if(u){
+        const {data}=await supabase.from("profiles").select("avatar_url,favorite_team").eq("id",u.id).single();
+        if(data?.avatar_url){setUserAvatar(data.avatar_url);localStorage.setItem("moundiguide_avatar",data.avatar_url);}
+        if(data?.favorite_team&&!localStorage.getItem("moundiguide_setup_done"))localStorage.setItem("moundiguide_setup_done","true");
+      } else {
+        setUserAvatar(null);
+        localStorage.removeItem("moundiguide_avatar");
+      }
+    });
+    return()=>{subscription.unsubscribe();clearTimeout(timeout);};
   },[]);
   useEffect(()=>{const h=()=>setIsDesk(window.innerWidth>=768);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
   useEffect(()=>{setScrolled(false);window.scrollTo(0,0);},[page]);
@@ -62,16 +86,16 @@ export default function MoundiGuide(){
   // Persist lang, selectedTeam
   useEffect(()=>{localStorage.setItem("lang",lang);},[lang]);
   useEffect(()=>{if(selectedTeam)localStorage.setItem("userTeam",JSON.stringify(selectedTeam));else localStorage.setItem("userTeam","neutral");},[selectedTeam]);
-  // Show picker after splash only if user has never chosen a team
+  // Show picker on mount if user has never chosen a team
   useEffect(()=>{
-    if(!splash&&!hasShownPicker.current){
+    if(!hasShownPicker.current){
       hasShownPicker.current=true;
       if(!localStorage.getItem("userTeam")){
         const t=setTimeout(()=>setShowTeamPicker(true),600);
         return()=>clearTimeout(t);
       }
     }
-  },[splash]);
+  },[]);
 
   const _t=makeTheme();
   const C={bg:_t.bg,hdr:_t.nav,card:_t.card,bdr:_t.border,txt:_t.bod,str:_t.str,mut:_t.mut,fld:"#F9FAFB",bot:_t.card,bbdr:_t.border,usr:`linear-gradient(135deg,${_t.red},#B5102A)`,sh:_t.shadow,sc:_t.border};
@@ -105,24 +129,33 @@ export default function MoundiGuide(){
   const bgStyle={background:"#F4F5F7"};
   const scrollToTop=()=>window.scrollTo({top:0,behavior:"smooth"});
 
-  // Auth gating
-  if(authLoading&&!skipAuth) return <Splash onDone={()=>{}}/>;
+  // Brief loading while auth resolves (max 3s via timeout)
+  if(authLoading) return <div style={{background:"#121414",minHeight:"100vh"}}/>;
   if(!user&&!skipAuth) return(
-    <Suspense fallback={<Splash onDone={()=>{}}/>}>
+    <Suspense fallback={null}>
       <LoginPage lang={lang} onSkip={()=>{setSkipAuth(true);setPage("home");}}/>
     </Suspense>
   );
+  const setupDone=localStorage.getItem("moundiguide_setup_done");
+  if(user&&!setupDone) return(
+    <Suspense fallback={null}>
+      <SetupPage user={user} lang={lang} setLang={setLang} setUserTeam={setSelectedTeam}
+        onComplete={()=>{localStorage.setItem("moundiguide_setup_done","true");setPage("home");}}/>
+    </Suspense>
+  );
   if(page==="profile") return(
-    <Suspense fallback={<Splash onDone={()=>{}}/>}>
-      <ProfilePage user={user} lang={lang} isDesk={isDesk}
+    <Suspense fallback={null}>
+      <ProfilePage user={user} lang={lang} setLang={setLang} isDesk={isDesk}
         onSave={()=>setPage("home")}
-        onLogout={()=>{setUser(null);setSkipAuth(false);setPage("home");}}/>
+        onBack={()=>setPage("home")}
+        onLogout={()=>{setUser(null);setSkipAuth(false);setPage("home");}}
+        setUserTeam={setSelectedTeam}
+        setUserAvatar={setUserAvatar}/>
     </Suspense>
   );
 
   return(
     <>
-    {splash&&<Splash onDone={()=>setSplash(false)}/>}
     <div style={{minHeight:"100vh",width:"100%",...bgStyle,fontFamily:F,overflowX:"hidden",overflowY:"auto"}}>
 
       {/* Back to top button */}
@@ -184,18 +217,7 @@ export default function MoundiGuide(){
       <Navbar page={page} setPage={setPage} scrolled={scrolled} C={C}
         lang={lang} curLang={curLang} showLang={showLang} setShowLang={setShowLang}
         isDesk={isDesk} selectedTeam={selectedTeam} onPickTeam={()=>setShowTeamPicker(true)}
-        setShowTeamProfile={setShowTeamProfile}/>
-      {/* Profile avatar button */}
-      {user&&(
-        <button onClick={()=>setPage("profile")} title={user.email}
-          style={{position:"fixed",top:isDesk?16:10,right:isDesk?180:120,zIndex:1001,
-            width:32,height:32,borderRadius:"50%",border:"none",cursor:"pointer",
-            background:"#C41E3A",color:"#FFF",fontWeight:700,fontSize:13,fontFamily:F,
-            display:"flex",alignItems:"center",justifyContent:"center",
-            boxShadow:"0 2px 8px rgba(196,30,58,0.5)"}}>
-          {user.email?.[0]?.toUpperCase()||"U"}
-        </button>
-      )}
+        setShowTeamSheet={setShowTeamSheet} user={user} avatarUrl={userAvatar}/>
 
       {/* Language overlay */}
       {showLang&&(
@@ -276,18 +298,18 @@ export default function MoundiGuide(){
 
       {/* Page content */}
       <div style={{overflowX:"hidden",direction:lang==="ar"?"rtl":"ltr"}}>
-        {!splash&&page==="home"    &&<HomePage    C={C} ac={ac} F={F} lang={lang} send={send} setPage={setPage} isDesk={isDesk} selectedTeam={selectedTeam}/>}
+        {page==="home"    &&<HomePage    C={C} ac={ac} F={F} lang={lang} send={send} setPage={setPage} isDesk={isDesk} selectedTeam={selectedTeam}/>}
         <Suspense fallback={<div style={{minHeight:400}}/>}>
-          {!splash&&page==="ticket"  &&<TicketPage  C={C} F={F} isDesk={isDesk} lang={lang}/>}
-          {!splash&&page==="schedule"&&<SchedulePage C={C} ac={ac} F={F} send={send} isDesk={isDesk} lang={lang} selectedTeam={selectedTeam}/>}
-          {!splash&&<Footer C={C} F={F} setPage={setPage} lang={lang}/>}
+          {page==="ticket"  &&<TicketPage  C={C} F={F} isDesk={isDesk} lang={lang}/>}
+          {page==="schedule"&&<SchedulePage C={C} ac={ac} F={F} send={send} isDesk={isDesk} lang={lang} selectedTeam={selectedTeam}/>}
+          {<Footer C={C} F={F} setPage={setPage} lang={lang}/>}
         </Suspense>
       </div>
 
       {/* Team Profile drawer */}
       <Suspense fallback={null}>
-        <TeamProfile selectedTeam={selectedTeam} showTeamProfile={showTeamProfile}
-          setShowTeamProfile={setShowTeamProfile} isDesk={isDesk} setPage={setPage}/>
+        <TeamProfile selectedTeam={selectedTeam} showTeamSheet={showTeamSheet}
+          setShowTeamSheet={setShowTeamSheet} isDesk={isDesk} setPage={setPage} lang={lang}/>
       </Suspense>
 
       {/* Floating AI Chat */}

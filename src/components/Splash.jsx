@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { BR } from "../constants.js";
 
 export default function Splash({onDone}){
-  useEffect(()=>{const t=setTimeout(onDone,2600);return()=>clearTimeout(t);},[onDone]);
+  useEffect(()=>{const t=setTimeout(onDone,2600);return()=>clearTimeout(t);},[]);
   return(
     <div style={{position:"fixed",inset:0,zIndex:999999,background:"#121414",
       display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
