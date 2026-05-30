@@ -17,7 +17,7 @@ function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,userCoords,height
       if(m.tap)m.tap.enable();
       const mapContainer=m.getContainer();
       mapContainer.style.touchAction='none';
-      window.L.control.zoom({position:"bottomright"}).addTo(m);
+      window.L.control.zoom({position:"bottomleft"}).addTo(m);
       window.L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{attribution:"©OSM ©CartoDB",maxZoom:19,subdomains:"abcd"}).addTo(m);
       // Stadium markers — pin style
       const stIc=window.L.divIcon({className:"",html:`<div style="position:relative;width:34px;height:42px;cursor:pointer;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.45))"><div style="width:34px;height:34px;border-radius:50% 50% 50% 0;background:linear-gradient(135deg,${BR.red},${BR.green});transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.9)"><span style="transform:rotate(45deg);font-size:15px">⚽</span></div></div>`,iconSize:[34,42],iconAnchor:[17,42]});
@@ -89,7 +89,7 @@ function SMap({C,onSelect,onPoiSelect,activeCategory,flyTarget,userCoords,height
   },[userCoords]);
   const [dragEnabled,setDragEnabled]=useState(false);
   return(
-    <div style={{overflow:"hidden",borderRadius:20,border:`1px solid ${C.bdr}`,boxShadow:"0 2px 16px rgba(0,0,0,0.10)",position:"relative"}}>
+    <div style={{overflow:"hidden",borderRadius:20,border:`1px solid ${C.bdr}`,boxShadow:"0 2px 16px rgba(0,0,0,0.10)",position:"relative",zIndex:1,isolation:"isolate"}}>
       <div ref={ref} style={{width:"100%",height:height||300,touchAction:dragEnabled?"none":"pan-y"}}/>
       {/* Drag-lock overlay: blocks touch when scroll-safe, removed when drag enabled */}
       {!dragEnabled&&(

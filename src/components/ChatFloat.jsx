@@ -26,7 +26,7 @@ function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoic
       style={{position:"fixed",bottom:28,right:28,width:58,height:58,borderRadius:"50%",
         background:"linear-gradient(135deg,#C8102E,#00913F)",border:"none",cursor:"pointer",
         display:"flex",alignItems:"center",justifyContent:"center",
-        boxShadow:"0 8px 28px rgba(200,16,46,0.45)",zIndex:900,animation:"chatPulse 2s ease-in-out infinite"}}>
+        boxShadow:"0 8px 28px rgba(200,16,46,0.45)",zIndex:1001,animation:"chatPulse 2s ease-in-out infinite"}}>
       <Sparkles size={22} color="white"/>
     </button>
   );

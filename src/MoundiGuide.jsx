@@ -119,6 +119,9 @@ export default function MoundiGuide(){
         ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:${C.sc};border-radius:4px}
         .pills-row::-webkit-scrollbar{display:none}
         .cities-scroll-inner{direction:ltr!important}
+        .leaflet-control-container{z-index:400!important}
+        .leaflet-top,.leaflet-bottom{z-index:400!important}
+        .leaflet-control{z-index:400!important}
         input:focus{border-color:${ac}88!important}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
         input[type=number]{-moz-appearance:textfield}
