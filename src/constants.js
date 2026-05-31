@@ -369,6 +369,7 @@ export const TRANSLATIONS = {
     personalInfo:"Informations personnelles", firstName:"Prénom", lastName:"Nom de famille", email:"Email", saveChanges:"Enregistrer les modifications", changeTeam:"Changer d'équipe", language:"Langue", backHome:"Accueil", photoUpdated:"Photo mise à jour ✓", myProfile:"Mon Profil", contactSupport:"Contactez le support", confirmDelete:"Êtes-vous sûr ?", confirm:"Confirmer", cancel:"Annuler", saveAvatar:"Enregistrer la photo",
     chooseFavoriteTeam:"Choisissez votre équipe favorite", tellUsAboutYou:"Parlez-nous de vous", required:"Ce champ est obligatoire",
     searchTeam:"Rechercher une équipe...", setupComplete:"Vous êtes prêt ! Bienvenue dans l'aventure Mondial 2030 🎉",
+    completeProfile:"Complétez votre profil", completeProfileSub:"Personnalisez votre expérience MoundiGuide", completeLater:"Plus tard",
     letsGo:"→ Commencer", chooseTeam:"Choisissez une équipe", previous:"← Précédent",
   },
   en:{
@@ -407,6 +408,7 @@ export const TRANSLATIONS = {
     personalInfo:"Personal info", firstName:"First name", lastName:"Last name", email:"Email", saveChanges:"Save changes", changeTeam:"Change team", language:"Language", backHome:"Home", photoUpdated:"Photo updated ✓", myProfile:"My Profile", contactSupport:"Contact support", confirmDelete:"Are you sure?", confirm:"Confirm", cancel:"Cancel", saveAvatar:"Save photo",
     chooseFavoriteTeam:"Choose your favorite team", tellUsAboutYou:"Tell us about you", required:"This field is required",
     searchTeam:"Search a team...", setupComplete:"You're all set! Welcome to the World Cup 2030 adventure 🎉",
+    completeProfile:"Complete your profile", completeProfileSub:"Personalize your MoundiGuide experience", completeLater:"Later",
     letsGo:"→ Let's go", chooseTeam:"Choose a team", previous:"← Back",
   },
   ar:{
@@ -445,6 +447,7 @@ export const TRANSLATIONS = {
     personalInfo:"المعلومات الشخصية", firstName:"الاسم الأول", lastName:"اسم العائلة", email:"البريد الإلكتروني", saveChanges:"حفظ التغييرات", changeTeam:"تغيير الفريق", language:"اللغة", backHome:"الرئيسية", photoUpdated:"تم تحديث الصورة ✓", myProfile:"ملفي الشخصي", contactSupport:"تواصل مع الدعم", confirmDelete:"هل أنت متأكد؟", confirm:"تأكيد", cancel:"إلغاء", saveAvatar:"حفظ الصورة",
     chooseFavoriteTeam:"اختر فريقك المفضل", tellUsAboutYou:"أخبرنا عنك", required:"هذا الحقل مطلوب",
     searchTeam:"ابحث عن فريق...", setupComplete:"أنت جاهز! مرحباً بك في مغامرة كأس العالم 2030 🎉",
+    completeProfile:"أكمل ملفك الشخصي", completeProfileSub:"خصص تجربتك في MoundiGuide", completeLater:"لاحقاً",
     letsGo:"ابدأ ←", chooseTeam:"اختر فريقاً", previous:"السابق →",
   },
   es:{
@@ -483,6 +486,7 @@ export const TRANSLATIONS = {
     personalInfo:"Información personal", firstName:"Nombre", lastName:"Apellido", email:"Correo", saveChanges:"Guardar cambios", changeTeam:"Cambiar equipo", language:"Idioma", backHome:"Inicio", photoUpdated:"Foto actualizada ✓", myProfile:"Mi Perfil", contactSupport:"Contactar soporte", confirmDelete:"¿Estás seguro?", confirm:"Confirmar", cancel:"Cancelar", saveAvatar:"Guardar foto",
     chooseFavoriteTeam:"Elige tu equipo favorito", tellUsAboutYou:"Cuéntanos sobre ti", required:"Este campo es obligatorio",
     searchTeam:"Buscar equipo...", setupComplete:"¡Listo! Bienvenido a la aventura del Mundial 2030 🎉",
+    completeProfile:"Completa tu perfil", completeProfileSub:"Personaliza tu experiencia", completeLater:"Más tarde",
     letsGo:"→ Empezar", chooseTeam:"Elige un equipo", previous:"← Anterior",
   },
   pt:{
@@ -521,6 +525,7 @@ export const TRANSLATIONS = {
     personalInfo:"Informações pessoais", firstName:"Nome", lastName:"Apelido", email:"Email", saveChanges:"Guardar alterações", changeTeam:"Mudar equipa", language:"Idioma", backHome:"Início", photoUpdated:"Foto atualizada ✓", myProfile:"O Meu Perfil", contactSupport:"Contactar suporte", confirmDelete:"Tem a certeza?", confirm:"Confirmar", cancel:"Cancelar", saveAvatar:"Guardar foto",
     chooseFavoriteTeam:"Escolhe a tua equipa favorita", tellUsAboutYou:"Fala-nos de ti", required:"Este campo é obrigatório",
     searchTeam:"Pesquisar equipa...", setupComplete:"Estás pronto! Bem-vindo à aventura do Mundial 2030 🎉",
+    completeProfile:"Completa o teu perfil", completeProfileSub:"Personaliza a tua experiência", completeLater:"Mais tarde",
     letsGo:"→ Começar", chooseTeam:"Escolhe uma equipa", previous:"← Anterior",
   },
   zh:{
@@ -559,6 +564,7 @@ export const TRANSLATIONS = {
     personalInfo:"个人信息", firstName:"名字", lastName:"姓氏", email:"邮箱", saveChanges:"保存更改", changeTeam:"更换球队", language:"语言", backHome:"首页", photoUpdated:"照片已更新 ✓", myProfile:"我的主页", contactSupport:"联系客服", confirmDelete:"确定吗？", confirm:"确认", cancel:"取消", saveAvatar:"保存照片",
     chooseFavoriteTeam:"选择你最爱的球队", tellUsAboutYou:"告诉我们关于你", required:"此字段为必填项",
     searchTeam:"搜索球队...", setupComplete:"准备好了！欢迎来到2030世界杯之旅 🎉",
+    completeProfile:"完善你的资料", completeProfileSub:"个性化你的体验", completeLater:"稍后",
     letsGo:"→ 开始", chooseTeam:"选择球队", previous:"← 返回",
   },
 };

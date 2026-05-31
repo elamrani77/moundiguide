@@ -61,6 +61,30 @@ export default function SetupPage({ user, lang: initialLang, setLang, setUserTea
     !teamSearch.trim() || name.toLowerCase().includes(teamSearch.trim().toLowerCase())
   );
 
+  // Pre-fill existing profile data + smart step jump
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles")
+      .select("first_name,last_name,favorite_team")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        if (data.first_name) setFirstName(data.first_name);
+        if (data.last_name) setLastName(data.last_name);
+        if (data.favorite_team) setSelectedTeam(data.favorite_team);
+        // If everything is already filled, complete immediately
+        if (data.first_name && data.last_name && data.favorite_team) {
+          localStorage.setItem("moundiguide_setup_done", "true");
+          onComplete();
+          return;
+        }
+        // Skip to team step if name is already filled
+        if (data.first_name && data.last_name) setStep(3);
+      })
+      .catch(() => {}); // ignore errors — user proceeds normally
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Auto-navigate after 3 s on confirmation screen
   useEffect(() => {
     if (!showConfirm) return;
@@ -70,6 +94,25 @@ export default function SetupPage({ user, lang: initialLang, setLang, setUserTea
 
   async function complete() {
     setSaving(true);
+    let done = false;
+
+    function finalize() {
+      if (done) return;
+      done = true;
+      if (selectedTeam) {
+        const teamObj = { t: selectedTeam, f: TEAM_DATA[selectedTeam]?.flag || "" };
+        localStorage.setItem("userTeam", JSON.stringify(teamObj));
+        if (setUserTeam) setUserTeam(teamObj);
+      }
+      setLang(selectedLang);
+      localStorage.setItem("lang", selectedLang);
+      setSaving(false);
+      setShowConfirm(true);
+    }
+
+    // 4-second timeout fallback — proceed even if Supabase hangs
+    const saveTimeout = setTimeout(finalize, 4000);
+
     try {
       await supabase.from("profiles").upsert({
         id: user.id,
@@ -77,16 +120,13 @@ export default function SetupPage({ user, lang: initialLang, setLang, setUserTea
         last_name: lastName.trim(),
         favorite_team: selectedTeam || null,
       });
-      if (selectedTeam) {
-        const teamObj = { t: selectedTeam, f: TEAM_DATA[selectedTeam]?.flag || "" };
-        localStorage.setItem("userTeam", JSON.stringify(teamObj));
-        if (setUserTeam) setUserTeam(teamObj);
-      }
-    } catch { /* ignore */ }
-    setSaving(false);
-    setLang(selectedLang);
-    localStorage.setItem("lang", selectedLang);
-    setShowConfirm(true);
+      clearTimeout(saveTimeout);
+    } catch (err) {
+      clearTimeout(saveTimeout);
+      console.error("Setup save error:", err);
+    } finally {
+      finalize();
+    }
   }
 
   const inpStyle = (hasError) => ({

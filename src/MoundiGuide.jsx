@@ -38,7 +38,7 @@ export default function MoundiGuide(){
   const[user,setUser]=useState(null);
   const[userAvatar,setUserAvatar]=useState(()=>localStorage.getItem("moundiguide_avatar")||null);
   const[authLoading,setAuthLoading]=useState(true);
-  const[skipAuth,setSkipAuth]=useState(false);
+  const[showSetupModal,setShowSetupModal]=useState(false);
   const hasShownPicker=useRef(false);
   const endRef=useRef(null);const inpRef=useRef(null);const recRef=useRef(null);
 
@@ -50,21 +50,30 @@ export default function MoundiGuide(){
       setUser(u);
       setAuthLoading(false);
       if(u){
-        supabase.from("profiles").select("avatar_url,favorite_team").eq("id",u.id).single()
+        supabase.from("profiles").select("avatar_url,favorite_team,first_name,last_name").eq("id",u.id).single()
           .then(({data})=>{
             if(data?.avatar_url) setUserAvatar(data.avatar_url);
-            if(data?.favorite_team&&!localStorage.getItem("moundiguide_setup_done"))
+            const isComplete=data?.first_name&&data?.last_name&&data?.favorite_team;
+            if(isComplete){
               localStorage.setItem("moundiguide_setup_done","true");
+            } else if(!localStorage.getItem("moundiguide_setup_done")){
+              setTimeout(()=>setShowSetupModal(true),1000);
+            }
           });
       }
     }).catch(()=>{clearTimeout(timeout);setAuthLoading(false);});
-    const {data:{subscription}}=supabase.auth.onAuthStateChange(async(_,session)=>{
+    const {data:{subscription}}=supabase.auth.onAuthStateChange(async(event,session)=>{
       const u=session?.user??null;
       setUser(u);
       if(u){
-        const {data}=await supabase.from("profiles").select("avatar_url,favorite_team").eq("id",u.id).single();
+        const {data}=await supabase.from("profiles").select("avatar_url,favorite_team,first_name,last_name").eq("id",u.id).single();
         if(data?.avatar_url){setUserAvatar(data.avatar_url);localStorage.setItem("moundiguide_avatar",data.avatar_url);}
-        if(data?.favorite_team&&!localStorage.getItem("moundiguide_setup_done"))localStorage.setItem("moundiguide_setup_done","true");
+        const isComplete=data?.first_name&&data?.last_name&&data?.favorite_team;
+        if(isComplete){
+          localStorage.setItem("moundiguide_setup_done","true");
+        } else if(event==="SIGNED_IN"&&!localStorage.getItem("moundiguide_setup_done")){
+          setTimeout(()=>setShowSetupModal(true),500);
+        }
       } else {
         setUserAvatar(null);
         localStorage.removeItem("moundiguide_avatar");
@@ -131,26 +140,28 @@ export default function MoundiGuide(){
 
   // Brief loading while auth resolves (max 3s via timeout)
   if(authLoading) return <div style={{background:"#121414",minHeight:"100vh"}}/>;
-  if(!user&&!skipAuth) return(
+  // Page routes — login, setup, profile are full-screen page swaps
+  if(page==="login") return(
     <Suspense fallback={null}>
-      <LoginPage lang={lang} onSkip={()=>{setSkipAuth(true);setPage("home");}}/>
+      <LoginPage lang={lang} onSkip={()=>setPage("home")}/>
     </Suspense>
   );
-  const setupDone=localStorage.getItem("moundiguide_setup_done");
-  if(user&&!setupDone) return(
+  if(page==="setupFlow") return(
     <Suspense fallback={null}>
       <SetupPage user={user} lang={lang} setLang={setLang} setUserTeam={setSelectedTeam}
-        onComplete={()=>{localStorage.setItem("moundiguide_setup_done","true");setPage("home");}}/>
+        onComplete={()=>{localStorage.setItem("moundiguide_setup_done","true");setShowSetupModal(false);setPage("home");}}/>
     </Suspense>
   );
   if(page==="profile") return(
     <Suspense fallback={null}>
-      <ProfilePage user={user} lang={lang} setLang={setLang} isDesk={isDesk}
-        onSave={()=>setPage("home")}
-        onBack={()=>setPage("home")}
-        onLogout={()=>{setUser(null);setSkipAuth(false);setPage("home");}}
-        setUserTeam={setSelectedTeam}
-        setUserAvatar={setUserAvatar}/>
+      {user
+        ?<ProfilePage user={user} lang={lang} setLang={setLang} isDesk={isDesk}
+            onSave={()=>setPage("home")}
+            onBack={()=>setPage("home")}
+            onLogout={()=>{setUser(null);setPage("home");}}
+            setUserTeam={setSelectedTeam}
+            setUserAvatar={setUserAvatar}/>
+        :<LoginPage lang={lang} onSkip={()=>setPage("home")}/>}
     </Suspense>
   );
 
@@ -320,6 +331,47 @@ export default function MoundiGuide(){
           endRef={endRef} inpRef={inpRef} isDesk={isDesk} selectedTeam={selectedTeam}/>
       </Suspense>
     </div>
+
+    {/* Complete profile modal */}
+    {showSetupModal&&(
+      <div onClick={()=>setShowSetupModal(false)}
+        style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",zIndex:10000,
+          display:"flex",alignItems:"center",justifyContent:"center",padding:16,
+          backdropFilter:"blur(4px)"}}>
+        <div onClick={e=>e.stopPropagation()}
+          style={{width:"100%",maxWidth:460,background:"#1a1a2e",borderRadius:24,
+            padding:"32px 28px",boxShadow:"0 32px 80px rgba(0,0,0,0.7)",position:"relative",
+            fontFamily:F,animation:"popIn .2s ease"}}>
+          <button onClick={()=>setShowSetupModal(false)}
+            style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,0.1)",
+              border:"none",borderRadius:8,width:32,height:32,cursor:"pointer",
+              color:"rgba(255,255,255,0.7)",fontSize:20,display:"flex",
+              alignItems:"center",justifyContent:"center"}}>
+            ×
+          </button>
+          <div style={{fontSize:40,marginBottom:12}}>⚽</div>
+          <div style={{fontFamily:F,fontSize:22,fontWeight:800,color:"#FFF",marginBottom:8}}>
+            {(TRANSLATIONS[lang]||TRANSLATIONS.fr).completeProfile||"Complétez votre profil"}
+          </div>
+          <div style={{fontFamily:F,fontSize:14,color:"rgba(255,255,255,0.55)",marginBottom:28,lineHeight:1.5}}>
+            {(TRANSLATIONS[lang]||TRANSLATIONS.fr).completeProfileSub||"Personnalisez votre expérience MoundiGuide"}
+          </div>
+          <button onClick={()=>{setShowSetupModal(false);setPage("setupFlow");}}
+            style={{width:"100%",padding:"14px",borderRadius:12,border:"none",
+              background:"linear-gradient(135deg,#C41E3A,#A01028)",
+              color:"#FFF",fontFamily:F,fontSize:15,fontWeight:700,cursor:"pointer",
+              marginBottom:12,boxShadow:"0 4px 16px rgba(196,30,58,0.4)"}}>
+            {(TRANSLATIONS[lang]||TRANSLATIONS.fr).completeProfile||"Compléter mon profil"}
+          </button>
+          <button onClick={()=>{setShowSetupModal(false);localStorage.setItem("moundiguide_setup_done","skip");}}
+            style={{width:"100%",padding:"12px",borderRadius:12,
+              border:"1px solid rgba(255,255,255,0.15)",background:"rgba(255,255,255,0.06)",
+              color:"rgba(255,255,255,0.55)",fontFamily:F,fontSize:14,cursor:"pointer"}}>
+            {(TRANSLATIONS[lang]||TRANSLATIONS.fr).completeLater||"Plus tard"}
+          </button>
+        </div>
+      </div>
+    )}
     </>
   );
 }
