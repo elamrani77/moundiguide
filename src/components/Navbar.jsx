@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { TRANSLATIONS, BR, TEAM_DATA, TEAM_ACCENT, TEAM_ISO, F } from "../constants.js";
 import MoundiLogo from "./MoundiLogo.jsx";
 
-function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam, setShowTeamSheet, user, avatarUrl}){
+function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam, setShowTeamProfile}){
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(()=>{
     if(!selectedTeam)return;
@@ -71,27 +71,64 @@ function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLan
             {/* Divider */}
             <div style={{width:1,height:20,background:"#E5E7EB"}}/>
 
-            {/* Desktop right: profile only */}
+            {/* Team + Language buttons */}
             <div style={{display:"flex",alignItems:"center",gap:8}}>
-              {/* Profile circle */}
-              <button onClick={()=>setPage(user?"profile":"login")}
-                title={user?.email||"Se connecter"}
-                style={{width:36,height:36,borderRadius:"50%",border:"none",cursor:"pointer",
-                  background:avatarUrl?"transparent":"#C41E3A",color:"#FFF",fontWeight:700,fontSize:14,fontFamily:F,
-                  display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
-                  overflow:"hidden",
-                  boxShadow:"0 2px 8px rgba(196,30,58,0.4)"}}>
-                {avatarUrl
-                  ?<img src={`${avatarUrl}?t=${Date.now()}`} alt="avatar"
-                      style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%",display:"block"}}
-                      onError={e=>{e.target.style.display="none";}}/>
-                  :(user?user.email?.[0]?.toUpperCase()||"U":"👤")}
+              <button onClick={onPickTeam}
+                aria-label={`Changer d'équipe - ${selectedTeam?.t||"Sélectionner une équipe"}`}
+                style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
+                  padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
+                  fontFamily:F,fontSize:13,fontWeight:600,color:BR.red,transition:"all .2s"}}>
+                {selectedTeam
+                  ?<img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
+                    alt={selectedTeam.t} style={{width:24,height:18,borderRadius:2,objectFit:"cover"}}
+                    onError={e=>{e.target.style.display="none";}}/>
+                  :<span style={{fontSize:18}}>🌍</span>}
+                <span>{selectedTeam?.t||"Team"}</span>
+              </button>
+              {selectedTeam&&(
+                <button onClick={()=>setShowTeamProfile(true)}
+                  aria-label="Voir le profil de l'équipe"
+                  style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid #E5E7EB",
+                    background:"white",fontSize:12,cursor:"pointer",marginLeft:4,
+                    display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  ℹ
+                </button>
+              )}
+              <button onClick={handleNotifBell} title="Activer les alertes matchs"
+                aria-label="Activer les notifications"
+                style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid #E5E7EB",
+                  background:"white",fontSize:14,cursor:"pointer",
+                  display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                {notifGranted?"🔔":"🔕"}
+              </button>
+              <button onClick={e=>{e.stopPropagation();setShowLang(p=>!p);}}
+                aria-label={`Changer de langue - ${curLang?.label}`}
+                style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
+                  padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
+                  fontFamily:F,fontSize:13,fontWeight:600,color:linkColor,transition:"all .2s"}}>
+                <span>{curLang.label}</span>
+                <span style={{opacity:.5,fontSize:10}}>▼</span>
               </button>
             </div>
           </div>
         ):(
-          /* Mobile right side: hamburger only */
+          /* Mobile right side: bell + flag + hamburger */
           <div style={{display:"flex",alignItems:"center",gap:8}}>
+            {/* Bell */}
+            <button onClick={handleNotifBell} aria-label="Activer les notifications"
+              style={{background:"none",border:"none",cursor:"pointer",fontSize:18,lineHeight:1,padding:2}}>
+              {notifGranted?"🔔":"🔕"}
+            </button>
+            {/* Team flag → opens picker */}
+            <button onClick={onPickTeam}
+              aria-label={`Changer d'équipe - ${selectedTeam?.t||"Sélectionner une équipe"}`}
+              style={{background:"none",border:"none",cursor:"pointer",lineHeight:1,display:"flex",alignItems:"center",padding:2}}>
+              {selectedTeam
+                ?<img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
+                  alt={selectedTeam.t} style={{width:24,height:18,borderRadius:3,objectFit:"cover"}}
+                  onError={e=>{e.target.style.display="none";}}/>
+                :<span style={{fontSize:18}}>🌍</span>}
+            </button>
             {/* Hamburger */}
             <button onClick={()=>setMenuOpen(p=>!p)}
               aria-label={menuOpen?"Fermer le menu":"Ouvrir le menu"}
@@ -109,52 +146,29 @@ function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLan
         <div style={{background:"rgba(255,255,255,0.99)",
           borderTop:`1px solid ${C.bdr}`,padding:"12px 20px 20px",animation:"slideDown .2s ease"}}>
 
-          {/* Profile row */}
-          {user?(
-            <div onClick={()=>{setPage("profile");setMenuOpen(false);}}
-              style={{display:"flex",alignItems:"center",gap:12,padding:16,cursor:"pointer",
-                background:"rgba(196,30,58,0.06)",borderRadius:12,
-                marginBottom:12,border:"1px solid rgba(196,30,58,0.15)"}}>
-              <div style={{width:40,height:40,borderRadius:"50%",
-                background:avatarUrl?"transparent":"#C41E3A",
-                color:"#FFF",fontSize:18,fontWeight:700,fontFamily:F,flexShrink:0,
-                display:"flex",alignItems:"center",justifyContent:"center",
-                overflow:"hidden"}}>
-                {avatarUrl
-                  ?<img src={`${avatarUrl}?t=${Date.now()}`} alt="avatar"
-                      style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%",display:"block"}}
-                      onError={e=>{e.target.style.display="none";}}/>
-                  :(user.email?.[0]?.toUpperCase()||"U")}
-              </div>
-              <div>
-                <div style={{fontFamily:F,fontSize:14,fontWeight:600,color:C.str}}>
-                  {user.email?.split("@")[0]||"Fan"}
-                </div>
-                <div style={{fontFamily:F,fontSize:12,color:"#C41E3A",marginTop:2}}>
-                  {T.myProfile||"Mon Profil"} →
-                </div>
-              </div>
+          {/* Team row at top */}
+          {selectedTeam&&(
+            <div style={{display:"flex",gap:8,marginBottom:8,paddingBottom:8,borderBottom:`1px solid ${C.bdr}`}}>
+              <button onClick={()=>{onPickTeam();setMenuOpen(false);}}
+                style={{flex:1,display:"flex",alignItems:"center",gap:10,padding:"10px 14px",
+                  background:C.fld,border:`1px solid ${C.bdr}`,borderRadius:10,cursor:"pointer"}}>
+                <img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
+                  alt={selectedTeam.t} style={{width:24,height:18,borderRadius:3,objectFit:"cover"}}
+                  onError={e=>{e.target.style.display="none";}}/>
+                <span style={{fontFamily:F,fontSize:14,fontWeight:600,color:C.str}}>{selectedTeam.t}</span>
+              </button>
+              <button onClick={()=>{setShowTeamProfile(true);setMenuOpen(false);}}
+                style={{padding:"10px 14px",background:C.fld,border:`1px solid ${C.bdr}`,
+                  borderRadius:10,cursor:"pointer",fontFamily:F,fontSize:12,color:C.mut,whiteSpace:"nowrap"}}>
+                👤 Profil
+              </button>
             </div>
-          ):(
-            <button onClick={()=>{setPage("login");setMenuOpen(false);}}
-              style={{width:"100%",padding:"12px",borderRadius:12,border:"none",cursor:"pointer",
-                background:"#C41E3A",color:"#FFF",fontFamily:F,fontSize:14,fontWeight:600,
-                marginBottom:12,textAlign:"center"}}>
-              Se connecter
-            </button>
           )}
 
           {/* Nav links */}
-          {[
-            {id:"home",     label:T.mobileHome},
-            {id:"ticket",   label:T.mobileTick},
-            {id:"teamSheet",label:`📋 ${T.teamSheet||"Fiche Équipe"}`, action:()=>{if(selectedTeam){setShowTeamSheet(true);}else{setPage("profile");}setMenuOpen(false);}},
-            {id:"schedule", label:T.mobileSch},
-          ].map(({id,label,action})=>(
-            <button key={id}
-              onClick={action?action:()=>{setPage(id);setMenuOpen(false);}}
-              style={{display:"block",width:"100%",textAlign:"left",
-                background:page===id?`${BR.red}11`:"none",
+          {[{id:"home",label:T.mobileHome},{id:"ticket",label:T.mobileTick},{id:"schedule",label:T.mobileSch}].map(({id,label})=>(
+            <button key={id} onClick={()=>{setPage(id);setMenuOpen(false);}}
+              style={{display:"block",width:"100%",textAlign:"left",background:page===id?`${BR.red}11`:"none",
                 border:"none",padding:"12px 14px",borderRadius:10,cursor:"pointer",
                 fontFamily:F,fontSize:15,fontWeight:page===id?600:400,
                 color:page===id?BR.red:C.str,marginBottom:4,transition:"all .15s"}}>
@@ -162,6 +176,14 @@ function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLan
             </button>
           ))}
 
+          {/* Language selector */}
+          <div style={{display:"flex",gap:10,marginTop:8,paddingTop:12,borderTop:`1px solid ${C.bdr}`}}>
+            <button onClick={()=>setShowLang(p=>!p)}
+              style={{flex:1,padding:10,borderRadius:10,border:`1px solid ${C.bdr}`,
+                background:C.card,color:C.str,cursor:"pointer",fontFamily:F,fontSize:13}}>
+              {curLang.label}
+            </button>
+          </div>
         </div>
       )}
     </motion.nav>

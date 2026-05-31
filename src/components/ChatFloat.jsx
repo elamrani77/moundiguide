@@ -21,11 +21,6 @@ function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoic
   useEffect(()=>{
     messagesEndRef.current?.scrollIntoView({behavior:"smooth"});
   },[msgs]);
-  useEffect(()=>{
-    document.body.style.overflow = chatOpen ? "hidden" : "";
-    if(chatOpen){ window.lenis?.stop(); } else { window.lenis?.start(); }
-    return ()=>{ document.body.style.overflow = ""; window.lenis?.start(); };
-  },[chatOpen]);
   if(!chatOpen) return(
     <button onClick={()=>{setChatOpen(true);track("chat_opened");}} aria-label="Ouvrir le chat IA"
       style={{position:"fixed",bottom:28,right:28,width:58,height:58,borderRadius:"50%",
@@ -75,8 +70,7 @@ function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoic
 
         {/* Messages */}
         <div style={{flex:1,overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"12px 16px",
-          display:"flex",flexDirection:"column",gap:12,justifyContent:"flex-start",
-          overscrollBehavior:"contain"}}>
+          display:"flex",flexDirection:"column",gap:12,justifyContent:"flex-start"}}>
           {msgs.map((m,i)=>(
             <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",direction:isRTL?"rtl":"ltr"}}>
               {m.role==="assistant"&&<div style={{width:24,height:24,borderRadius:"50%",flexShrink:0,background:`linear-gradient(135deg,${BR.red},${BR.green})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,marginRight:6,marginTop:2}}>⚽</div>}

@@ -70,7 +70,6 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
   useEffect(()=>{fetch("https://open.er-api.com/v6/latest/MAD").then(r=>r.json()).then(d=>sR(d.rates)).catch(()=>sR({EUR:.091,USD:.099,GBP:.078,BRL:.57,JPY:14.8}));},[]);
   const citiesRef=useRef(null);const citiesInView=useInView(citiesRef,{once:true,margin:"-80px"});
   const cityTrackRef=useRef(null);
-  const[hoveredCity,setHoveredCity]=useState(null);
   const flipRefs=useRef({d:null,h:null,m:null,s:null});
   const prevCountRef=useRef({d:0,h:0,m:0,s:0});
   const fanWallRef=useRef(null);const fanWallInView=useInView(fanWallRef,{once:true,margin:"-80px"});
@@ -225,8 +224,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               <span style={{fontFamily:font,fontSize:isDesk?22:17,fontWeight:700,color:"rgba(255,255,255,0.92)",
                 textShadow:`0 0 24px ${teamData.colors[0]}CC`}}>
                 {lang==="ar"
-                  ?`!أهلاً مشجع ${teamData.name||selectedTeam.t}`
-                  :(WELCOME_FAN[lang]||WELCOME_FAN.en)("",teamData.name||selectedTeam.t)}
+                  ?`!أهلاً مشجع ${teamData.flag} ${teamData.name||selectedTeam.t}`
+                  :(WELCOME_FAN[lang]||WELCOME_FAN.en)(teamData.flag,teamData.name||selectedTeam.t)}
               </span>
             </div>
           )}
@@ -376,11 +375,9 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           <div dir="ltr"
             style={{position:"relative",overflow:"hidden",width:"100%",direction:"ltr",
               maskImage:"linear-gradient(90deg,transparent 0%,black 8%,black 92%,transparent 100%)",
-              WebkitMaskImage:"linear-gradient(90deg,transparent 0%,black 8%,black 92%,transparent 100%)",
-              overscrollBehaviorX:"contain"}}
+              WebkitMaskImage:"linear-gradient(90deg,transparent 0%,black 8%,black 92%,transparent 100%)"}}
             onMouseEnter={()=>{if(cityTrackRef.current)cityTrackRef.current.style.animationPlayState="paused";}}
             onMouseLeave={()=>{if(cityTrackRef.current)cityTrackRef.current.style.animationPlayState="running";}}
-            onWheel={(e)=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY))return;e.stopPropagation();}}
           >
             <div ref={cityTrackRef} className="cities-scroll-inner"
               style={{display:"flex",gap:isDesk?16:10,width:"max-content",
@@ -390,12 +387,10 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                 <div key={i}
                   style={{width:isDesk?280:160,height:isDesk?380:220,borderRadius:16,overflow:"hidden",
                     flexShrink:0,position:"relative",cursor:"pointer",
-                    transform:hoveredCity===i?"scale(1.03)":"scale(1)",
-                    boxShadow:hoveredCity===i?"0 8px 24px rgba(0,0,0,0.18)":"0 2px 12px rgba(0,0,0,0.06)",
-                    transition:"transform 0.3s ease, box-shadow 0.3s ease",
-                    willChange:"transform"}}
-                  onMouseEnter={()=>setHoveredCity(i)}
-                  onMouseLeave={()=>setHoveredCity(null)}
+                    boxShadow:"0 2px 12px rgba(0,0,0,0.06)",
+                    transition:"transform 0.3s ease"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="scale(1.04)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}
                 >
                   <img src={city.img} alt={city.city}
                     loading="lazy" decoding="async"

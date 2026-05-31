@@ -12,16 +12,6 @@ export default defineConfig({
     }),
   ],
   server: {
-    host: true,
-    port: 5173,
-    strictPort: false,
-    hmr: {
-      host: "localhost",
-      protocol: "ws",
-      port: 5173,
-      clientPort: 5173,
-      timeout: 5000,
-    },
     proxy: {
       "/api": {
         target: "http://localhost:3000",
