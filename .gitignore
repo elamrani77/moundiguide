@@ -6,3 +6,17 @@ dist
 .DS_Store
 Thumbs.db
 *.log
+# AI tool configs
+.codebuddy/
+.codex/
+.continue/
+.cursor/
+.gemini/
+.kiro/
+.opencode/
+.qoder/
+.roo/
+.trae/
+.windsurf/
+nanobanana-output/
+dist/
