@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase.js";
 import { TRANSLATIONS, LANGUAGES, TEAM_DATA, TEAM_ISO, PLAYERS_IMG, F } from "../constants.js";
+import logger from "../utils/logger.js";
 import MoundiLogo from "../components/MoundiLogo.jsx";
 
 const TEAM_ORDER = [
@@ -121,6 +122,7 @@ export default function SetupPage({ user, lang: initialLang, setLang, setUserTea
         favorite_team: selectedTeam || null,
       });
       clearTimeout(saveTimeout);
+      logger.info("setup","Setup completed",{lang:selectedLang,team:selectedTeam,hasName:!!(firstName&&lastName)},user?.id);
     } catch (err) {
       clearTimeout(saveTimeout);
       console.error("Setup save error:", err);
@@ -175,7 +177,7 @@ export default function SetupPage({ user, lang: initialLang, setLang, setUserTea
         }}>
           {T.setupComplete || "Vous êtes prêt ! Bienvenue dans l'aventure Mondial 2030 🎉"}
         </div>
-        <button onClick={onComplete} style={{
+        <button onClick={()=>{logger.info("setup","Setup skipped",{},user?.id);onComplete();}} style={{
           background: "none", border: "none", cursor: "pointer",
           color: "rgba(255,255,255,0.4)", fontFamily: F, fontSize: 13,
           textDecoration: "underline",
@@ -219,6 +221,7 @@ export default function SetupPage({ user, lang: initialLang, setLang, setUserTea
             const active = selectedLang === l.code;
             return (
               <button key={l.code} onClick={() => setSelectedLang(l.code)}
+                role="radio" aria-checked={active} aria-label={l.label}
                 style={{
                   width: 140, height: 48, borderRadius: 24, border: "none", cursor: "pointer",
                   background: active ? "#C41E3A" : "rgba(255,255,255,0.08)",
@@ -277,9 +280,11 @@ export default function SetupPage({ user, lang: initialLang, setLang, setUserTea
             {T.tellUsAboutYou || "Parlez-nous de vous"}
           </div>
           <input value={firstName} onChange={e => { setFirstName(e.target.value); setShowRequired(false); }}
-            placeholder={T.firstName || "Prénom"} style={inpStyle(firstEmpty)}/>
+            placeholder={T.firstName || "Prénom"} aria-label={T.firstName || "Prénom"} aria-required="true"
+            style={inpStyle(firstEmpty)}/>
           <input value={lastName} onChange={e => { setLastName(e.target.value); setShowRequired(false); }}
-            placeholder={T.lastName || "Nom de famille"} style={inpStyle(lastEmpty)}/>
+            placeholder={T.lastName || "Nom de famille"} aria-label={T.lastName || "Nom de famille"} aria-required="true"
+            style={inpStyle(lastEmpty)}/>
           {showRequired && (!firstName.trim() || !lastName.trim()) && (
             <div style={{ color: "#FF6B6B", fontSize: 13, marginTop: -4, marginBottom: 8, textAlign: isRTL ? "right" : "left" }}>
               {T.required || "Ce champ est obligatoire"}
@@ -349,6 +354,7 @@ export default function SetupPage({ user, lang: initialLang, setLang, setUserTea
             value={teamSearch}
             onChange={e => setTeamSearch(e.target.value)}
             placeholder={T.searchTeam || "Rechercher une équipe..."}
+            aria-label={T.searchTeam || "Rechercher une équipe"}
             style={{
               width: "100%", background: "rgba(255,255,255,0.07)",
               border: "1px solid rgba(255,255,255,0.12)",
@@ -362,19 +368,21 @@ export default function SetupPage({ user, lang: initialLang, setLang, setUserTea
         </div>
 
         {/* Team list — fills remaining space, scrolls internally */}
-        <div style={{
-          flex: 1, overflowY: "auto",
-          overscrollBehavior: "contain",
-          padding: "4px 0",
-          scrollbarWidth: "thin",
-          scrollbarColor: "rgba(255,255,255,0.2) transparent",
-        }}>
+        <div role="listbox" aria-label={T.chooseFavoriteTeam || "Choisissez votre équipe favorite"}
+          style={{
+            flex: 1, overflowY: "auto",
+            overscrollBehavior: "contain",
+            padding: "4px 0",
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(255,255,255,0.2) transparent",
+          }}>
           {filteredTeams.map(name => {
             const isSelected = selectedTeam === name;
             const isHovered = hoveredTeamRow === name;
             const iso = (TEAM_ISO[name] || "ma").toLowerCase();
             return (
               <div key={name}
+                role="option" aria-selected={isSelected} aria-label={name}
                 onClick={() => setSelectedTeam(name)}
                 onMouseEnter={() => setHoveredTeamRow(name)}
                 onMouseLeave={() => setHoveredTeamRow(null)}

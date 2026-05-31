@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase.js";
 import { TEAM_DATA, TEAM_ISO, PLAYERS_IMG, TRANSLATIONS, LANGUAGES, BR, F } from "../constants.js";
+import logger from "../utils/logger.js";
 
-function Toggle({ on, onToggle }) {
+function Toggle({ on, onToggle, ariaLabel }) {
   return (
-    <div onClick={onToggle} style={{
-      width:40,height:22,borderRadius:11,cursor:"pointer",flexShrink:0,
-      background:on?"#C41E3A":"#444",transition:"background 0.2s",position:"relative",
-    }}>
+    <div onClick={onToggle} role="switch" aria-checked={on} aria-label={ariaLabel}
+      style={{
+        width:40,height:22,borderRadius:11,cursor:"pointer",flexShrink:0,
+        background:on?"#C41E3A":"#444",transition:"background 0.2s",position:"relative",
+      }}>
       <div style={{position:"absolute",top:2,left:on?18:2,width:18,height:18,borderRadius:"50%",background:"#FFF",transition:"left 0.2s"}}/>
     </div>
   );
@@ -22,6 +24,7 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [avatarMsg, setAvatarMsg] = useState("");
   const [pendingAvatar, setPendingAvatar] = useState(null);
+  const [avatarError, setAvatarError] = useState(null);
   const [favoriteTeam, setFavoriteTeam] = useState(null);
   const [showTeamGrid, setShowTeamGrid] = useState(false);
   const [username, setUsername] = useState("");
@@ -42,7 +45,7 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
     setMemberSince(new Date(user.created_at||Date.now()).toLocaleDateString(
       lang==="ar"?"ar-MA":lang,{year:"numeric",month:"long"}
     ));
-    supabase.from("profiles").select("*").eq("id",user.id).single().then(({data})=>{
+    supabase.from("profiles").select("id,username,first_name,last_name,avatar_url,favorite_team,created_at").eq("id",user.id).single().then(({data})=>{
       if(data?.favorite_team){
         setFavoriteTeam(data.favorite_team);
         if(setUserTeam) setUserTeam({t:data.favorite_team,f:TEAM_DATA[data.favorite_team]?.flag||""});
@@ -59,6 +62,21 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
   function handleAvatarChange(e) {
     const file = e.target.files?.[0];
     if(!file||!user) return;
+    const ALLOWED_TYPES = ["image/jpeg","image/jpg","image/png","image/webp"];
+    const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+    if(!ALLOWED_TYPES.includes(file.type)){
+      setAvatarError(T.avatarFormatError||"Format non supporté. Utilisez JPG, PNG ou WebP.");
+      logger.warn("profile","Invalid avatar file",{type:file.type,size:file.size},user?.id);
+      e.target.value = "";
+      return;
+    }
+    if(file.size > MAX_SIZE_BYTES){
+      setAvatarError(T.avatarSizeError||"Fichier trop volumineux. Maximum 5MB.");
+      logger.warn("profile","Invalid avatar file",{type:file.type,size:file.size},user?.id);
+      e.target.value = "";
+      return;
+    }
+    setAvatarError(null);
     setAvatarPreview(URL.createObjectURL(file));
     setPendingAvatar(file);
     e.target.value = "";
@@ -76,7 +94,8 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
       localStorage.setItem("moundiguide_avatar", publicUrl);
       setAvatarMsg(T.photoUpdated||"Photo mise à jour ✓");
       setTimeout(()=>setAvatarMsg(""),2500);
-    } catch { /* ignore */ }
+      logger.info("profile","Avatar uploaded",{size:pendingAvatar.size},user.id);
+    } catch(err) { logger.error("profile","Avatar upload failed",{error:err?.message},user.id); }
     setSaving(false);
   }
 
@@ -111,6 +130,7 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
     }
     setSaving(false); setSavedMsg(T.saved||"Enregistré !");
     setTimeout(()=>setSavedMsg(""),2500);
+    logger.info("profile","Profile updated",{fields:["first_name","last_name","username"]},user.id);
   }
 
   function toggle(key, val, setVal) {
@@ -120,19 +140,29 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
   }
 
   async function handleLogout() {
-    await supabase.auth.signOut();
-    onLogout();
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("signOut error:", err);
+    } finally {
+      onLogout();
+      localStorage.removeItem("moundiguide_avatar");
+      localStorage.removeItem("userTeam");
+      localStorage.removeItem("moundiguide_setup_done");
+      localStorage.removeItem("lang");
+    }
   }
 
   async function handleChangePassword() {
     if(!user?.email) return;
     await supabase.auth.resetPasswordForEmail(user.email);
+    logger.info("profile","Password reset requested",{},user.id);
     setPwMsg(T.emailSent||"📧 Email envoyé");
     setTimeout(()=>setPwMsg(""),3000);
   }
 
   const sec = {background:"rgba(255,255,255,0.04)",borderRadius:20,padding:20,marginBottom:16};
-  const sectionTitle = {fontFamily:F,fontSize:11,fontWeight:700,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:1.5,marginBottom:16};
+  const sectionTitle = {fontFamily:F,fontSize:11,fontWeight:700,color:"rgba(255,255,255,0.6)",textTransform:"uppercase",letterSpacing:1.5,marginBottom:16};
   const inpStyle = {background:"transparent",border:"none",outline:"none",fontFamily:F,color:"#FFF",padding:0,cursor:"text",width:"100%"};
 
   return (
@@ -153,6 +183,7 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
 
           {/* CHANGE 1: Avatar with upload */}
           <input type="file" accept="image/*" ref={avatarInputRef} style={{display:"none"}}
+            aria-label={T.saveAvatar||"Changer la photo de profil"}
             onChange={handleAvatarChange}/>
           <div onClick={()=>avatarInputRef.current?.click()}
             style={{position:"relative",cursor:"pointer"}}>
@@ -214,36 +245,45 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
             </button>
           </div>
         )}
+        {avatarError&&(
+          <p style={{color:"#E24B4A",fontSize:12,textAlign:"center",marginTop:0,marginBottom:16,fontFamily:F}}>
+            {avatarError}
+          </p>
+        )}
         {avatarMsg&&<div style={{fontFamily:F,fontSize:11,color:"#4ADE80",marginBottom:16}}>{avatarMsg}</div>}
 
         {/* ── SECTION: Informations personnelles ── */}
-        <div style={sec}>
+        <div style={sec} role="group" aria-label={T.personalInfo||"Informations personnelles"}>
           <div style={sectionTitle}>{T.personalInfo||"Informations personnelles"}</div>
           <input value={firstName} onChange={e=>setFirstName(e.target.value)}
             placeholder={T.firstName||"Prénom"}
+            aria-label={T.firstName||"Prénom"}
             style={{width:"100%",background:"rgba(255,255,255,0.07)",
               border:"1px solid rgba(255,255,255,0.12)",borderRadius:12,
               padding:"12px 16px",color:"#FFF",fontSize:15,marginBottom:12,
               outline:"none",fontFamily:"Outfit, sans-serif"}}/>
           <input value={lastName} onChange={e=>setLastName(e.target.value)}
             placeholder={T.lastName||"Nom de famille"}
+            aria-label={T.lastName||"Nom de famille"}
             style={{width:"100%",background:"rgba(255,255,255,0.07)",
               border:"1px solid rgba(255,255,255,0.12)",borderRadius:12,
               padding:"12px 16px",color:"#FFF",fontSize:15,marginBottom:12,
               outline:"none",fontFamily:"Outfit, sans-serif"}}/>
           <input value={username} onChange={e=>setUsername(e.target.value)}
             placeholder={T.username||"Nom d'utilisateur"}
+            aria-label={T.username||"Nom d'utilisateur"}
             style={{width:"100%",background:"rgba(255,255,255,0.07)",
               border:"1px solid rgba(255,255,255,0.12)",borderRadius:12,
               padding:"12px 16px",color:"#FFF",fontSize:15,marginBottom:12,
               outline:"none",fontFamily:"Outfit, sans-serif"}}/>
           {/* Email — read-only */}
-          <div style={{marginBottom:12}}>
-            <div style={{fontFamily:F,fontSize:12,fontWeight:700,color:"rgba(255,255,255,0.4)",
+          <div style={{marginBottom:12}} role="group" aria-label={T.email||"Email"}>
+            <div style={{fontFamily:F,fontSize:12,fontWeight:700,color:"rgba(255,255,255,0.6)",
               textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>
               {T.email||"Email"}
             </div>
-            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+            <div role="textbox" aria-readonly="true" aria-label={T.email||"Email"}
+              style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
               borderRadius:12,padding:"12px 16px",color:"rgba(255,255,255,0.5)",
               fontSize:15,display:"flex",alignItems:"center",gap:8,cursor:"default",fontFamily:F}}>
               🔒 {user?.email}
@@ -314,7 +354,7 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
         </div>
 
         {/* ── SECTION B: Notifications ── */}
-        <div style={sec}>
+        <div style={sec} role="group" aria-label={T.notifications||"Notifications"}>
           <div style={sectionTitle}>{T.notifications||"Notifications"}</div>
           {[
             {label:T.matchAlerts||"Alertes matchs",    key:"moundiguide_notif_matches",val:notifMatches,set:setNotifMatches},
@@ -325,7 +365,7 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
               paddingBottom:i<arr.length-1?12:0,marginBottom:i<arr.length-1?12:0,
               borderBottom:i<arr.length-1?"1px solid rgba(255,255,255,0.06)":"none"}}>
               <span style={{fontFamily:F,fontSize:14,color:"rgba(255,255,255,0.85)"}}>{label}</span>
-              <Toggle on={val} onToggle={()=>toggle(key,val,set)}/>
+              <Toggle on={val} onToggle={()=>toggle(key,val,set)} ariaLabel={label}/>
             </div>
           ))}
         </div>
@@ -339,6 +379,8 @@ export default function ProfilePage({ user, lang, setLang, onLogout, onSave, onB
               return(
                 <button key={l.code}
                   onClick={()=>{if(setLang)setLang(l.code);localStorage.setItem("lang",l.code);}}
+                  aria-label={`${T.language||"Langue"}: ${l.label}`}
+                  aria-pressed={active}
                   style={{padding:"8px 16px",borderRadius:20,border:"none",cursor:"pointer",
                     fontFamily:F,fontSize:14,fontWeight:active?700:500,
                     background:active?"#C41E3A":"rgba(255,255,255,0.08)",
