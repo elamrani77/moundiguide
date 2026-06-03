@@ -1,5 +1,3 @@
-import { supabase } from "../supabase.js";
-
 const isDev = import.meta.env.DEV;
 
 const log = async (level, category, message, metadata = {}, userId = null) => {
@@ -8,6 +6,7 @@ const log = async (level, category, message, metadata = {}, userId = null) => {
     console.log(`${emoji} [${category}] ${message}`, metadata);
   }
   try {
+    const { supabase } = await import("../supabase.js");
     await supabase.from("logs").insert({ level, category, message, user_id: userId, metadata });
   } catch (e) {
     if (isDev) console.error("Logger failed:", e);

@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const videos = ["/wc2026-intro.mp4", "/pepsi-football.mp4", "/adidas_com.mp4"];
+const videos = [
+  "https://res.cloudinary.com/dcrk8qhqo/video/upload/q_auto,f_auto/v1780229376/wc2026-intro_ojxtmg.mp4",
+  "https://res.cloudinary.com/dcrk8qhqo/video/upload/q_auto,f_auto/v1780229706/pepsi-football_jjofyj.mp4",
+  "https://res.cloudinary.com/dcrk8qhqo/video/upload/q_auto,f_auto/v1780229327/adidas_com_rgkjsp.mp4",
+];
 
 const TEAM_COLORS = {
   MA: { primary:"#C8102E", secondary:"#00913F", accent:"#F0B429" },
@@ -302,7 +306,7 @@ function LEDBoard({days,hours,minutes,seconds,teamCode,isDesk,fixtures=[],latest
           <video
             key={videoIdx}
             src={videos[videoIdx]}
-            autoPlay muted loop={false} playsInline
+            autoPlay muted loop={false} playsInline preload="none"
             style={{width:"100%",height:"100%",objectFit:"cover",display:"block",position:"absolute",top:0,left:0,zIndex:1,pointerEvents:"none"}}
             onPlay={()=>setVideoPlaying(true)}
             onLoadedMetadata={handleVideoMeta}

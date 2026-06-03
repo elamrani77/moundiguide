@@ -2,8 +2,7 @@ import React, { useRef, useEffect } from "react";
 import { Sparkles, X } from "lucide-react";
 import { BR, PLACEHOLDERS, F } from "../constants.js";
 import { useAnalytics } from "../hooks/useAnalytics.js";
-
-function md(t){if(!t)return t;return t.split("\n").map((l,i)=>{let c=l.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");if(l.startsWith("- ")||l.startsWith("• "))return<div key={i} style={{paddingLeft:12,marginBottom:2}} dangerouslySetInnerHTML={{__html:"• "+c.slice(2)}}/>;if(l.trim()==="")return<div key={i} style={{height:6}}/>;return<div key={i} dangerouslySetInnerHTML={{__html:c}}/>;});}
+import md from "../utils/markdown.jsx";
 
 const SUGGESTIONS={
   fr:["🏟️ Les stades","🎟️ Billets","🗺️ Villes hôtes","💱 Convertir MAD"],
@@ -70,7 +69,7 @@ function ChatFloat({C,lang,msgs,input,setInput,loading,send,listening,toggleVoic
 
         {/* Messages */}
         <div style={{flex:1,overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"12px 16px",
-          display:"flex",flexDirection:"column",gap:12,justifyContent:"flex-start"}}>
+          display:"flex",flexDirection:"column",gap:12,justifyContent:"flex-start",overscrollBehavior:"contain"}}>
           {msgs.map((m,i)=>(
             <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",direction:isRTL?"rtl":"ltr"}}>
               {m.role==="assistant"&&<div style={{width:24,height:24,borderRadius:"50%",flexShrink:0,background:`linear-gradient(135deg,${BR.red},${BR.green})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,marginRight:6,marginTop:2}}>⚽</div>}

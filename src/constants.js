@@ -141,14 +141,14 @@ export const TEAM_DATA={
   "Wales":       {flag:"🏴󠁧󠁢󠁷󠁬󠁳󠁿",colors:["#C8102E","#00A499"],heroGradient:"linear-gradient(135deg,#C8102E 0%,#00A499 100%)",stars:["Brennan Johnson","Neco Williams","Harry Wilson"]},
 };
 export const PLAYERS_IMG={
-  MA:"/players-ma.png",
-  BR:"/players-br.png",
-  DE:"/players-de.png",
-  AR:"/players-ar.png",
-  FR:"/players-fr.png",
+  MA:"/players-ma.webp",
+  BR:"/players-br.webp",
+  DE:"/players-de.webp",
+  AR:"/players-ar.webp",
+  FR:"/players-fr.webp",
   EN:"/players-en.webp",
-  PT:"/players-pt.png",
-  ES:"/players-es.png",
+  PT:"/players-pt.webp",
+  ES:"/players-es.webp",
   NL:"/players-nl.png",
   BE:"/players-be.png",
   HR:"/players-hr.png",
@@ -167,7 +167,7 @@ export const PLAYERS_IMG={
   UY:"/players-uy.png",
   CO:"/players-co.png",
   IT:"/players-it.png",
-  default:"/players-default.png",
+  default:"/players-default.webp",
 };
 export const TEAM_ISO={
   "Morocco":"ma","Spain":"es","Portugal":"pt","France":"fr","Argentina":"ar",

@@ -15,8 +15,7 @@ import { useLiveScores } from "../hooks/useLiveScores";
 
 const SMap = lazy(() => import("../components/SMap.jsx"));
 
-// ── md renderer ──
-function md(t){if(!t)return t;return t.split("\n").map((l,i)=>{let c=l.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");if(l.startsWith("- ")||l.startsWith("• "))return<div key={i} style={{paddingLeft:12,marginBottom:2}} dangerouslySetInnerHTML={{__html:"• "+c.slice(2)}}/>;if(l.trim()==="")return<div key={i} style={{height:6}}/>;return<div key={i} dangerouslySetInnerHTML={{__html:c}}/>;});}
+import md from "../utils/markdown.jsx";
 
 export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selectedTeam}){
   const font = Fprop || F;
@@ -388,8 +387,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                   style={{width:isDesk?280:160,height:isDesk?380:220,borderRadius:16,overflow:"hidden",
                     flexShrink:0,position:"relative",cursor:"pointer",
                     boxShadow:"0 2px 12px rgba(0,0,0,0.06)",
-                    transition:"transform 0.3s ease"}}
-                  onMouseEnter={e=>e.currentTarget.style.transform="scale(1.04)"}
+                    transition:"transform 0.3s ease",willChange:"transform"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="scale(1.03)"}
                   onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}
                 >
                   <img src={city.img} alt={city.city}
@@ -770,7 +769,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               🗓️ Road to 2030
             </motion.div>
             {isDesk ? (
-            <div style={{overflowX:"auto",paddingBottom:8}}>
+            <div style={{overflowX:"auto",paddingBottom:8,overscrollBehaviorX:"contain"}}>
               <div style={{minWidth:580,position:"relative",height:170}}>
                 {/* Gray base track */}
                 <div style={{position:"absolute",top:"50%",left:"5%",right:"5%",height:2,background:C.bdr,transform:"translateY(-50%)"}}/>

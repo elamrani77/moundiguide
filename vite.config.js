@@ -11,6 +11,9 @@ export default defineConfig({
       webp: { quality: 80 },
     }),
   ],
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   server: {
     proxy: {
       "/api": {
