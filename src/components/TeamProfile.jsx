@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { TEAM_DATA, TEAM_ISO, PLAYERS, PLAYERS_IMG, TRANSLATIONS, BR, F, TEAM_GROUPS } from "../constants.js";
+import { TEAM_DATA, TEAM_ISO, PLAYERS, PLAYERS_IMG, TRANSLATIONS, BR, F, TEAM_GROUPS, TEAM_OPPONENTS } from "../constants.js";
 import { useAnalytics } from "../hooks/useAnalytics.js";
 
 export default function TeamProfile({
@@ -22,10 +22,7 @@ export default function TeamProfile({
   const primaryColor= teamData?.colors[0] || BR.red;
   const secondColor = teamData?.colors[1] || "#1a1a1a";
   const flagSrc     = `https://flagcdn.com/48x36/${isoRaw.toLowerCase()}.png`;
-  const group       = TEAM_GROUPS[selectedTeam.t] || '?';
-  const groupmates  = Object.entries(TEAM_GROUPS)
-    .filter(([t, g]) => g === group && t !== selectedTeam.t)
-    .map(([t]) => t).join(' · ');
+  const group = TEAM_GROUPS[selectedTeam.t] || '?';
 
   return(
     <>
@@ -164,14 +161,12 @@ export default function TeamProfile({
                 textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>
                 {T.group||"Groupe"}
               </div>
-              <div style={{fontFamily:F,fontSize:24,fontWeight:700,color:"#FFFFFF",marginBottom:6}}>
+              <div style={{fontFamily:F,fontSize:16,fontWeight:700,color:'#111827'}}>
                 {group}
               </div>
-              {groupmates && (
-                <div style={{fontFamily:F,fontSize:11,color:"rgba(255,255,255,0.5)"}}>
-                  {groupmates}
-                </div>
-              )}
+              <div style={{fontFamily:F,fontSize:11,color:'#9CA3AF',marginTop:4}}>
+                {TEAM_OPPONENTS[selectedTeam.t] || ''}
+              </div>
             </div>
           </div>
 
@@ -189,14 +184,14 @@ export default function TeamProfile({
               📅 {T.viewMatches || "Voir les matchs"}
             </button>
             <button
-              onClick={()=>{setPage("home");setShowTeamProfile(false);}}
+              onClick={()=>{setPage("ticket");setShowTeamProfile(false);}}
               style={{
                 width:"100%",padding:"13px",borderRadius:12,
                 background:"transparent",border:`1.5px solid ${primaryColor}`,
                 cursor:"pointer",fontFamily:F,fontWeight:600,fontSize:14,color:primaryColor,
               }}
             >
-              🗺️ {T.viewMap || "Carte des stades"}
+              🎟 {T.navTicket || "Billets"}
             </button>
           </div>
 
