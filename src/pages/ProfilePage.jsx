@@ -259,7 +259,7 @@ export default function ProfilePage({
   return (
     <div dir={isRTL ? "rtl" : "ltr"}
       style={{
-        minHeight: "100vh", height: "100vh", background: "#121414", fontFamily: F,
+        height: "100%", background: "#121414", fontFamily: F,
         overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch",
       }}>
       <div style={{ paddingBottom: 100, overflowY: "auto", overscrollBehavior: "contain" }}>

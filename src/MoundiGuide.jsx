@@ -163,7 +163,7 @@ export default function MoundiGuide(){
   return(
     <>
     {splash&&<Splash onDone={()=>setSplash(false)}/>}
-    <div style={{minHeight:"100vh",width:"100%",...bgStyle,fontFamily:F,overflowX:"hidden",overflowY:"auto"}}>
+    <div style={{minHeight:"100vh",width:"100%",...bgStyle,fontFamily:F,overflowX:"hidden",overflowY:"auto",WebkitOverflowScrolling:"touch",position:"relative"}}>
 
       {/* Back to top button */}
       {showBackTop&&(
