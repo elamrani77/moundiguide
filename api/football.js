@@ -29,8 +29,11 @@ export default async function handler(req, res) {
       url = `${BASE}/fixtures?league=${LEAGUE}&season=${SEASON}&team=${encodeURIComponent(team || "")}`;
       break;
     case "next":
+      // Only WC 2026 fixtures — league=1 season=2026
+      url = `${BASE}/fixtures?league=1&season=2026&status=NS&next=48`;
+      break;
     default:
-      url = `${BASE}/fixtures?league=${LEAGUE}&season=${SEASON}&status=NS&next=10`;
+      url = `${BASE}/fixtures?league=${LEAGUE}&season=${SEASON}&status=NS&next=20`;
   }
 
   try {

@@ -16,6 +16,7 @@ import { useLiveScores } from "../hooks/useLiveScores";
 const SMap = lazy(() => import("../components/SMap.jsx"));
 
 import md from "../utils/markdown.jsx";
+import { getNextMatch, getTeamIsoFromName } from "../services/wc2026Api.js";
 
 export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selectedTeam}){
   const font = Fprop || F;
@@ -25,6 +26,12 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
   const heroTeamCode = selectedTeam ? (()=>{const r=TEAM_ISO[selectedTeam.t]||"ma";return r.startsWith("gb-")?r.slice(3,5).toUpperCase():r.slice(0,2).toUpperCase();})() : null;
   const teamCode = selectedTeam ? (TEAM_ISO[selectedTeam?.t]?.toUpperCase()||"MA") : null;
   const heroImg = teamCode ? (PLAYERS_IMG[teamCode]||"/players-ma.png") : "/players-default.png";
+
+  const [nextTeamMatch, setNextTeamMatch] = useState(null);
+  useEffect(() => {
+    if (!selectedTeam?.t) { setNextTeamMatch(null); return; }
+    getNextMatch(selectedTeam.t).then(m => { if (m) setNextTeamMatch(m); }).catch(() => {});
+  }, [selectedTeam?.t]);
 
   const [installPrompt,setInstallPrompt]=useState(null);
   const [showInstall,setShowInstall]=useState(false);
@@ -268,6 +275,40 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
               ))}
             </div>
           )}
+
+          {/* Next team match pill */}
+          {nextTeamMatch&&(()=>{
+            const matchDate=nextTeamMatch.fixture?.date
+              ?new Date(nextTeamMatch.fixture.date).toLocaleDateString(
+                  lang==="ar"?"ar-MA":lang==="zh"?"zh-CN":lang,
+                  {day:"numeric",month:"short"})
+              :null;
+            return matchDate?(
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:18,flexWrap:"wrap",
+                direction:"ltr",background:"rgba(255,255,255,0.08)",borderRadius:20,
+                padding:"5px 14px",backdropFilter:"blur(8px)",
+                border:"1px solid rgba(255,255,255,0.12)"}}>
+                <span style={{fontFamily:font,fontSize:9,fontWeight:700,
+                  color:"rgba(255,255,255,0.5)",letterSpacing:1.5,textTransform:"uppercase"}}>
+                  {lang==="ar"?"القادم":lang==="es"?"Próximo":lang==="pt"?"Próximo":lang==="zh"?"下场":"Prochain"}
+                </span>
+                <img src={`https://flagcdn.com/24x18/${getTeamIsoFromName(nextTeamMatch.teams?.home?.name)}.png`}
+                  alt="" style={{width:18,height:13,objectFit:"cover",borderRadius:2}}
+                  onError={e=>{e.target.style.display="none";}}/>
+                <span style={{fontFamily:font,fontSize:12,fontWeight:700,color:"white"}}>
+                  {nextTeamMatch.teams?.home?.name}
+                </span>
+                <span style={{fontFamily:font,fontSize:11,color:"rgba(255,255,255,0.4)"}}>vs</span>
+                <span style={{fontFamily:font,fontSize:12,fontWeight:700,color:"white"}}>
+                  {nextTeamMatch.teams?.away?.name}
+                </span>
+                <img src={`https://flagcdn.com/24x18/${getTeamIsoFromName(nextTeamMatch.teams?.away?.name)}.png`}
+                  alt="" style={{width:18,height:13,objectFit:"cover",borderRadius:2}}
+                  onError={e=>{e.target.style.display="none";}}/>
+                <span style={{fontFamily:font,fontSize:10,fontWeight:700,color:BR.gold}}>— {matchDate}</span>
+              </div>
+            ):null;
+          })()}
 
           {/* Flags */}
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:32,position:"relative",zIndex:3,direction:lang==="ar"?"rtl":"ltr"}}>

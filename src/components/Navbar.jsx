@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TRANSLATIONS, BR, F } from "../constants.js";
 import MoundiLogo from "./MoundiLogo.jsx";
-import { getLiveMatches, getTeamIsoFromName } from "../services/wc2026Api.js";
+import { getLiveMatches, getNextMatch, getTeamIsoFromName } from "../services/wc2026Api.js";
 
 function Navbar({
   page, setPage, scrolled, C, lang, setLang,
@@ -14,25 +14,35 @@ function Navbar({
     typeof Notification !== "undefined" && Notification.permission === "granted"
   );
   const [liveMatch,    setLiveMatch   ] = useState(null);
+  const [nextMatch,    setNextMatch   ] = useState(null);
+  const [countdown,    setCountdown   ] = useState("");
 
-  // Poll WC 2026 live scores every 60 s
+  // Poll WC 2026 live scores every 60 s; fall back to next match countdown
   useEffect(() => {
+    // Clear stale data immediately so the pill doesn't flash the old team
+    setNextMatch(null);
+    setCountdown("");
+
     async function fetchLive() {
       try {
         const matches = await getLiveMatches();
         if (matches.length > 0) {
           const m = matches[0];
           setLiveMatch({
-            home:         m.teams?.home?.name,
-            away:         m.teams?.away?.name,
-            homeScore:    m.goals?.home ?? 0,
-            awayScore:    m.goals?.away ?? 0,
-            minute:       m.fixture?.status?.elapsed || "?",
-            homeFlagIso:  getTeamIsoFromName(m.teams?.home?.name),
-            awayFlagIso:  getTeamIsoFromName(m.teams?.away?.name),
+            home:        m.teams?.home?.name,
+            away:        m.teams?.away?.name,
+            homeScore:   m.goals?.home ?? 0,
+            awayScore:   m.goals?.away ?? 0,
+            minute:      m.fixture?.status?.elapsed || "?",
+            homeFlagIso: getTeamIsoFromName(m.teams?.home?.name),
+            awayFlagIso: getTeamIsoFromName(m.teams?.away?.name),
           });
+          setNextMatch(null);
         } else {
           setLiveMatch(null);
+          const teamName = selectedTeam?.t;
+          const next = await getNextMatch(teamName);
+          setNextMatch(next);
         }
       } catch {
         setLiveMatch(null);
@@ -41,7 +51,26 @@ function Navbar({
     fetchLive();
     const interval = setInterval(fetchLive, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedTeam?.t]);
+
+  // Tick countdown every second when a next match is known
+  useEffect(() => {
+    if (!nextMatch?.fixture?.date) return;
+    function updateCountdown() {
+      const diff = new Date(nextMatch.fixture.date) - new Date();
+      if (diff <= 0) { setCountdown("EN COURS"); return; }
+      const days    = Math.floor(diff / 86400000);
+      const hours   = Math.floor((diff % 86400000) / 3600000);
+      const minutes = Math.floor((diff % 3600000)  / 60000);
+      const seconds = Math.floor((diff % 60000)    / 1000);
+      if (days > 0)        setCountdown(`${days}j ${hours}h ${minutes}m`);
+      else if (hours > 0)  setCountdown(`${hours}h ${minutes}m ${seconds}s`);
+      else                 setCountdown(`${minutes}m ${seconds}s`);
+    }
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, [nextMatch]);
 
 
   async function handleNotifBell() {
@@ -143,6 +172,118 @@ function Navbar({
         {isDesk ? (
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
 
+            <style>{`
+              @keyframes livePulse {
+                0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(196,30,58,0.4); }
+                50%    { opacity:0.7; box-shadow:0 0 0 4px rgba(196,30,58,0); }
+              }
+            `}</style>
+
+            {/* ── Live match pill ── */}
+            {liveMatch && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                background: "linear-gradient(135deg,rgba(196,30,58,0.12),rgba(139,0,0,0.08))",
+                border: "1px solid rgba(196,30,58,0.3)",
+                borderRadius: 24, padding: "6px 14px",
+                backdropFilter: "blur(8px)",
+                boxShadow: "0 2px 12px rgba(196,30,58,0.15)",
+                flexShrink: 0,
+              }}>
+                <div style={{
+                  background: "#C41E3A", color: "white",
+                  fontSize: 9, fontWeight: 800, letterSpacing: 1.2,
+                  padding: "2px 7px", borderRadius: 20,
+                  textTransform: "uppercase",
+                  animation: "livePulse 1.5s ease-in-out infinite",
+                  flexShrink: 0,
+                }}>LIVE</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <img src={`https://flagcdn.com/24x18/${liveMatch.homeFlagIso}.png`}
+                    alt={liveMatch.home || ""}
+                    style={{ width: 20, height: 15, objectFit: "cover", borderRadius: 3 }}
+                    onError={e => { e.target.style.display = "none"; }}/>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#121414", fontFamily: F,
+                    maxWidth: 60, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {liveMatch.home?.split(" ").slice(-1)[0]}
+                  </span>
+                </div>
+                <div style={{
+                  background: "#121414", color: "white",
+                  fontSize: 13, fontWeight: 800, fontFamily: F,
+                  padding: "2px 10px", borderRadius: 10,
+                  letterSpacing: 1, minWidth: 44, textAlign: "center",
+                }}>
+                  {liveMatch.homeScore} - {liveMatch.awayScore}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#121414", fontFamily: F,
+                    maxWidth: 60, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {liveMatch.away?.split(" ").slice(-1)[0]}
+                  </span>
+                  <img src={`https://flagcdn.com/24x18/${liveMatch.awayFlagIso}.png`}
+                    alt={liveMatch.away || ""}
+                    style={{ width: 20, height: 15, objectFit: "cover", borderRadius: 3 }}
+                    onError={e => { e.target.style.display = "none"; }}/>
+                </div>
+                <span style={{ fontSize: 11, color: "rgba(196,30,58,0.8)", fontWeight: 700, fontFamily: F }}>
+                  {liveMatch.minute}'
+                </span>
+              </div>
+            )}
+
+            {/* ── Next match countdown pill ── */}
+            {nextMatch && countdown && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                background: "rgba(0,0,0,0.04)",
+                border: "1px solid rgba(0,0,0,0.08)",
+                borderRadius: 24, padding: "6px 14px",
+                backdropFilter: "blur(8px)",
+                flexShrink: 0,
+              }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                  <img
+                    src={`https://flagcdn.com/48x36/${getTeamIsoFromName(nextMatch.teams?.home?.name)}.png`}
+                    alt={nextMatch.teams?.home?.name || ""}
+                    style={{ width: 24, height: 18, objectFit: "cover", borderRadius: 3,
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }}
+                    onError={e => { e.target.style.display = "none"; }}
+                  />
+                  <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.5)", fontFamily: F,
+                    maxWidth: 36, textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {nextMatch.teams?.home?.name?.split(" ").slice(-1)[0]}
+                  </span>
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 800, color: "rgba(0,0,0,0.25)", fontFamily: F }}>
+                  vs
+                </span>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                  <img
+                    src={`https://flagcdn.com/48x36/${getTeamIsoFromName(nextMatch.teams?.away?.name)}.png`}
+                    alt={nextMatch.teams?.away?.name || ""}
+                    style={{ width: 24, height: 18, objectFit: "cover", borderRadius: 3,
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }}
+                    onError={e => { e.target.style.display = "none"; }}
+                  />
+                  <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.5)", fontFamily: F,
+                    maxWidth: 36, textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {nextMatch.teams?.away?.name?.split(" ").slice(-1)[0]}
+                  </span>
+                </div>
+                <div style={{ width: 1, height: 28, background: "rgba(0,0,0,0.08)" }}/>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "#C41E3A", fontFamily: F,
+                    letterSpacing: 0.5, minWidth: 64, textAlign: "center" }}>
+                    ⏱ {countdown}
+                  </span>
+                  <span style={{ fontSize: 8, color: "rgba(0,0,0,0.35)", fontFamily: F, letterSpacing: 0.5 }}>
+                    PROCHAIN
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Profile avatar */}
             <button
               onClick={() => setPage(user ? "profile" : "login")}
@@ -193,40 +334,6 @@ function Navbar({
           </div>
         )}
       </div>
-
-      {/* ── WC 2026 live score strip ────────────────────────────────────── */}
-      {liveMatch && (
-        <div style={{
-          background: "rgba(196,30,58,0.92)", backdropFilter: "blur(8px)",
-          padding: "4px 24px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          gap: 10, fontSize: 12, fontFamily: F, color: "white",
-          direction: "ltr",
-        }}>
-          <span style={{
-            background: "rgba(255,255,255,0.2)", borderRadius: 4,
-            padding: "1px 6px", fontSize: 9, fontWeight: 800, letterSpacing: 1.5,
-          }}>🔴 LIVE</span>
-          <img
-            src={`https://flagcdn.com/16x12/${liveMatch.homeFlagIso}.png`}
-            alt={liveMatch.home}
-            style={{ height: 10, borderRadius: 2 }}
-            onError={e => { e.target.style.display = "none"; }}
-          />
-          <span style={{ fontWeight: 600 }}>{liveMatch.home}</span>
-          <span style={{ fontWeight: 800, fontSize: 14, margin: "0 2px" }}>
-            {liveMatch.homeScore}&nbsp;–&nbsp;{liveMatch.awayScore}
-          </span>
-          <img
-            src={`https://flagcdn.com/16x12/${liveMatch.awayFlagIso}.png`}
-            alt={liveMatch.away}
-            style={{ height: 10, borderRadius: 2 }}
-            onError={e => { e.target.style.display = "none"; }}
-          />
-          <span style={{ fontWeight: 600 }}>{liveMatch.away}</span>
-          <span style={{ color: "rgba(255,255,255,0.65)", fontSize: 10 }}>{liveMatch.minute}'</span>
-        </div>
-      )}
 
       {/* ── Mobile dropdown menu ─────────────────────────────────────────── */}
       {!isDesk && menuOpen && (

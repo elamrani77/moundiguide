@@ -26,33 +26,24 @@ const T = {
 
 // ─── CSS Keyframes ────────────────────────────────────────────────────────────
 const KF = `
-  @keyframes mgSceneIn  { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes mgSceneIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
 
-  /* IDLE */
-  @keyframes mgIdleBody { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(1.018)} }
-  @keyframes mgIdleBall { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-
-  /* RUNNING — one-directional dash toward goal */
-  @keyframes mgRunP  { 0%{transform:translateX(0)} 100%{transform:translateX(120px)} }
-  @keyframes mgRunB  { 0%{transform:translateX(0)} 100%{transform:translateX(120px)} }
-
-  /* SUCCESS: dash → kick → ball arcs into net → jump celebrate */
+  /* SUCCESS */
   @keyframes mgSuccessP {
     0%   { transform: translate(0px,0px)     rotate(0deg)  }
     34%  { transform: translate(130px,0px)   rotate(0deg)  }
-    44%  { transform: translate(135px,0px)   rotate(-16deg)}  /* wind-up kick */
-    54%  { transform: translate(135px,0px)   rotate(8deg)  }  /* follow-through */
-    66%  { transform: translate(135px,-24px) rotate(0deg)  }  /* jump! */
-    82%  { transform: translate(135px,-24px) rotate(0deg)  }  /* hang time */
-    100% { transform: translate(135px,0px)   rotate(0deg)  }  /* land */
+    44%  { transform: translate(135px,0px)   rotate(-16deg)}
+    54%  { transform: translate(135px,0px)   rotate(8deg)  }
+    66%  { transform: translate(135px,-24px) rotate(0deg)  }
+    82%  { transform: translate(135px,-24px) rotate(0deg)  }
+    100% { transform: translate(135px,0px)   rotate(0deg)  }
   }
-  /* Ball: travels with player, then launches on a parabolic arc into the net */
   @keyframes mgSuccessB {
-    0%   { transform: translate(0px,0px);    opacity:1 }
-    34%  { transform: translate(130px,0px);  opacity:1 }  /* at kick spot */
-    50%  { transform: translate(195px,-90px); opacity:1 } /* rising arc */
-    64%  { transform: translate(232px,-28px); opacity:1 } /* into net */
-    100% { transform: translate(232px,-28px); opacity:1 } /* stays in net */
+    0%   { transform: translate(0px,0px);     opacity:1 }
+    34%  { transform: translate(130px,0px);   opacity:1 }
+    50%  { transform: translate(195px,-90px); opacity:1 }
+    64%  { transform: translate(232px,-28px); opacity:1 }
+    100% { transform: translate(232px,-28px); opacity:1 }
   }
   @keyframes mgNetShake {
     0%,100%{ transform:translateX(0) }
@@ -61,8 +52,9 @@ const KF = `
   }
   @keyframes mgGoalText {
     0%   { opacity:0; transform:scale(0.35) translateY(12px) }
-    14%  { opacity:1; transform:scale(1.2)  translateY(0) }
-    26%  { transform:scale(1) translateY(0) }
+    10%  { opacity:0; transform:scale(0.35) translateY(12px) }
+    24%  { opacity:1; transform:scale(1.2)  translateY(0) }
+    36%  { transform:scale(1) translateY(0) }
     78%  { opacity:1 }
     100% { opacity:0 }
   }
@@ -72,34 +64,28 @@ const KF = `
     100% { opacity:0; transform:scale(1.7) rotate(48deg) }
   }
 
-  /* FAILURE: dash → kick → ball misses wide right → player falls */
+  /* FAILURE */
   @keyframes mgFailP {
     0%   { transform: translate(0px,0px)     rotate(0deg)  }
     34%  { transform: translate(130px,0px)   rotate(0deg)  }
-    44%  { transform: translate(135px,0px)   rotate(-14deg)}  /* kick attempt */
+    44%  { transform: translate(135px,0px)   rotate(-14deg)}
     55%  { transform: translate(135px,0px)   rotate(6deg)  }
-    68%  { transform: translate(135px,14px)  rotate(28deg) }  /* stumble */
-    100% { transform: translate(135px,18px)  rotate(32deg) }  /* lying down */
+    68%  { transform: translate(135px,14px)  rotate(28deg) }
+    100% { transform: translate(135px,18px)  rotate(32deg) }
   }
-  /* Ball: launched but curves high and wide, misses goal, exits screen */
   @keyframes mgFailB {
     0%   { transform: translate(0px,0px);     opacity:1 }
     34%  { transform: translate(130px,0px);   opacity:1 }
-    52%  { transform: translate(220px,-95px); opacity:1 } /* high arc */
-    74%  { transform: translate(360px,40px);  opacity:0.5 } /* misses right */
-    100% { transform: translate(420px,80px);  opacity:0 }   /* off screen */
+    52%  { transform: translate(220px,-95px); opacity:1 }
+    74%  { transform: translate(360px,40px);  opacity:0.5 }
+    100% { transform: translate(420px,80px);  opacity:0 }
   }
   @keyframes mgFailText {
     0%   { opacity:0; transform:translateY(14px) }
-    14%  { opacity:1; transform:translateY(0) }
+    30%  { opacity:0; transform:translateY(14px) }
+    44%  { opacity:1; transform:translateY(0) }
     76%  { opacity:1 }
     100% { opacity:0; transform:translateY(-8px) }
-  }
-
-  /* Arm waves on celebrate */
-  @keyframes mgArmWave {
-    0%,100%{ transform:rotate(0deg) }
-    50%{ transform:rotate(-35deg) }
   }
 `;
 
@@ -107,11 +93,9 @@ const KF = `
 function FootballerScene({ anim }) {
   const playerStyle = {
     transformBox: "fill-box",
-    transformOrigin: "80px 215px",  /* pivot near hips */
+    transformOrigin: "80px 215px",
     animation:
-      anim === "idle"    ? "none"
-    : anim === "running" ? "mgRunP 0.9s ease-in-out forwards"
-    : anim === "success" ? "mgSuccessP 2.6s cubic-bezier(.4,0,.2,1) forwards"
+      anim === "success" ? "mgSuccessP 2.6s cubic-bezier(.4,0,.2,1) forwards"
     : anim === "fail"    ? "mgFailP 2.6s cubic-bezier(.4,0,.2,1) forwards"
     : "none",
   };
@@ -120,9 +104,7 @@ function FootballerScene({ anim }) {
     transformBox: "fill-box",
     transformOrigin: "110px 245px",
     animation:
-      anim === "idle"    ? "mgIdleBall 1.7s ease-in-out infinite"
-    : anim === "running" ? "mgRunB 0.9s ease-in-out forwards"
-    : anim === "success" ? "mgSuccessB 2.6s cubic-bezier(.4,0,.2,1) forwards"
+      anim === "success" ? "mgSuccessB 2.6s cubic-bezier(.4,0,.2,1) forwards"
     : anim === "fail"    ? "mgFailB 2.6s cubic-bezier(.4,0,.2,1) forwards"
     : "none",
   };
@@ -142,18 +124,12 @@ function FootballerScene({ anim }) {
     : "none",
   };
 
-  const bodyIdleStyle = {
-    transformBox: "fill-box",
-    transformOrigin: "80px 212px",
-    animation: anim === "idle" ? "mgIdleBody 2.4s ease-in-out infinite" : "none",
-  };
-
   return (
     <div style={{ width:"100%", height:"100%", animation:"mgSceneIn 0.85s ease both" }}>
       <style>{KF}</style>
       <svg viewBox="0 0 400 300" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
 
-        {/* ── Background ── */}
+        {/* ── Background stars ── */}
         {[[28,22],[85,16],[148,12],[212,38],[288,20],[352,15],[388,42],
           [46,72],[318,65],[164,55],[240,30],[120,45],[70,38],[200,18]].map(([x,y],i)=>(
           <circle key={i} cx={x} cy={y} r={i%5===0?2.2:1.2}
@@ -170,17 +146,14 @@ function FootballerScene({ anim }) {
 
         {/* ── Goal (right side) ── */}
         <g style={netStyle}>
-          {/* Net diagonals */}
           {[0,14,28,42,56,70,74].map((dy,i)=>(
             <line key={`nd${i}`} x1={305} y1={176+dy} x2={373} y2={250}
               stroke="rgba(196,30,58,0.22)" strokeWidth={0.8}/>
           ))}
-          {/* Net verticals */}
           {[0,17,34,51,68].map((dx,i)=>(
             <line key={`nv${i}`} x1={305+dx} y1={176} x2={305+dx} y2={250}
               stroke="rgba(196,30,58,0.16)" strokeWidth={0.8}/>
           ))}
-          {/* Posts — glow then solid on top */}
           <line x1={305} y1={176} x2={305} y2={250} stroke="rgba(196,30,58,0.28)" strokeWidth={8} strokeLinecap="round"/>
           <line x1={373} y1={176} x2={373} y2={250} stroke="rgba(196,30,58,0.28)" strokeWidth={8} strokeLinecap="round"/>
           <line x1={305} y1={176} x2={373} y2={176} stroke="rgba(196,30,58,0.28)" strokeWidth={8} strokeLinecap="round"/>
@@ -189,66 +162,47 @@ function FootballerScene({ anim }) {
           <line x1={305} y1={176} x2={373} y2={176} stroke="#C41E3A" strokeWidth={3} strokeLinecap="round"/>
         </g>
 
-        {/* ── Player ── */}
+        {/* ── Player (static for idle/running, animated for success/fail) ── */}
         <g style={playerStyle}>
-          {/* Foot shadow */}
           <ellipse cx={80} cy={251} rx={15} ry={3.5} fill="rgba(255,255,255,0.07)"/>
-
-          {/* Body — idle breathing group */}
-          <g style={bodyIdleStyle}>
-            {/* Head */}
-            <circle cx={80} cy={180} r={14} stroke="white" strokeWidth={2}
-              fill="rgba(255,255,255,0.05)"/>
-            {/* Hair tuft */}
-            <path d="M72,172 Q80,167 88,172" stroke="white" strokeWidth={1.5}
-              fill="none" strokeLinecap="round"/>
-            {/* Eyes */}
-            <circle cx={75.5} cy={179} r={1.9} fill="white"/>
-            <circle cx={84.5} cy={179} r={1.9} fill="white"/>
-            {/* Smile */}
-            <path d="M74,186 Q80,191 86,186" stroke="white" strokeWidth={1.3}
-              fill="none" strokeLinecap="round"/>
-
-            {/* Body */}
-            <line x1={80} y1={194} x2={80} y2={230}
-              stroke="white" strokeWidth={2} strokeLinecap="round"/>
-            {/* Jersey stripe */}
-            <line x1={72} y1={207} x2={88} y2={207}
-              stroke="rgba(196,30,58,0.7)" strokeWidth={1.3}/>
-
-            {/* Left arm */}
-            <line x1={80} y1={205} x2={60} y2={220}
-              stroke="white" strokeWidth={2} strokeLinecap="round"/>
-            {/* Right arm */}
-            <line x1={80} y1={205} x2={100} y2={215}
-              stroke="white" strokeWidth={2} strokeLinecap="round"/>
-
-            {/* Shorts line */}
-            <line x1={66} y1={238} x2={94} y2={238}
-              stroke="rgba(255,255,255,0.38)" strokeWidth={1.2}/>
-
-            {/* Left leg */}
-            <line x1={80} y1={230} x2={65} y2={255}
-              stroke="white" strokeWidth={2} strokeLinecap="round"/>
-            {/* Right leg */}
-            <line x1={80} y1={230} x2={95} y2={255}
-              stroke="white" strokeWidth={2} strokeLinecap="round"/>
-            {/* Cleats */}
-            <line x1={62} y1={255} x2={68} y2={255}
-              stroke="white" strokeWidth={2.5} strokeLinecap="round"/>
-            <line x1={92} y1={255} x2={98} y2={255}
-              stroke="white" strokeWidth={2.5} strokeLinecap="round"/>
-          </g>
+          {/* Head */}
+          <circle cx={80} cy={180} r={14} stroke="white" strokeWidth={2}
+            fill="rgba(255,255,255,0.05)"/>
+          <path d="M72,172 Q80,167 88,172" stroke="white" strokeWidth={1.5}
+            fill="none" strokeLinecap="round"/>
+          <circle cx={75.5} cy={179} r={1.9} fill="white"/>
+          <circle cx={84.5} cy={179} r={1.9} fill="white"/>
+          <path d="M74,186 Q80,191 86,186" stroke="white" strokeWidth={1.3}
+            fill="none" strokeLinecap="round"/>
+          {/* Torso */}
+          <line x1={80} y1={194} x2={80} y2={230}
+            stroke="white" strokeWidth={2} strokeLinecap="round"/>
+          <line x1={72} y1={207} x2={88} y2={207}
+            stroke="rgba(196,30,58,0.7)" strokeWidth={1.3}/>
+          <line x1={66} y1={238} x2={94} y2={238}
+            stroke="rgba(255,255,255,0.38)" strokeWidth={1.2}/>
+          {/* Arms */}
+          <line x1={80} y1={205} x2={60} y2={220}
+            stroke="white" strokeWidth={2} strokeLinecap="round"/>
+          <line x1={80} y1={205} x2={100} y2={215}
+            stroke="white" strokeWidth={2} strokeLinecap="round"/>
+          {/* Legs */}
+          <line x1={80} y1={230} x2={65} y2={255}
+            stroke="white" strokeWidth={2} strokeLinecap="round"/>
+          <line x1={62} y1={255} x2={68} y2={255}
+            stroke="white" strokeWidth={2.5} strokeLinecap="round"/>
+          <line x1={80} y1={230} x2={95} y2={255}
+            stroke="white" strokeWidth={2} strokeLinecap="round"/>
+          <line x1={92} y1={255} x2={98} y2={255}
+            stroke="white" strokeWidth={2.5} strokeLinecap="round"/>
         </g>
 
         {/* ── Ball ── */}
         <g style={ballStyle}>
           <circle cx={110} cy={245} r={10} stroke="white" strokeWidth={2}
             fill="rgba(255,255,255,0.05)"/>
-          {/* Pentagon */}
           <path d="M110,235 L114.8,239.5 L113,245 L107,245 L105.2,239.5 Z"
             stroke="white" strokeWidth={1.1} fill="rgba(0,0,0,0.22)"/>
-          {/* Seams */}
           <line x1={110} y1={234} x2={110} y2={236} stroke="white" strokeWidth={1}/>
           <line x1={115} y1={240} x2={117} y2={239} stroke="white" strokeWidth={1}/>
           <line x1={113} y1={246} x2={115} y2={248} stroke="white" strokeWidth={1}/>
@@ -256,10 +210,9 @@ function FootballerScene({ anim }) {
           <line x1={105} y1={240} x2={103} y2={239} stroke="white" strokeWidth={1}/>
         </g>
 
-        {/* ── Success extras ── */}
+        {/* ── Success star burst ── */}
         {anim === "success" && (
           <>
-            {/* Star burst particles */}
             {[[222,148],[256,134],[278,150],[244,166],[268,140]].map(([x,y],i)=>(
               <text key={i} x={x} y={y}
                 style={{
@@ -282,7 +235,7 @@ function FootballerScene({ anim }) {
               fill: anim === "success" ? "#F5A623" : "rgba(255,255,255,0.62)",
               fontFamily: F,
             }}>
-            {anim === "success" ? "⚽ GOAL!" : "😅 Raté..."}
+            {anim === "success" ? "⚽ GOAL!" : "🟥 Raté!"}
           </text>
         )}
 

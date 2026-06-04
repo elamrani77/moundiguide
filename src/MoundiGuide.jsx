@@ -143,7 +143,14 @@ export default function MoundiGuide(){
       <ProfilePage
         user={user} lang={lang} setLang={handleLangChange} isDesk={isDesk}
         onBack={()=>setPage("home")}
-        onLogout={()=>{setUser(null);setPage("home");}}
+        onLogout={()=>{
+          [
+            "moundiguide_avatar","userTeam","moundiguide_setup_done","lang",
+            "moundiguide_notif_matches","moundiguide_notif_live","moundiguide_notif_news","moundiNotif",
+          ].forEach(k=>localStorage.removeItem(k));
+          sessionStorage.clear();
+          setUser(null);setUserAvatar(null);setSelectedTeam(null);setPage("home");
+        }}
         onSave={()=>setPage("home")}
         setUserTeam={setSelectedTeam}
         setUserAvatar={setUserAvatar}

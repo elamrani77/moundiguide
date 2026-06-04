@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { TEAM_DATA, TEAM_ISO, PLAYERS, PLAYERS_IMG, TRANSLATIONS, BR, F } from "../constants.js";
+import { TEAM_DATA, TEAM_ISO, PLAYERS, PLAYERS_IMG, TRANSLATIONS, BR, F, TEAM_GROUPS } from "../constants.js";
 import { useAnalytics } from "../hooks/useAnalytics.js";
 
 export default function TeamProfile({
@@ -22,6 +22,10 @@ export default function TeamProfile({
   const primaryColor= teamData?.colors[0] || BR.red;
   const secondColor = teamData?.colors[1] || "#1a1a1a";
   const flagSrc     = `https://flagcdn.com/48x36/${isoRaw.toLowerCase()}.png`;
+  const group       = TEAM_GROUPS[selectedTeam.t] || '?';
+  const groupmates  = Object.entries(TEAM_GROUPS)
+    .filter(([t, g]) => g === group && t !== selectedTeam.t)
+    .map(([t]) => t).join(' · ');
 
   return(
     <>
@@ -44,7 +48,7 @@ export default function TeamProfile({
           position:"fixed",right:0,top:0,
           width:isDesk?420:"100vw",
           height:"100vh",
-          background:"#FFFFFF",
+          background:"#0f0f0f",
           zIndex:1100,
           boxShadow:"-4px 0 32px rgba(0,0,0,0.15)",
           transform:showTeamProfile?"translateX(0)":"translateX(100%)",
@@ -111,97 +115,63 @@ export default function TeamProfile({
             />
           </div>
 
-          {/* ── SECTION A — FIX 6: Squad / Hommes de match ── */}
+          {/* ── SECTION A — Homme de match (featured star) ── */}
           {players && (
             <div style={{padding:"20px 16px 0"}}>
-              <div style={{fontFamily:F,fontSize:13,fontWeight:700,color:"#374151",
-                textTransform:"uppercase",letterSpacing:1.5,marginBottom:12}}>
-                ⚽ {T.squad || "Hommes de match"}
+              <div style={{fontFamily:F,fontSize:13,fontWeight:700,color:"rgba(255,255,255,0.5)",
+                textTransform:"uppercase",letterSpacing:1.5,marginBottom:12,
+                borderLeft:`3px solid ${primaryColor}`,paddingLeft:10}}>
+                ⚽ {T.manOfMatch || "Homme de match"}
               </div>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                {[
-                  {name:players.p1, num:players.n1},
-                  {name:players.p2, num:players.n2},
-                  {name:players.p3, num:players.n3},
-                ].map((p,i)=>(
-                  <div key={i} style={{
-                    display:"flex",alignItems:"center",gap:12,
-                    padding:"12px",borderRadius:12,
-                    background:`${primaryColor}08`,
-                    border:`1px solid ${primaryColor}22`,
-                  }}>
-                    <div style={{
-                      width:40,height:40,borderRadius:10,flexShrink:0,
-                      background:`linear-gradient(135deg,${primaryColor},${secondColor})`,
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      color:"#FFF",fontSize:18,fontWeight:800,
-                    }}>
-                      {p.num}
-                    </div>
-                    <div style={{fontFamily:F,fontSize:14,fontWeight:600,color:"#111827",lineHeight:1.2}}>
-                      {p.name}
-                    </div>
+              <div style={{
+                display:"flex",alignItems:"center",gap:16,
+                padding:"16px 20px",borderRadius:14,
+                background:"rgba(255,255,255,0.05)",
+                border:"1px solid rgba(255,255,255,0.1)",
+              }}>
+                <div style={{
+                  width:52,height:52,borderRadius:12,flexShrink:0,
+                  background:`linear-gradient(135deg,${primaryColor},${secondColor})`,
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  color:"#FFF",fontSize:22,fontWeight:900,
+                }}>
+                  {players.n1}
+                </div>
+                <div>
+                  <div style={{fontFamily:F,fontSize:16,fontWeight:700,color:"#FFFFFF"}}>
+                    {players.p1}
                   </div>
-                ))}
+                  <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginTop:4}}>
+                    {T.manOfMatch || "Homme de match"} ⭐
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* ── Tournament grid — FIX 6: only Groupe + Matchs ── */}
+          {/* ── Tournament ── */}
           <div style={{padding:"20px 16px 0"}}>
-            <div style={{fontFamily:F,fontSize:13,fontWeight:700,color:"#374151",
-              textTransform:"uppercase",letterSpacing:1.5,marginBottom:12}}>
-              🏆 {T.tournament || "Tournoi 2030"}
+            <div style={{fontFamily:F,fontSize:13,fontWeight:700,color:"rgba(255,255,255,0.5)",
+              textTransform:"uppercase",letterSpacing:1.5,marginBottom:12,
+              borderLeft:`3px solid ${primaryColor}`,paddingLeft:10}}>
+              🏆 {T.tournament || "Tournoi 2026"}
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-              {[
-                {label:T.group       ||"Groupe", value:"TBD"},
-                {label:T.navSchedule ||"Matchs", value:"TBD"},
-              ].map(({label,value})=>(
-                <div key={label} style={{
-                  background:"#F9FAFB",border:"1px solid #E5E7EB",
-                  borderRadius:10,padding:"12px 14px",
-                }}>
-                  <div style={{fontFamily:F,fontSize:10,color:"#9CA3AF",fontWeight:500,
-                    textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>
-                    {label}
-                  </div>
-                  <div style={{fontFamily:F,fontSize:16,fontWeight:700,color:"#111827"}}>
-                    {value}
-                  </div>
+            <div style={{
+              background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",
+              borderRadius:10,padding:"12px 14px",
+            }}>
+              <div style={{fontFamily:F,fontSize:10,color:"rgba(255,255,255,0.4)",fontWeight:500,
+                textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>
+                {T.group||"Groupe"}
+              </div>
+              <div style={{fontFamily:F,fontSize:24,fontWeight:700,color:"#FFFFFF",marginBottom:6}}>
+                {group}
+              </div>
+              {groupmates && (
+                <div style={{fontFamily:F,fontSize:11,color:"rgba(255,255,255,0.5)"}}>
+                  {groupmates}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── SECTION B — FIX 6: Statistiques (placeholder) ── */}
-          <div style={{padding:"20px 16px 0"}}>
-            <div style={{fontFamily:F,fontSize:13,fontWeight:700,color:"#374151",
-              textTransform:"uppercase",letterSpacing:1.5,marginBottom:12}}>
-              📊 {T.matchStats || "Statistiques"}
-            </div>
-            <div style={{display:"flex",gap:8}}>
-              {[
-                {icon:"🏆",val:"TBD",label:T.group||"Groupe"},
-                {icon:"⚽",val:"0",  label:"Buts"},
-                {icon:"📅",val:"TBD",label:T.navSchedule||"Matchs"},
-              ].map(({icon,val,label})=>(
-                <div key={label} style={{
-                  flex:1,background:"#F9FAFB",border:"1px solid #E5E7EB",
-                  borderRadius:12,padding:"12px",textAlign:"center",
-                }}>
-                  <div style={{fontSize:20}}>{icon}</div>
-                  <div style={{fontFamily:F,fontSize:18,fontWeight:800,color:"#111827",margin:"4px 0 2px"}}>
-                    {val}
-                  </div>
-                  <div style={{fontFamily:F,fontSize:10,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:1}}>
-                    {label}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div style={{fontFamily:F,fontSize:11,color:"#9CA3AF",textAlign:"center",marginTop:8,fontStyle:"italic"}}>
-              {T.comingSoon || "Données à venir"}
+              )}
             </div>
           </div>
 
