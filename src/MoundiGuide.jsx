@@ -53,14 +53,16 @@ export default function MoundiGuide(){
       if(u){
         const{data}=await supabase.from("profiles").select("avatar_url,favorite_team").eq("id",u.id).single();
         if(data?.avatar_url){setUserAvatar(data.avatar_url);localStorage.setItem("moundiguide_avatar",data.avatar_url);}
+        if(data?.favorite_team){const teamObj={t:data.favorite_team,f:TEAM_DATA[data.favorite_team]?.flag||''};setSelectedTeam(teamObj);localStorage.setItem("userTeam",JSON.stringify(teamObj));}
       }
     }).catch(()=>{clearTimeout(timeout);setAuthLoading(false);});
     const {data:{subscription}}=supabase.auth.onAuthStateChange(async(_event,session)=>{
       const u=session?.user??null;
       setUser(u);
       if(_event==="SIGNED_IN"&&u){
-        const{data}=await supabase.from("profiles").select("avatar_url").eq("id",u.id).single();
+        const{data}=await supabase.from("profiles").select("avatar_url,favorite_team").eq("id",u.id).single();
         if(data?.avatar_url){setUserAvatar(data.avatar_url);localStorage.setItem("moundiguide_avatar",data.avatar_url);}
+        if(data?.favorite_team){const teamObj={t:data.favorite_team,f:TEAM_DATA[data.favorite_team]?.flag||''};setSelectedTeam(teamObj);localStorage.setItem("userTeam",JSON.stringify(teamObj));}
       }
     });
     return()=>subscription.unsubscribe();
