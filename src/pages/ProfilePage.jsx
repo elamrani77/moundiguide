@@ -258,8 +258,11 @@ export default function ProfilePage({
   // ── Main render ───────────────────────────────────────────────────────────
   return (
     <div dir={isRTL ? "rtl" : "ltr"}
-      style={{ minHeight: "100vh", background: "#121414", fontFamily: F }}>
-      <div style={{ paddingBottom: 32, overflowY: "auto", overscrollBehavior: "contain" }}>
+      style={{
+        minHeight: "100vh", height: "100vh", background: "#121414", fontFamily: F,
+        overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch",
+      }}>
+      <div style={{ paddingBottom: 100, overflowY: "auto", overscrollBehavior: "contain" }}>
         <div style={{ maxWidth: 680, margin: "0 auto" }}>
 
           {/* ══ SECTION 0 — Stadium VIP Banner ══════════════════════════════ */}

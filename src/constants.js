@@ -733,6 +733,229 @@ export const TRANSLATIONS = {
   },
 };
 
+export const CITY_GUIDE = {
+  'New York': {
+    country:'usa', flag:'🇺🇸',
+    stadium:'MetLife Stadium',
+    restaurants:[
+      {name:'Laut',                 type:'🍜 Halal Asian',           price:'$$',  area:'Union Square'},
+      {name:'Mamoun\'s Falafel',    type:'🥙 Halal Middle Eastern',  price:'$',   area:'Manhattan'},
+      {name:'Burger & Lobster',     type:'🍔 American',              price:'$$$', area:'Midtown'},
+    ],
+    hotels:[
+      {name:'The Jane Hotel',   stars:3, price:'$120/nuit', area:'West Village'},
+      {name:'YOTEL New York',   stars:4, price:'$180/nuit', area:'Midtown'},
+      {name:'Pod 51',           stars:3, price:'$100/nuit', area:'Midtown East'},
+    ],
+    transport:[
+      'Metro (MTA) — billet $2.90, carnet $33',
+      'Bus NJ Transit → MetLife Stadium depuis Penn Station',
+      'Taxi/Uber disponibles 24h/24',
+    ],
+    fanZone:'Times Square Fan Zone — matchs sur écrans géants',
+    emergency:{police:'911', hospital:'NYC Health + Hospitals', embassy:'Ambassade Maroc: +1 202 462 7979'},
+    tips:'Achetez la MetroCard hebdomadaire ($33). Évitez les taxis non officiels.',
+  },
+  'Los Angeles': {
+    country:'usa', flag:'🇺🇸',
+    stadium:'SoFi Stadium',
+    restaurants:[
+      {name:'Zankou Chicken',   type:'🍗 Halal Armenian',  price:'$',   area:'Hollywood'},
+      {name:'Bavel',            type:'🥙 Mediterranean',   price:'$$$', area:'Downtown'},
+      {name:'In-N-Out Burger',  type:'🍔 American',        price:'$',   area:'Partout'},
+    ],
+    hotels:[
+      {name:'Hotel Figueroa',       stars:4, price:'$160/nuit', area:'Downtown'},
+      {name:'Freehand Los Angeles', stars:3, price:'$130/nuit', area:'Koreatown'},
+      {name:'The LINE Hotel',       stars:4, price:'$200/nuit', area:'Koreatown'},
+    ],
+    transport:[
+      'Metro LA — billet $1.75, pass journée $5',
+      'Uber/Lyft — recommandé pour SoFi Stadium',
+      'Location voiture conseillée pour se déplacer',
+    ],
+    fanZone:'LA Live Fan Village — proche Crypto.com Arena',
+    emergency:{police:'911', hospital:'Cedars-Sinai Medical Center', embassy:'Consulat Maroc LA: +1 310 444 2900'},
+    tips:'LA est très étendue — logez proche du métro. Réservez Uber à l\'avance les jours de match.',
+  },
+  'Dallas': {
+    country:'usa', flag:'🇺🇸',
+    stadium:'AT&T Stadium (Arlington)',
+    restaurants:[
+      {name:'Afrah Mediterranean', type:'🥙 Halal Mediterranean', price:'$$', area:'Richardson'},
+      {name:'Pecan Lodge BBQ',     type:'🥩 Texas BBQ',           price:'$$', area:'Deep Ellum'},
+      {name:'Al Basha',            type:'🧆 Halal Arab',          price:'$',  area:'Richardson'},
+    ],
+    hotels:[
+      {name:'Omni Dallas Hotel',    stars:4, price:'$200/nuit', area:'Downtown'},
+      {name:'Hyatt Regency Dallas', stars:4, price:'$180/nuit', area:'Downtown'},
+      {name:'Aloft Dallas',         stars:3, price:'$130/nuit', area:'Uptown'},
+    ],
+    transport:[
+      'DART Light Rail — billet $2.50',
+      'Navette officielle FIFA depuis Downtown Dallas',
+      'Location voiture recommandée',
+    ],
+    fanZone:'Dallas Fan Festival — Reunion Tower area',
+    emergency:{police:'911', hospital:'Baylor University Medical Center', embassy:'Ambassade Maroc DC: +1 202 462 7979'},
+    tips:'Températures élevées en juin (35°C+). Hydratez-vous. Portez de la crème solaire.',
+  },
+  'Miami': {
+    country:'usa', flag:'🇺🇸',
+    stadium:'Hard Rock Stadium',
+    restaurants:[
+      {name:'Casablanca Restaurant', type:'🥙 Marocain/Halal',  price:'$$',  area:'Little Havana'},
+      {name:'Jaguar Restaurant',     type:'🍹 Latin American',  price:'$$$', area:'Coconut Grove'},
+      {name:'Wynwood Kitchen',       type:'🍕 American',        price:'$$',  area:'Wynwood'},
+    ],
+    hotels:[
+      {name:'Urbanica The Meridian',    stars:3, price:'$140/nuit', area:'South Beach'},
+      {name:'Selina Gold Dust Miami',   stars:3, price:'$120/nuit', area:'Downtown'},
+      {name:'SIXTY LES Hotel',          stars:4, price:'$220/nuit', area:'South Beach'},
+    ],
+    transport:[
+      'Metrorail + Metromover gratuit Downtown',
+      'Uber/Lyft très utilisés',
+      'Bateau-taxi Brickell City Centre',
+    ],
+    fanZone:'Bayfront Park Fan Zone — bord de mer Miami',
+    emergency:{police:'911', hospital:'Jackson Memorial Hospital', embassy:'Consulat Maroc Miami: +1 305 373 5300'},
+    tips:'Humidité très élevée en juin. Logez à Brickell ou Downtown pour éviter la circulation.',
+  },
+  'Kansas City': {
+    country:'usa', flag:'🇺🇸',
+    stadium:'Arrowhead Stadium',
+    restaurants:[
+      {name:'Halal Guys KC',          type:'🥙 Halal Mediterranean', price:'$',  area:'Downtown'},
+      {name:'Joe\'s Kansas City BBQ', type:'🥩 BBQ',                 price:'$$', area:'Mission'},
+      {name:'Fiorella\'s Jack Stack', type:'🥩 BBQ',                 price:'$$', area:'Martin City'},
+    ],
+    hotels:[
+      {name:'Hotel Kansas City', stars:4, price:'$150/nuit', area:'Downtown'},
+      {name:'Crossroads Hotel',  stars:4, price:'$160/nuit', area:'Crossroads'},
+      {name:'21c Museum Hotel',  stars:4, price:'$180/nuit', area:'Downtown'},
+    ],
+    transport:[
+      'Streetcar KC — gratuit sur Main St',
+      'Lyft/Uber pour Arrowhead Stadium',
+      'Parking limité — navettes recommandées',
+    ],
+    fanZone:'Power & Light District Fan Zone',
+    emergency:{police:'911', hospital:'KU Medical Center', embassy:'Ambassade Maroc DC: +1 202 462 7979'},
+    tips:'Orages fréquents en juin. Prévoyez un imperméable.',
+  },
+  'Houston': {
+    country:'usa', flag:'🇺🇸',
+    stadium:'NRG Stadium',
+    restaurants:[
+      {name:'Al-Aseel Grill',        type:'🥙 Halal Lebanese', price:'$$', area:'Westheimer'},
+      {name:'The Halal Guys Houston', type:'🥙 Halal',         price:'$',  area:'Midtown'},
+      {name:'Killen\'s BBQ',         type:'🥩 Texas BBQ',      price:'$$', area:'Pearland'},
+    ],
+    hotels:[
+      {name:'C. Baldwin Hotel',     stars:4, price:'$170/nuit', area:'Downtown'},
+      {name:'Aloft Houston',        stars:3, price:'$130/nuit', area:'Midtown'},
+      {name:'Hotel ZaZa Houston',   stars:4, price:'$200/nuit', area:'Museum District'},
+    ],
+    transport:[
+      'METRORail — billet $1.25',
+      'Navette officielle FIFA depuis Downtown',
+      'Location voiture recommandée',
+    ],
+    fanZone:'Discovery Green Fan Zone — Houston Downtown',
+    emergency:{police:'911', hospital:'Memorial Hermann Texas Medical Center', embassy:'Consulat Maroc Houston: +1 713 439 2422'},
+    tips:'Chaleur et humidité extrêmes (38°C+). Restez hydratés. NRG Stadium est climatisé.',
+  },
+  'Mexico City': {
+    country:'mexico', flag:'🇲🇽',
+    stadium:'Estadio Azteca',
+    restaurants:[
+      {name:'El Cardenal',      type:'🌮 Mexican traditionnel', price:'$$',   area:'Centro Histórico'},
+      {name:'Pujol',            type:'🍽 Gastronomique',        price:'$$$$', area:'Polanco'},
+      {name:'Halal Food México', type:'🥙 Halal',              price:'$',    area:'Polanco'},
+    ],
+    hotels:[
+      {name:'Hotel Carlota',              stars:4, price:'$120/nuit', area:'Cuauhtémoc'},
+      {name:'Casa Decu',                  stars:3, price:'$80/nuit',  area:'Condesa'},
+      {name:'Hyatt Regency Mexico City',  stars:5, price:'$200/nuit', area:'Polanco'},
+    ],
+    transport:[
+      'Metro CDMX — billet 5 pesos (~0.25$)',
+      'Metrobus — billet 6 pesos',
+      'Uber disponible et économique',
+    ],
+    fanZone:'Zócalo Fan Zone — Place principale CDMX',
+    emergency:{police:'911', hospital:'Hospital Ángeles Lomas', embassy:'Ambassade Maroc Mexico: +52 55 5596 3467'},
+    tips:'Altitude 2240m — acclimatez-vous 1-2 jours. Évitez l\'eau du robinet. Uber est sûr et pas cher.',
+  },
+  'Guadalajara': {
+    country:'mexico', flag:'🇲🇽',
+    stadium:'Estadio Akron',
+    restaurants:[
+      {name:'La Chata',              type:'🌮 Mexican tapatío', price:'$',  area:'Centro'},
+      {name:'Karne Garibaldi',       type:'🥩 Birria',         price:'$$', area:'Zapopan'},
+      {name:'Restaurant Halal GDL',  type:'🥙 Halal',          price:'$',  area:'Zapopan'},
+    ],
+    hotels:[
+      {name:'One Guadalajara Tapatío', stars:3, price:'$70/nuit',  area:'Tapatío'},
+      {name:'Hilton Guadalajara',      stars:5, price:'$160/nuit', area:'Centro'},
+      {name:'Hampton Inn Zapopan',     stars:3, price:'$90/nuit',  area:'Zapopan'},
+    ],
+    transport:[
+      'Tren Ligero (tramway) — billet 9 pesos',
+      'Uber recommandé pour Estadio Akron',
+      'Macrobús — réseau bus rapide',
+    ],
+    fanZone:'Zapopan Fan Village — près du stade',
+    emergency:{police:'911', hospital:'Hospital Country 2000', embassy:'Ambassade Maroc Mexico: +52 55 5596 3467'},
+    tips:'Ville très sûre. Climat agréable. Tequila et birria — spécialités locales à goûter!',
+  },
+  'Toronto': {
+    country:'canada', flag:'🇨🇦',
+    stadium:'BMO Field',
+    restaurants:[
+      {name:'Paramount Fine Foods',        type:'🥙 Halal Lebanese', price:'$$',   area:'Multiple locations'},
+      {name:'Ali Baba\'s Middle Eastern',  type:'🥙 Halal',          price:'$',    area:'Downtown'},
+      {name:'Canoe Restaurant',            type:'🍁 Canadian',       price:'$$$$', area:'Financial District'},
+    ],
+    hotels:[
+      {name:'Gladstone House',                 stars:4, price:'$160/nuit', area:'West Queen West'},
+      {name:'Ace Hotel Toronto',               stars:4, price:'$200/nuit', area:'Waverley'},
+      {name:'Holiday Inn Toronto Downtown',    stars:3, price:'$140/nuit', area:'Downtown'},
+    ],
+    transport:[
+      'TTC Subway — billet $3.30 CAD',
+      'Streetcar 509 → BMO Field direct',
+      'Presto Card recommandée (carte rechargeable)',
+    ],
+    fanZone:'Nathan Phillips Square Fan Zone',
+    emergency:{police:'911', hospital:'Toronto General Hospital', embassy:'Ambassade Maroc Ottawa: +1 613 236 7391'},
+    tips:'Très multiculturel — nombreux restaurants halal. Réservez tôt — hébergements limités.',
+  },
+  'Vancouver': {
+    country:'canada', flag:'🇨🇦',
+    stadium:'BC Place',
+    restaurants:[
+      {name:'Jamjar Canteen',   type:'🥙 Halal Lebanese', price:'$$',  area:'Commercial Drive'},
+      {name:'Medina Café',      type:'☕ Brunch',          price:'$$',  area:'Downtown'},
+      {name:'Ask for Luigi',    type:'🍝 Italian',         price:'$$$', area:'Railtown'},
+    ],
+    hotels:[
+      {name:'Skwachàys Lodge', stars:4, price:'$180/nuit', area:'Downtown Eastside'},
+      {name:'Victorian Hotel', stars:3, price:'$130/nuit', area:'Downtown'},
+      {name:'Listel Hotel',    stars:4, price:'$200/nuit', area:'West End'},
+    ],
+    transport:[
+      'SkyTrain — billet $3.15 CAD',
+      'Compass Card — carte rechargeable recommandée',
+      'BC Place accessible à pied depuis Downtown',
+    ],
+    fanZone:'Jack Poole Plaza Fan Zone — waterfront',
+    emergency:{police:'911', hospital:'Vancouver General Hospital', embassy:'Ambassade Maroc Ottawa: +1 613 236 7391'},
+    tips:'Ville magnifique. Pluie possible en juin. BC Place est à 10min à pied du centre.',
+  },
+};
+
 // ── Helper functions ──
 export function haversine(lat1,lng1,lat2,lng2){
   const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;

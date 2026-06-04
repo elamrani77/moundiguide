@@ -6,7 +6,8 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 import {
   TRANSLATIONS, BR, TEAM_DATA, PLAYERS_IMG, TEAM_ISO, PLAYERS,
   WELCOME_FAN, WELCOME, STADIUMS, CITIES, POIS, POI_CATS, NEWS,
-  CURRENCIES, INFO_ITEMS, DARIJA, haversine, normalize, formatDist, F
+  CURRENCIES, INFO_ITEMS, DARIJA, haversine, normalize, formatDist, F,
+  CITY_GUIDE
 } from "../constants.js";
 import { useAnalytics } from "../hooks/useAnalytics.js";
 import LEDBoard from "../components/LEDBoard.jsx";
@@ -82,6 +83,8 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
   const timelineRef=useRef(null);const timelineInView=useInView(timelineRef,{margin:"-50px"});
   const timelineLineRef=useRef(null);
   const [selectedStadium,setSelectedStadium]=useState(null);
+  const [selectedCity,setSelectedCity]=useState(null);
+  const [selectedCityTab,setSelectedCityTab]=useState(0);
   const [poiCategory,setPoiCategory]=useState("all");
   const [selectedPoi,setSelectedPoi]=useState(null);
   const [mapFlyTarget,setMapFlyTarget]=useState(null);
@@ -441,11 +444,57 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
                     <div style={{fontFamily:font,fontSize:isDesk?18:13,fontWeight:700,color:"#FFF"}}>{city.flag} {city.city}</div>
                     <div style={{fontFamily:font,fontSize:isDesk?10:9,color:"rgba(255,255,255,0.6)",marginTop:4,
                       letterSpacing:2,textTransform:"uppercase"}}>{T.villeHote}</div>
+                    {CITY_GUIDE[city.city]&&(
+                      <button
+                        onClick={e=>{e.stopPropagation();setSelectedCity(city.city);setSelectedCityTab(0);}}
+                        style={{marginTop:8,padding:"4px 10px",borderRadius:20,
+                          background:"rgba(196,30,58,0.1)",border:"1px solid rgba(196,30,58,0.4)",
+                          color:"#C41E3A",fontSize:9,fontWeight:700,cursor:"pointer",fontFamily:font}}
+                      >
+                        📍 Guide pratique
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* International WC 2026 host cities */}
+          <div style={{marginTop:28}}>
+            <div style={{fontFamily:font,fontSize:isDesk?16:14,fontWeight:700,color:C.str,marginBottom:14}}>
+              🌍 Villes internationales — WC 2026
+            </div>
+            <div style={{display:"flex",gap:12,overflowX:"auto",paddingBottom:8,WebkitOverflowScrolling:"touch",
+              scrollbarWidth:"thin"}}>
+              {Object.entries(CITY_GUIDE).map(([cityName,guide])=>{
+                const cColors={usa:"#3C3B6E",canada:"#D52B1E",mexico:"#006847"};
+                const bg=cColors[guide.country]||"#1A56DB";
+                return(
+                  <div key={cityName} style={{flexShrink:0,width:isDesk?200:150,borderRadius:16,
+                    background:`linear-gradient(135deg,${bg} 0%,${bg}BB 100%)`,
+                    padding:"16px 14px"}}>
+                    <div style={{fontSize:22,marginBottom:6}}>{guide.flag}</div>
+                    <div style={{fontFamily:font,fontSize:isDesk?14:12,fontWeight:700,color:"#FFF",lineHeight:1.2,marginBottom:3}}>
+                      {cityName}
+                    </div>
+                    <div style={{fontFamily:font,fontSize:10,color:"rgba(255,255,255,0.65)",marginBottom:12}}>
+                      🏟️ {guide.stadium}
+                    </div>
+                    <button
+                      onClick={()=>{setSelectedCity(cityName);setSelectedCityTab(0);}}
+                      style={{padding:"5px 11px",borderRadius:20,
+                        background:"rgba(196,30,58,0.1)",border:"1px solid rgba(196,30,58,0.5)",
+                        color:"#C41E3A",fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:font}}
+                    >
+                      📍 Guide pratique
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
         </div>
 
         {/* Map — full width */}
@@ -913,6 +962,183 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           </button>
         </div>
       </div>
+
+      {/* ── City Guide Drawer ── */}
+      {selectedCity&&CITY_GUIDE[selectedCity]&&(()=>{
+        const guide=CITY_GUIDE[selectedCity];
+        const cColors={usa:"#3C3B6E",canada:"#D52B1E",mexico:"#006847"};
+        const hBg=cColors[guide.country]||"#1A56DB";
+        const tabs=["🍽 Restaurants","🏨 Hôtels","🚇 Transport","🆘 Urgences"];
+        return(
+          <>
+            {/* Backdrop */}
+            <div
+              onClick={()=>setSelectedCity(null)}
+              style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:2000}}
+            />
+            {/* Panel */}
+            <div style={{
+              position:"fixed",zIndex:2001,overflow:"hidden",
+              display:"flex",flexDirection:"column",background:"#FAFAFA",
+              ...(isDesk
+                ?{right:0,top:0,width:420,height:"100vh",boxShadow:"-4px 0 32px rgba(0,0,0,0.2)"}
+                :{bottom:0,left:0,right:0,height:"85vh",borderRadius:"20px 20px 0 0",boxShadow:"0 -4px 32px rgba(0,0,0,0.2)"}),
+            }}>
+              {/* Header */}
+              <div style={{background:`linear-gradient(135deg,${hBg},${hBg}CC)`,
+                padding:"24px 20px 20px",position:"relative",flexShrink:0}}>
+                <button
+                  onClick={()=>setSelectedCity(null)}
+                  style={{position:"absolute",top:12,right:12,background:"rgba(255,255,255,0.2)",
+                    border:"none",borderRadius:8,width:32,height:32,cursor:"pointer",
+                    color:"#FFF",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}
+                >✕</button>
+                <div style={{fontSize:28,marginBottom:4}}>{guide.flag}</div>
+                <div style={{fontFamily:font,fontSize:22,fontWeight:800,color:"#FFF",lineHeight:1.1}}>{selectedCity}</div>
+                <div style={{fontFamily:font,fontSize:12,color:"rgba(255,255,255,0.7)",marginTop:4}}>🏟️ {guide.stadium}</div>
+              </div>
+
+              {/* Tabs */}
+              <div style={{display:"flex",borderBottom:"1px solid #E5E7EB",flexShrink:0,background:"#FFF"}}>
+                {tabs.map((tab,i)=>(
+                  <button key={i} onClick={()=>setSelectedCityTab(i)} style={{
+                    flex:1,padding:"11px 4px",border:"none",cursor:"pointer",
+                    background:"transparent",fontFamily:font,
+                    fontSize:isDesk?11:9,fontWeight:selectedCityTab===i?700:500,
+                    color:selectedCityTab===i?hBg:"#6B7280",
+                    borderBottom:selectedCityTab===i?`2px solid ${hBg}`:"2px solid transparent",
+                    transition:"all .15s",
+                  }}>{tab}</button>
+                ))}
+              </div>
+
+              {/* Scrollable content */}
+              <div style={{flex:1,overflowY:"auto",padding:"16px"}}>
+
+                {/* Tab 0 — Restaurants */}
+                {selectedCityTab===0&&(
+                  <div>
+                    {guide.restaurants.map((r,i)=>(
+                      <div key={i} style={{background:"#FFF",border:"1px solid #E5E7EB",
+                        borderRadius:12,padding:"12px 14px",marginBottom:8}}>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                          <div style={{flex:1}}>
+                            <div style={{fontFamily:font,fontSize:13,fontWeight:700,color:"#111827"}}>{r.name}</div>
+                            <div style={{fontFamily:font,fontSize:11,color:"#6B7280",marginTop:2}}>{r.type}</div>
+                            <div style={{fontFamily:font,fontSize:10,color:"#9CA3AF",marginTop:2}}>📍 {r.area}</div>
+                          </div>
+                          <div style={{fontFamily:font,fontSize:13,fontWeight:700,color:"#00823C",
+                            flexShrink:0,marginLeft:8}}>{r.price}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Tab 1 — Hôtels */}
+                {selectedCityTab===1&&(
+                  <div>
+                    {guide.hotels.map((h,i)=>(
+                      <a key={i}
+                        href={`https://www.google.com/maps/search/${encodeURIComponent(h.name+" "+selectedCity)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        style={{textDecoration:"none",display:"block",marginBottom:8}}>
+                        <div style={{background:"#FFF",border:"1px solid #E5E7EB",borderRadius:12,padding:"12px 14px"}}>
+                          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                            <div style={{flex:1}}>
+                              <div style={{fontFamily:font,fontSize:13,fontWeight:700,color:"#111827"}}>{h.name}</div>
+                              <div style={{fontFamily:font,fontSize:12,color:BR.gold,marginTop:2}}>{"★".repeat(h.stars)}</div>
+                              <div style={{fontFamily:font,fontSize:10,color:"#9CA3AF",marginTop:2}}>📍 {h.area}</div>
+                            </div>
+                            <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
+                              <div style={{fontFamily:font,fontSize:11,fontWeight:700,color:hBg}}>{h.price}</div>
+                              <div style={{fontFamily:font,fontSize:9,color:"#9CA3AF",marginTop:2}}>🗺️ Maps ↗</div>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {/* Tab 2 — Transport */}
+                {selectedCityTab===2&&(
+                  <div>
+                    {guide.transport.map((t,i)=>(
+                      <div key={i} style={{display:"flex",gap:10,padding:"10px 0",
+                        borderBottom:i<guide.transport.length-1?"1px solid #F3F4F6":"none",
+                        alignItems:"flex-start"}}>
+                        <span style={{fontSize:16,flexShrink:0,marginTop:2}}>🚇</span>
+                        <span style={{fontFamily:font,fontSize:12,color:"#374151",lineHeight:1.5}}>{t}</span>
+                      </div>
+                    ))}
+                    {guide.fanZone&&(
+                      <div style={{background:`${hBg}11`,border:`1px solid ${hBg}33`,
+                        borderRadius:12,padding:"12px 14px",marginTop:12}}>
+                        <div style={{fontFamily:font,fontSize:12,fontWeight:700,color:hBg,marginBottom:4}}>
+                          🎉 Fan Zone
+                        </div>
+                        <div style={{fontFamily:font,fontSize:12,color:"#374151"}}>{guide.fanZone}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab 3 — Urgences */}
+                {selectedCityTab===3&&(
+                  <div>
+                    <div style={{background:"#FEF2F2",border:"1px solid #FECACA",
+                      borderRadius:12,padding:"14px",marginBottom:12}}>
+                      <div style={{display:"flex",gap:10,marginBottom:10,alignItems:"center"}}>
+                        <span style={{fontSize:20}}>🚔</span>
+                        <div>
+                          <div style={{fontFamily:font,fontSize:10,color:"#9CA3AF",
+                            textTransform:"uppercase",letterSpacing:1,marginBottom:2}}>Police</div>
+                          <div style={{fontFamily:font,fontSize:20,fontWeight:800,color:"#C41E3A"}}>
+                            {guide.emergency.police}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
+                        <span style={{fontSize:20}}>🏥</span>
+                        <div>
+                          <div style={{fontFamily:font,fontSize:10,color:"#9CA3AF",
+                            textTransform:"uppercase",letterSpacing:1,marginBottom:2}}>Hôpital</div>
+                          <div style={{fontFamily:font,fontSize:13,fontWeight:600,color:"#374151"}}>
+                            {guide.emergency.hospital}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                        <span style={{fontSize:20}}>📞</span>
+                        <div>
+                          <div style={{fontFamily:font,fontSize:10,color:"#9CA3AF",
+                            textTransform:"uppercase",letterSpacing:1,marginBottom:2}}>Ambassade Maroc</div>
+                          <div style={{fontFamily:font,fontSize:12,fontWeight:600,color:"#374151"}}>
+                            {guide.emergency.embassy}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {guide.tips&&(
+                      <div style={{background:"#FFFBEB",border:"1px solid #FCD34D",
+                        borderRadius:12,padding:"12px 14px"}}>
+                        <div style={{fontFamily:font,fontSize:12,fontWeight:700,color:"#92400E",marginBottom:6}}>
+                          💡 Conseils locaux
+                        </div>
+                        <div style={{fontFamily:font,fontSize:12,color:"#78350F",lineHeight:1.6}}>
+                          {guide.tips}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              </div>
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 }
