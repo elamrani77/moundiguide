@@ -1,189 +1,327 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { TRANSLATIONS, BR, TEAM_DATA, TEAM_ACCENT, TEAM_ISO, F } from "../constants.js";
+import { TRANSLATIONS, BR, F } from "../constants.js";
 import MoundiLogo from "./MoundiLogo.jsx";
+import { getLiveMatches, getTeamIsoFromName } from "../services/wc2026Api.js";
 
-function Navbar({page, setPage, scrolled, C, lang, curLang, showLang, setShowLang, isDesk, selectedTeam, onPickTeam, setShowTeamProfile}){
-  const [menuOpen, setMenuOpen] = useState(false);
-  useEffect(()=>{
-    if(!selectedTeam)return;
-    const iso=(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase();
-    const link=document.createElement("link");
-    link.rel="preload";link.as="image";
-    link.href=`https://flagcdn.com/24x18/${iso}.png`;
-    document.head.appendChild(link);
-    return()=>{if(document.head.contains(link))document.head.removeChild(link);};
-  },[selectedTeam?.t]);
-  const [notifGranted,setNotifGranted]=useState(
-    typeof Notification!=="undefined"&&Notification.permission==="granted"
+function Navbar({
+  page, setPage, scrolled, C, lang, setLang,
+  curLang, showLang, setShowLang,
+  isDesk, selectedTeam, onPickTeam, setShowTeamProfile, user, userAvatar,
+}){
+  const [menuOpen,     setMenuOpen    ] = useState(false);
+  const [notifGranted, setNotifGranted] = useState(
+    typeof Notification !== "undefined" && Notification.permission === "granted"
   );
-  async function handleNotifBell(){
-    if(notifGranted)return;
-    if(!("Notification" in window))return;
-    const perm=await Notification.requestPermission();
-    if(perm==="granted"){
+  const [liveMatch,    setLiveMatch   ] = useState(null);
+
+  // Poll WC 2026 live scores every 60 s
+  useEffect(() => {
+    async function fetchLive() {
+      try {
+        const matches = await getLiveMatches();
+        if (matches.length > 0) {
+          const m = matches[0];
+          setLiveMatch({
+            home:         m.teams?.home?.name,
+            away:         m.teams?.away?.name,
+            homeScore:    m.goals?.home ?? 0,
+            awayScore:    m.goals?.away ?? 0,
+            minute:       m.fixture?.status?.elapsed || "?",
+            homeFlagIso:  getTeamIsoFromName(m.teams?.home?.name),
+            awayFlagIso:  getTeamIsoFromName(m.teams?.away?.name),
+          });
+        } else {
+          setLiveMatch(null);
+        }
+      } catch {
+        setLiveMatch(null);
+      }
+    }
+    fetchLive();
+    const interval = setInterval(fetchLive, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+
+  async function handleNotifBell() {
+    if (notifGranted) return;
+    if (!("Notification" in window)) return;
+    const perm = await Notification.requestPermission();
+    if (perm === "granted") {
       setNotifGranted(true);
-      localStorage.setItem("moundiNotif","true");
-      new Notification("MoundiGuide 🏆",{
-        body:"Notifications activées ! Vous recevrez des alertes avant les matchs.",
-        icon:"/logo.png",badge:"/logo.png",
+      localStorage.setItem("moundiNotif", "true");
+      new Notification("MoundiGuide 🏆", {
+        body: "Notifications activées ! Vous recevrez des alertes avant les matchs.",
+        icon: "/logo.png", badge: "/logo.png",
       });
     }
   }
+
   const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
-  const navBg = "#FFFFFF";
   const linkColor = "#374151";
 
-  const NavLink = ({id, label}) => {
+  // ── Desktop NavLink ──────────────────────────────────────────────────────
+  const NavLink = ({ id, label }) => {
     const active = page === id;
-    return(
-      <button onClick={()=>{setPage(id);setMenuOpen(false);}}
-        style={{background:"none",border:"none",cursor:"pointer",fontFamily:F,fontSize:14,fontWeight:active?600:400,
-          color:active?"#C8102E":linkColor,
-          padding:"6px 4px",position:"relative",transition:"all .2s",letterSpacing:0.3}}>
+    return (
+      <button
+        onClick={() => { setPage(id); setMenuOpen(false); }}
+        style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontFamily: F, fontSize: 14, fontWeight: active ? 600 : 500,
+          color: active ? "#C41E3A" : "#121414",
+          padding: "8px 16px", position: "relative", transition: "color .2s",
+        }}
+      >
         {label}
-        {active&&<div style={{position:"absolute",bottom:-2,left:0,right:0,height:2,background:"#C8102E",borderRadius:2}}/>}
+        {active && (
+          <div style={{
+            position: "absolute", bottom: 0, left: 8, right: 8,
+            height: 2, background: "#C41E3A", borderRadius: 2,
+          }}/>
+        )}
       </button>
     );
   };
 
-  return(
+  // ── Render ───────────────────────────────────────────────────────────────
+  return (
     <motion.nav
-      initial={{opacity:0,y:-24}}
-      animate={{opacity:1,y:0}}
-      transition={{duration:0.6,ease:"easeOut"}}
-      style={{position:"fixed",top:0,left:0,right:0,zIndex:1000,background:navBg,backdropFilter:"blur(12px)",
-      borderBottom:"1px solid #E5E7EB",padding:"0 24px"}}>
-      <div style={{maxWidth:1280,margin:"0 auto",height:isDesk?64:52,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      initial={{ opacity: 0, y: -24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000,
+        background: "rgba(255,255,255,0.98)", backdropFilter: "blur(12px)",
+        borderBottom: "1px solid rgba(0,0,0,0.08)",
+        padding: "0 24px",
+      }}
+    >
+      <div style={{
+        maxWidth: 1280, margin: "0 auto",
+        height: isDesk ? 64 : 52,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        position: "relative",
+      }}>
 
-        {/* Logo */}
-        <div onClick={()=>setPage("home")} style={{cursor:"pointer"}}>
-          <MoundiLogo size={isDesk?52:32} textColor={BR.red} showSubtitle={isDesk} textSize={isDesk?18:15}/>
+        {/* ── LEFT: Logo ─────────────────────────────────────────────────── */}
+        <div onClick={() => setPage("home")} style={{ cursor: "pointer", flexShrink: 0 }}>
+          <MoundiLogo
+            size={isDesk ? 52 : 32}
+            textColor={BR.red}
+            showSubtitle={isDesk}
+            textSize={isDesk ? 18 : 15}
+          />
         </div>
 
-        {/* Desktop nav */}
-        {isDesk?(
-          <div style={{display:"flex",alignItems:"center",gap:28}}>
+        {/* ── CENTER: Nav links — absolutely centered (desktop only) ──────── */}
+        {isDesk && (
+          <div style={{
+            position: "absolute", left: "50%", transform: "translateX(-50%)",
+            display: "flex", alignItems: "center", gap: 4,
+          }}>
             <NavLink id="home"     label={T.navHome}/>
             <NavLink id="ticket"   label={T.navTicket}/>
             <NavLink id="schedule" label={T.navSchedule}/>
-
-            {/* Divider */}
-            <div style={{width:1,height:20,background:"#E5E7EB"}}/>
-
-            {/* Team + Language buttons */}
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <button onClick={onPickTeam}
-                aria-label={`Changer d'équipe - ${selectedTeam?.t||"Sélectionner une équipe"}`}
-                style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
-                  padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
-                  fontFamily:F,fontSize:13,fontWeight:600,color:BR.red,transition:"all .2s"}}>
-                {selectedTeam
-                  ?<img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
-                    alt={selectedTeam.t} style={{width:24,height:18,borderRadius:2,objectFit:"cover"}}
-                    onError={e=>{e.target.style.display="none";}}/>
-                  :<span style={{fontSize:18}}>🌍</span>}
-                <span>{selectedTeam?.t||"Team"}</span>
-              </button>
-              {selectedTeam&&(
-                <button onClick={()=>setShowTeamProfile(true)}
-                  aria-label="Voir le profil de l'équipe"
-                  style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid #E5E7EB",
-                    background:"white",fontSize:12,cursor:"pointer",marginLeft:4,
-                    display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  ℹ
-                </button>
-              )}
-              <button onClick={handleNotifBell} title="Activer les alertes matchs"
-                aria-label="Activer les notifications"
-                style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid #E5E7EB",
-                  background:"white",fontSize:14,cursor:"pointer",
-                  display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                {notifGranted?"🔔":"🔕"}
-              </button>
-              <button onClick={e=>{e.stopPropagation();setShowLang(p=>!p);}}
-                aria-label={`Changer de langue - ${curLang?.label}`}
-                style={{background:"transparent",border:"1.5px solid currentColor",borderRadius:999,
-                  padding:"6px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:6,
-                  fontFamily:F,fontSize:13,fontWeight:600,color:linkColor,transition:"all .2s"}}>
-                <span>{curLang.label}</span>
-                <span style={{opacity:.5,fontSize:10}}>▼</span>
-              </button>
-            </div>
+            {/* Fiche Équipe */}
+            <button
+              onClick={() => selectedTeam ? setShowTeamProfile(true) : setPage("profile")}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontFamily: F, fontSize: 14, fontWeight: 500,
+                color: "#121414",
+                padding: "8px 16px", transition: "color .2s",
+              }}
+            >
+              {T.teamSheet || "Fiche Équipe"}
+            </button>
           </div>
-        ):(
-          /* Mobile right side: bell + flag + hamburger */
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            {/* Bell */}
-            <button onClick={handleNotifBell} aria-label="Activer les notifications"
-              style={{background:"none",border:"none",cursor:"pointer",fontSize:18,lineHeight:1,padding:2}}>
-              {notifGranted?"🔔":"🔕"}
+        )}
+
+        {/* ── RIGHT (desktop) or mobile controls ─────────────────────────── */}
+        {isDesk ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+
+            {/* Profile avatar */}
+            <button
+              onClick={() => setPage(user ? "profile" : "login")}
+              aria-label={user ? "Mon profil" : "Se connecter"}
+              style={{
+                width: 40, height: 40, borderRadius: "50%",
+                background: userAvatar ? "transparent" : user ? "#C41E3A" : "rgba(0,0,0,0.07)",
+                border: userAvatar ? "none" : user ? "none" : "1.5px solid #E5E7EB",
+                cursor: "pointer", display: "flex",
+                alignItems: "center", justifyContent: "center",
+                color: user ? "#FFF" : linkColor,
+                fontSize: user ? 14 : 18, fontWeight: 700,
+                flexShrink: 0, transition: "all .2s",
+                overflow: "hidden", padding: 0,
+              }}
+            >
+              {userAvatar ? (
+                <img
+                  src={`${userAvatar}?t=${Date.now()}`}
+                  alt="avatar"
+                  style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", display: "block" }}
+                  onError={e => { e.target.style.display = "none"; }}
+                />
+              ) : (
+                user ? (user.email?.[0]?.toUpperCase() || "U") : "👤"
+              )}
             </button>
-            {/* Team flag → opens picker */}
-            <button onClick={onPickTeam}
-              aria-label={`Changer d'équipe - ${selectedTeam?.t||"Sélectionner une équipe"}`}
-              style={{background:"none",border:"none",cursor:"pointer",lineHeight:1,display:"flex",alignItems:"center",padding:2}}>
-              {selectedTeam
-                ?<img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
-                  alt={selectedTeam.t} style={{width:24,height:18,borderRadius:3,objectFit:"cover"}}
-                  onError={e=>{e.target.style.display="none";}}/>
-                :<span style={{fontSize:18}}>🌍</span>}
-            </button>
+          </div>
+
+        ) : (
+
+          /* Mobile right controls — logo + hamburger only */
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {/* Hamburger */}
-            <button onClick={()=>setMenuOpen(p=>!p)}
-              aria-label={menuOpen?"Fermer le menu":"Ouvrir le menu"}
-              style={{background:"none",border:`1px solid ${C.bdr}`,
-                borderRadius:8,width:36,height:36,cursor:"pointer",color:linkColor,fontSize:18,
-                display:"flex",alignItems:"center",justifyContent:"center"}}>
-              {menuOpen?"✕":"☰"}
+            <button
+              onClick={() => setMenuOpen(p => !p)}
+              aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+              style={{
+                background: "none",
+                border: "1px solid #E5E7EB",
+                borderRadius: 8, width: 36, height: 36, cursor: "pointer",
+                color: linkColor, fontSize: 18,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              {menuOpen ? "✕" : "☰"}
             </button>
           </div>
         )}
       </div>
 
-      {/* Mobile dropdown menu */}
-      {!isDesk&&menuOpen&&(
-        <div style={{background:"rgba(255,255,255,0.99)",
-          borderTop:`1px solid ${C.bdr}`,padding:"12px 20px 20px",animation:"slideDown .2s ease"}}>
+      {/* ── WC 2026 live score strip ────────────────────────────────────── */}
+      {liveMatch && (
+        <div style={{
+          background: "rgba(196,30,58,0.92)", backdropFilter: "blur(8px)",
+          padding: "4px 24px",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          gap: 10, fontSize: 12, fontFamily: F, color: "white",
+          direction: "ltr",
+        }}>
+          <span style={{
+            background: "rgba(255,255,255,0.2)", borderRadius: 4,
+            padding: "1px 6px", fontSize: 9, fontWeight: 800, letterSpacing: 1.5,
+          }}>🔴 LIVE</span>
+          <img
+            src={`https://flagcdn.com/16x12/${liveMatch.homeFlagIso}.png`}
+            alt={liveMatch.home}
+            style={{ height: 10, borderRadius: 2 }}
+            onError={e => { e.target.style.display = "none"; }}
+          />
+          <span style={{ fontWeight: 600 }}>{liveMatch.home}</span>
+          <span style={{ fontWeight: 800, fontSize: 14, margin: "0 2px" }}>
+            {liveMatch.homeScore}&nbsp;–&nbsp;{liveMatch.awayScore}
+          </span>
+          <img
+            src={`https://flagcdn.com/16x12/${liveMatch.awayFlagIso}.png`}
+            alt={liveMatch.away}
+            style={{ height: 10, borderRadius: 2 }}
+            onError={e => { e.target.style.display = "none"; }}
+          />
+          <span style={{ fontWeight: 600 }}>{liveMatch.away}</span>
+          <span style={{ color: "rgba(255,255,255,0.65)", fontSize: 10 }}>{liveMatch.minute}'</span>
+        </div>
+      )}
 
-          {/* Team row at top */}
-          {selectedTeam&&(
-            <div style={{display:"flex",gap:8,marginBottom:8,paddingBottom:8,borderBottom:`1px solid ${C.bdr}`}}>
-              <button onClick={()=>{onPickTeam();setMenuOpen(false);}}
-                style={{flex:1,display:"flex",alignItems:"center",gap:10,padding:"10px 14px",
-                  background:C.fld,border:`1px solid ${C.bdr}`,borderRadius:10,cursor:"pointer"}}>
-                <img src={`https://flagcdn.com/24x18/${(TEAM_ISO[selectedTeam.t]||"ma").toLowerCase()}.png`}
-                  alt={selectedTeam.t} style={{width:24,height:18,borderRadius:3,objectFit:"cover"}}
-                  onError={e=>{e.target.style.display="none";}}/>
-                <span style={{fontFamily:F,fontSize:14,fontWeight:600,color:C.str}}>{selectedTeam.t}</span>
-              </button>
-              <button onClick={()=>{setShowTeamProfile(true);setMenuOpen(false);}}
-                style={{padding:"10px 14px",background:C.fld,border:`1px solid ${C.bdr}`,
-                  borderRadius:10,cursor:"pointer",fontFamily:F,fontSize:12,color:C.mut,whiteSpace:"nowrap"}}>
-                👤 Profil
-              </button>
+      {/* ── Mobile dropdown menu ─────────────────────────────────────────── */}
+      {!isDesk && menuOpen && (
+        <div style={{
+          background: "rgba(255,255,255,0.99)",
+          borderTop: "1px solid #E5E7EB",
+          padding: "12px 16px 20px",
+          animation: "slideDown .2s ease",
+        }}>
+
+          {/* ── Profile row (top) ── */}
+          <button
+            onClick={() => { setPage(user ? "profile" : "login"); setMenuOpen(false); }}
+            style={{
+              display: "flex", alignItems: "center", gap: 12, width: "100%",
+              padding: "10px 12px", borderRadius: 10,
+              background: "#F9FAFB", border: "1px solid #E5E7EB",
+              cursor: "pointer", textAlign: "left", marginBottom: 4,
+            }}
+          >
+            <div style={{
+              width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
+              background: userAvatar ? "transparent" : user ? "#C41E3A" : "rgba(0,0,0,0.07)",
+              border: userAvatar ? "none" : user ? "none" : "1.5px solid #E5E7EB",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: user ? "#FFF" : linkColor, fontSize: user ? 15 : 18, fontWeight: 700,
+              overflow: "hidden",
+            }}>
+              {userAvatar ? (
+                <img
+                  src={`${userAvatar}?t=${Date.now()}`}
+                  alt="avatar"
+                  style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", display: "block" }}
+                  onError={e => { e.target.style.display = "none"; }}
+                />
+              ) : (
+                user ? (user.email?.[0]?.toUpperCase() || "U") : "👤"
+              )}
             </div>
-          )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontFamily: F, fontSize: 13, fontWeight: 600, color: "#111827",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
+                {user ? user.email : (T.login || "Se connecter")}
+              </div>
+              {user && (
+                <div style={{ fontFamily: F, fontSize: 11, color: "#6B7280" }}>
+                  {T.myProfile || "Mon profil"}
+                </div>
+              )}
+            </div>
+            <span style={{ color: "#9CA3AF", fontSize: 14, flexShrink: 0 }}>→</span>
+          </button>
 
-          {/* Nav links */}
-          {[{id:"home",label:T.mobileHome},{id:"ticket",label:T.mobileTick},{id:"schedule",label:T.mobileSch}].map(({id,label})=>(
-            <button key={id} onClick={()=>{setPage(id);setMenuOpen(false);}}
-              style={{display:"block",width:"100%",textAlign:"left",background:page===id?`${BR.red}11`:"none",
-                border:"none",padding:"12px 14px",borderRadius:10,cursor:"pointer",
-                fontFamily:F,fontSize:15,fontWeight:page===id?600:400,
-                color:page===id?BR.red:C.str,marginBottom:4,transition:"all .15s"}}>
-              {label}
-            </button>
-          ))}
+          {/* Divider */}
+          <div style={{ height: 1, background: "#E5E7EB", margin: "10px 0" }}/>
 
-          {/* Language selector */}
-          <div style={{display:"flex",gap:10,marginTop:8,paddingTop:12,borderTop:`1px solid ${C.bdr}`}}>
-            <button onClick={()=>setShowLang(p=>!p)}
-              style={{flex:1,padding:10,borderRadius:10,border:`1px solid ${C.bdr}`,
-                background:C.card,color:C.str,cursor:"pointer",fontFamily:F,fontSize:13}}>
-              {curLang.label}
-            </button>
-          </div>
+          {/* ── Nav links ── */}
+          {[
+            { id: "home",     icon: "🏠", label: T.mobileHome },
+            { id: "ticket",   icon: "🎟️", label: T.mobileTick },
+            { id: "teamsheet",icon: "📋", label: T.teamSheet || "Fiche Équipe", teamsheet: true },
+            { id: "schedule", icon: "📅", label: T.mobileSch  },
+          ].map(({ id, icon, label, teamsheet }) => {
+            const active = !teamsheet && page === id;
+            return (
+              <button
+                key={id}
+                onClick={() => {
+                  if (teamsheet) {
+                    setMenuOpen(false);
+                    if (selectedTeam) setShowTeamProfile(true);
+                    else setPage("profile");
+                  } else {
+                    setPage(id); setMenuOpen(false);
+                  }
+                }}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  width: "100%", textAlign: "left",
+                  background: active ? `${BR.red}11` : "none",
+                  border: "none", padding: "12px 14px", borderRadius: 10,
+                  cursor: "pointer", fontFamily: F, fontSize: 15,
+                  fontWeight: active ? 600 : 400,
+                  color: active ? BR.red : linkColor,
+                  marginBottom: 2, transition: "all .15s",
+                }}
+              >
+                {teamsheet && <span style={{ fontSize: 16 }}>📋</span>}
+                <span>{label}</span>
+              </button>
+            );
+          })}
+
         </div>
       )}
     </motion.nav>

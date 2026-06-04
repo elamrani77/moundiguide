@@ -1,13 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TRANSLATIONS, BR, PHASE_COLORS, MATCHES, FIFA_RANKINGS, NEWS, F } from "../constants.js";
+import { getAllFixtures, formatFixture } from "../services/wc2026Api.js";
+
+function normalizeRoundToPhase(round) {
+  if (!round) return "G";
+  const r = round.toLowerCase();
+  if (r.includes("group")) return "G";
+  if (r.includes("round of 16") || r.includes("of 16")) return "8";
+  if (r.includes("quarter")) return "Q";
+  if (r.includes("semi")) return "S";
+  if (r.includes("3rd") || r.includes("place")) return "3";
+  if (r.includes("final")) return "F";
+  return "G";
+}
 
 export default function SchedulePage({C,ac,F: Fprop,send,isDesk,lang,selectedTeam}){
   const font = Fprop || F;
   const T = TRANSLATIONS[lang] || TRANSLATIONS.en;
-  const[phase,setPhase]=useState("all");
+  const [phase,     setPhase    ] = useState("all");
+  const [apiMatches,setApiMatches] = useState([]);
+
   const phases=[{id:"all",label:T.phAll},{id:"G",label:T.phG},{id:"8",label:T.ph8},{id:"Q",label:T.phQ},{id:"S",label:T.phS},{id:"F",label:T.phF}];
   const PHASE_LABELS_T = {G:T.phG,"8":T.ph8,Q:T.phQ,S:T.phS,F:T.phF};
-  const filtered=phase==="all"?MATCHES:MATCHES.filter(m=>m.ph===phase);
+
+  // Fetch real WC 2026 fixtures; fall back to hardcoded MATCHES on error
+  useEffect(() => {
+    getAllFixtures()
+      .then(fixtures => {
+        const normalized = fixtures.map(f => {
+          const fmt = formatFixture(f);
+          const d   = fmt.date ? new Date(fmt.date) : null;
+          return {
+            ph:        normalizeRoundToPhase(fmt.round),
+            d:         d ? d.toLocaleDateString("fr-FR", {day:"numeric",month:"short"}) : "TBD",
+            tm:        d ? d.toLocaleTimeString("fr-FR", {hour:"2-digit",minute:"2-digit"}) : "",
+            a:         fmt.homeTeam || "TBD",
+            b:         fmt.awayTeam || "TBD",
+            c:         fmt.city || fmt.venue || "",
+            status:    fmt.status,
+            homeScore: fmt.homeScore,
+            awayScore: fmt.awayScore,
+            elapsed:   fmt.elapsed,
+          };
+        });
+        if (normalized.length > 0) setApiMatches(normalized);
+      })
+      .catch(() => { /* keep hardcoded MATCHES as fallback */ });
+  }, []);
+
+  const DISPLAY_MATCHES = apiMatches.length > 0 ? apiMatches : MATCHES;
+  const filtered = phase === "all"
+    ? DISPLAY_MATCHES
+    : DISPLAY_MATCHES.filter(m => m.ph === phase);
 
   return(
     <div style={{minHeight:"100vh",paddingTop:68,background:"#F4F5F7"}}>
@@ -40,7 +84,11 @@ export default function SchedulePage({C,ac,F: Fprop,send,isDesk,lang,selectedTea
         {/* 2-column grid desktop, 1-col mobile */}
         <div style={{display:"grid",gridTemplateColumns:isDesk?"1fr 1fr":"1fr",gap:14,marginBottom:48}}>
           {filtered.map((m,i)=>{
-            const isTeamMatch=selectedTeam&&(m.a.includes(selectedTeam.f)||m.b.includes(selectedTeam.f));
+            const isTeamMatch=selectedTeam&&(
+              (m.a||"").includes(selectedTeam.f||"___")||
+              (m.b||"").includes(selectedTeam.f||"___")||
+              m.a===selectedTeam.t||m.b===selectedTeam.t
+            );
             return(
             <div key={i}
               style={{background:isTeamMatch?`${ac}10`:"#FFFFFF",
@@ -58,9 +106,22 @@ export default function SchedulePage({C,ac,F: Fprop,send,isDesk,lang,selectedTea
                 </div>
                 <span style={{fontFamily:font,fontSize:11,color:C.mut}}>{m.d} · {m.tm}</span>
               </div>
-              <div style={{fontFamily:font,fontSize:isDesk?16:14,fontWeight:700,color:C.str,marginBottom:6}}>
+              <div style={{fontFamily:font,fontSize:isDesk?16:14,fontWeight:700,color:C.str,marginBottom:4}}>
                 {m.a} <span style={{color:C.mut,fontWeight:400,fontSize:13}}>vs</span> {m.b}
               </div>
+              {/* Live / finished score — only shown for real API data */}
+              {m.status && m.status !== "NS" && (
+                <div style={{fontFamily:font,fontSize:13,fontWeight:800,color:BR.red,marginBottom:4,display:"flex",alignItems:"center",gap:6}}>
+                  {m.homeScore ?? "–"}&nbsp;–&nbsp;{m.awayScore ?? "–"}
+                  {(m.status==="1H"||m.status==="2H"||m.status==="ET")&&(
+                    <span style={{fontSize:10,color:BR.red,background:`${BR.red}18`,borderRadius:4,padding:"1px 5px"}}>
+                      {m.elapsed?`${m.elapsed}'`:m.status}
+                    </span>
+                  )}
+                  {m.status==="HT"&&<span style={{fontSize:10,color:BR.gold,background:`${BR.gold}18`,borderRadius:4,padding:"1px 5px"}}>HT</span>}
+                  {m.status==="FT"&&<span style={{fontSize:10,color:C.mut}}>FT</span>}
+                </div>
+              )}
               <div style={{fontFamily:font,fontSize:12,color:C.mut}}>📍 {m.c}</div>
             </div>
             );

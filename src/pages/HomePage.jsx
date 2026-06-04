@@ -222,9 +222,7 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             <div style={{marginBottom:12,direction:lang==="ar"?"rtl":"ltr",textAlign:lang==="ar"?"right":"left"}}>
               <span style={{fontFamily:font,fontSize:isDesk?22:17,fontWeight:700,color:"rgba(255,255,255,0.92)",
                 textShadow:`0 0 24px ${teamData.colors[0]}CC`}}>
-                {lang==="ar"
-                  ?`!أهلاً مشجع ${teamData.flag} ${teamData.name||selectedTeam.t}`
-                  :(WELCOME_FAN[lang]||WELCOME_FAN.en)(teamData.flag,teamData.name||selectedTeam.t)}
+                {(WELCOME_FAN[lang]||WELCOME_FAN.en)(teamData.flag, selectedTeam.t)}
               </span>
             </div>
           )}

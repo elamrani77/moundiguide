@@ -20,3 +20,6 @@ Thumbs.db
 .windsurf/
 nanobanana-output/
 dist/
+
+.vercel
+.env*
