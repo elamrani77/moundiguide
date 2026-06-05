@@ -966,3 +966,16 @@ export function normalize(s){return s.normalize("NFD").replace(/[̀-ͯ]/g,"").to
 export function formatDist(m){return m<1000?`${Math.round(m)}m`:`${(m/1000).toFixed(1)}km`;}
 
 export const F = "'Outfit'";
+
+export const FIFA_RANKINGS_MAP = Object.fromEntries(
+  FIFA_RANKINGS.map(item => [item.t, {rank: item.r, points: item.p}])
+);
+
+export const POLL_FAVORITES = [
+  {t:"Morocco",   f:"🇲🇦", color:"#C41E3A"},
+  {t:"Spain",     f:"🇪🇸", color:"#AA151B"},
+  {t:"Argentina", f:"🇦🇷", color:"#4B9CD3"},
+  {t:"France",    f:"🇫🇷", color:"#002395"},
+  {t:"Brazil",    f:"🇧🇷", color:"#009C3B"},
+  {t:"Portugal",  f:"🇵🇹", color:"#006600"},
+];

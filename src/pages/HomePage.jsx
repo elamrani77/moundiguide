@@ -460,41 +460,6 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             </div>
           </div>
 
-          {/* International WC 2026 host cities */}
-          <div style={{marginTop:28}}>
-            <div style={{fontFamily:font,fontSize:isDesk?16:14,fontWeight:700,color:C.str,marginBottom:14}}>
-              🌍 Villes internationales — WC 2026
-            </div>
-            <div style={{display:"flex",gap:12,overflowX:"auto",paddingBottom:8,WebkitOverflowScrolling:"touch",
-              scrollbarWidth:"thin"}}>
-              {Object.entries(CITY_GUIDE).map(([cityName,guide])=>{
-                const cColors={usa:"#3C3B6E",canada:"#D52B1E",mexico:"#006847"};
-                const bg=cColors[guide.country]||"#1A56DB";
-                return(
-                  <div key={cityName} style={{flexShrink:0,width:isDesk?200:150,borderRadius:16,
-                    background:`linear-gradient(135deg,${bg} 0%,${bg}BB 100%)`,
-                    padding:"16px 14px"}}>
-                    <div style={{fontSize:22,marginBottom:6}}>{guide.flag}</div>
-                    <div style={{fontFamily:font,fontSize:isDesk?14:12,fontWeight:700,color:"#FFF",lineHeight:1.2,marginBottom:3}}>
-                      {cityName}
-                    </div>
-                    <div style={{fontFamily:font,fontSize:10,color:"rgba(255,255,255,0.65)",marginBottom:12}}>
-                      🏟️ {guide.stadium}
-                    </div>
-                    <button
-                      onClick={()=>{setSelectedCity(cityName);setSelectedCityTab(0);}}
-                      style={{padding:"5px 11px",borderRadius:20,
-                        background:"rgba(196,30,58,0.1)",border:"1px solid rgba(196,30,58,0.5)",
-                        color:"#C41E3A",fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:font}}
-                    >
-                      📍 Guide pratique
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
         </div>
 
         {/* Map — full width */}
@@ -979,56 +944,58 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             {/* Panel */}
             <div style={{
               position:"fixed",zIndex:2001,overflow:"hidden",
-              display:"flex",flexDirection:"column",background:"#FAFAFA",
+              display:"flex",flexDirection:"column",background:"#F8F9FA",
               ...(isDesk
                 ?{right:0,top:0,width:420,height:"100vh",boxShadow:"-4px 0 32px rgba(0,0,0,0.2)"}
                 :{bottom:0,left:0,right:0,height:"85vh",borderRadius:"20px 20px 0 0",boxShadow:"0 -4px 32px rgba(0,0,0,0.2)"}),
             }}>
               {/* Header */}
-              <div style={{background:`linear-gradient(135deg,${hBg},${hBg}CC)`,
+              <div style={{background:"linear-gradient(135deg,#C41E3A,#8B0000)",
                 padding:"24px 20px 20px",position:"relative",flexShrink:0}}>
                 <button
                   onClick={()=>setSelectedCity(null)}
-                  style={{position:"absolute",top:12,right:12,background:"rgba(255,255,255,0.2)",
+                  style={{position:"absolute",top:12,right:12,background:"rgba(255,255,255,0.15)",
                     border:"none",borderRadius:8,width:32,height:32,cursor:"pointer",
                     color:"#FFF",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}
                 >✕</button>
                 <div style={{fontSize:28,marginBottom:4}}>{guide.flag}</div>
-                <div style={{fontFamily:font,fontSize:22,fontWeight:800,color:"#FFF",lineHeight:1.1}}>{selectedCity}</div>
-                <div style={{fontFamily:font,fontSize:12,color:"rgba(255,255,255,0.7)",marginTop:4}}>🏟️ {guide.stadium}</div>
+                <div style={{fontFamily:font,fontSize:24,fontWeight:800,color:"#FFF",lineHeight:1.1}}>{selectedCity}</div>
+                <div style={{fontFamily:font,fontSize:13,color:"rgba(255,255,255,0.7)",marginTop:4}}>🏟️ {guide.stadium}</div>
               </div>
 
               {/* Tabs */}
-              <div style={{display:"flex",borderBottom:"1px solid #E5E7EB",flexShrink:0,background:"#FFF"}}>
+              <div style={{display:"flex",borderBottom:"1px solid rgba(0,0,0,0.08)",flexShrink:0,background:"white"}}>
                 {tabs.map((tab,i)=>(
                   <button key={i} onClick={()=>setSelectedCityTab(i)} style={{
                     flex:1,padding:"11px 4px",border:"none",cursor:"pointer",
                     background:"transparent",fontFamily:font,
                     fontSize:isDesk?11:9,fontWeight:selectedCityTab===i?700:500,
-                    color:selectedCityTab===i?hBg:"#6B7280",
-                    borderBottom:selectedCityTab===i?`2px solid ${hBg}`:"2px solid transparent",
+                    color:selectedCityTab===i?"#C41E3A":"rgba(0,0,0,0.5)",
+                    borderBottom:selectedCityTab===i?"2px solid #C41E3A":"2px solid transparent",
                     transition:"all .15s",
                   }}>{tab}</button>
                 ))}
               </div>
 
               {/* Scrollable content */}
-              <div style={{flex:1,overflowY:"auto",padding:"16px"}}>
+              <div className="city-guide-drawer" style={{flex:1,overflowY:"auto",padding:"16px",scrollbarWidth:"none",msOverflowStyle:"none"}}>
 
                 {/* Tab 0 — Restaurants */}
                 {selectedCityTab===0&&(
                   <div>
                     {guide.restaurants.map((r,i)=>(
-                      <div key={i} style={{background:"#FFF",border:"1px solid #E5E7EB",
-                        borderRadius:12,padding:"12px 14px",marginBottom:8}}>
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                      <div key={i} style={{background:"white",border:"1px solid rgba(0,0,0,0.08)",
+                        borderRadius:12,padding:"14px 16px",marginBottom:8,
+                        boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+                        <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
+                          <div style={{fontFamily:font,fontSize:13,fontWeight:700,color:"#C41E3A",
+                            background:"rgba(196,30,58,0.08)",borderRadius:8,padding:"4px 10px",
+                            flexShrink:0,whiteSpace:"nowrap"}}>{r.price}</div>
                           <div style={{flex:1}}>
-                            <div style={{fontFamily:font,fontSize:13,fontWeight:700,color:"#111827"}}>{r.name}</div>
-                            <div style={{fontFamily:font,fontSize:11,color:"#6B7280",marginTop:2}}>{r.type}</div>
-                            <div style={{fontFamily:font,fontSize:10,color:"#9CA3AF",marginTop:2}}>📍 {r.area}</div>
+                            <div style={{fontFamily:font,fontSize:15,fontWeight:700,color:"#111827"}}>{r.name}</div>
+                            <div style={{fontFamily:font,fontSize:12,color:"rgba(0,0,0,0.5)",marginTop:2}}>{r.type}</div>
+                            <div style={{fontFamily:font,fontSize:11,color:"rgba(0,0,0,0.4)",marginTop:2}}>📍 {r.area}</div>
                           </div>
-                          <div style={{fontFamily:font,fontSize:13,fontWeight:700,color:"#00823C",
-                            flexShrink:0,marginLeft:8}}>{r.price}</div>
                         </div>
                       </div>
                     ))}

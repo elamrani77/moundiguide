@@ -125,6 +125,18 @@ export default function MoundiGuide(){
     localStorage.setItem("lang",code);
   };
 
+  const navigateTo=(newPage)=>{
+    setPage(newPage);
+    window.history.pushState({page:newPage},'',`#${newPage}`);
+  };
+
+  useEffect(()=>{
+    const handlePop=(e)=>{const p=e.state?.page||'home';setPage(p);};
+    window.addEventListener('popstate',handlePop);
+    window.history.replaceState({page:'home'},'','#home');
+    return()=>window.removeEventListener('popstate',handlePop);
+  },[]);
+
   const curLang=LANGUAGES.find(l=>l.code===lang);
   const bgStyle={background:"#F4F5F7"};
   const scrollToTop=()=>window.scrollTo({top:0,behavior:"smooth"});
@@ -135,7 +147,7 @@ export default function MoundiGuide(){
   // Login page — full-screen, no nav/chat
   if(page==="login") return(
     <Suspense fallback={<div style={{background:"#121414",minHeight:"100vh"}}/>}>
-      <LoginPage lang={lang} onSkip={()=>setPage("home")} onSuccess={()=>setPage("home")}/>
+      <LoginPage lang={lang} onSkip={()=>navigateTo("home")} onSuccess={()=>navigateTo("home")}/>
     </Suspense>
   );
 
@@ -144,7 +156,7 @@ export default function MoundiGuide(){
     <Suspense fallback={<div style={{background:"#121414",minHeight:"100vh"}}/>}>
       <ProfilePage
         user={user} lang={lang} setLang={handleLangChange} isDesk={isDesk}
-        onBack={()=>setPage("home")}
+        onBack={()=>navigateTo("home")}
         onLogout={()=>{
           [
             "moundiguide_avatar","userTeam","moundiguide_setup_done","lang",
@@ -153,7 +165,7 @@ export default function MoundiGuide(){
           sessionStorage.clear();
           setUser(null);setUserAvatar(null);setSelectedTeam(null);setPage("home");
         }}
-        onSave={()=>setPage("home")}
+        onSave={()=>navigateTo("home")}
         setUserTeam={setSelectedTeam}
         setUserAvatar={setUserAvatar}
       />
@@ -207,6 +219,8 @@ export default function MoundiGuide(){
         *{box-sizing:border-box;margin:0;padding:0}
         ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:${C.sc};border-radius:4px}
         .pills-row::-webkit-scrollbar{display:none}
+        .cities-scroll::-webkit-scrollbar{display:none}
+        .city-guide-drawer::-webkit-scrollbar{display:none}
         .cities-scroll-inner{direction:ltr!important}
         .leaflet-control-container{z-index:400!important}
         .leaflet-top,.leaflet-bottom{z-index:400!important}
@@ -221,7 +235,7 @@ export default function MoundiGuide(){
       `}</style>
 
       {/* Navbar — always on top */}
-      <Navbar page={page} setPage={setPage} scrolled={scrolled} C={C}
+      <Navbar page={page} setPage={navigateTo} scrolled={scrolled} C={C}
         lang={lang} setLang={handleLangChange} curLang={curLang} showLang={showLang} setShowLang={setShowLang}
         isDesk={isDesk} selectedTeam={selectedTeam} onPickTeam={()=>setShowTeamPicker(true)}
         setShowTeamProfile={setShowTeamProfile} user={user} userAvatar={userAvatar}/>
@@ -305,18 +319,18 @@ export default function MoundiGuide(){
 
       {/* Page content */}
       <div style={{overflowX:"hidden",direction:lang==="ar"?"rtl":"ltr"}}>
-        {!splash&&page==="home"    &&<HomePage    C={C} ac={ac} F={F} lang={lang} send={send} setPage={setPage} isDesk={isDesk} selectedTeam={selectedTeam}/>}
+        {!splash&&page==="home"    &&<HomePage    C={C} ac={ac} F={F} lang={lang} send={send} setPage={navigateTo} isDesk={isDesk} selectedTeam={selectedTeam}/>}
         <Suspense fallback={<div style={{minHeight:400}}/>}>
           {!splash&&page==="ticket"  &&<TicketPage  C={C} F={F} isDesk={isDesk} lang={lang}/>}
           {!splash&&page==="schedule"&&<SchedulePage C={C} ac={ac} F={F} send={send} isDesk={isDesk} lang={lang} selectedTeam={selectedTeam}/>}
-          {!splash&&<Footer C={C} F={F} setPage={setPage} lang={lang}/>}
+          {!splash&&<Footer C={C} F={F} setPage={navigateTo} lang={lang}/>}
         </Suspense>
       </div>
 
       {/* Team Profile drawer */}
       <Suspense fallback={null}>
         <TeamProfile selectedTeam={selectedTeam} showTeamProfile={showTeamProfile}
-          setShowTeamProfile={setShowTeamProfile} isDesk={isDesk} setPage={setPage} lang={lang}/>
+          setShowTeamProfile={setShowTeamProfile} isDesk={isDesk} setPage={navigateTo} lang={lang}/>
       </Suspense>
 
       {/* Floating AI Chat */}
