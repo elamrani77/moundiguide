@@ -2,9 +2,9 @@ const CACHE_NAME = "moundiguide-v1";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
-  "/logo.png",
+  "/logo.webp",
   "/manifest.json",
-  "/players-default.png",
+  "/players-default.webp",
 ];
 
 self.addEventListener("install", e => {
@@ -75,8 +75,8 @@ self.addEventListener("push", e => {
   e.waitUntil(
     self.registration.showNotification(data.title || "MoundiGuide 🏆", {
       body: data.body || "Notification MoundiGuide",
-      icon: "/logo.png",
-      badge: "/logo.png",
+      icon: "/logo.webp",
+      badge: "/logo.webp",
       data: { url: data.url || "/" },
     })
   );
