@@ -18,6 +18,7 @@ const Footer       = lazy(() => import("./components/Footer.jsx"));
 const ChatFloat    = lazy(() => import("./components/ChatFloat.jsx"));
 const LoginPage    = lazy(() => import("./pages/LoginPage.jsx"));
 const ProfilePage  = lazy(() => import("./pages/ProfilePage.jsx"));
+const NewsPage     = lazy(() => import("./pages/NewsPage.jsx"));
 
 export default function MoundiGuide(){
   const { track } = useAnalytics();
@@ -323,6 +324,7 @@ export default function MoundiGuide(){
         <Suspense fallback={<div style={{minHeight:400}}/>}>
           {!splash&&page==="ticket"  &&<TicketPage  C={C} F={F} isDesk={isDesk} lang={lang}/>}
           {!splash&&page==="schedule"&&<SchedulePage C={C} ac={ac} F={F} send={send} isDesk={isDesk} lang={lang} selectedTeam={selectedTeam}/>}
+          {!splash&&page==="news"    &&<NewsPage     lang={lang} setPage={navigateTo} C={C} F={F} isDesk={isDesk}/>}
           {!splash&&<Footer C={C} F={F} setPage={navigateTo} lang={lang}/>}
         </Suspense>
       </div>

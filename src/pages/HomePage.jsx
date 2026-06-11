@@ -348,6 +348,24 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
             </button>
           </div>
 
+          {/* Actualités en direct */}
+          <button
+            onClick={()=>{setPage("news");track("cta_click",{button:"actualites"});}}
+            style={{
+              background:"none",border:"none",cursor:"pointer",
+              fontFamily:font,fontSize:13,fontWeight:500,
+              color:"rgba(255,255,255,0.65)",padding:"8px 0",
+              display:"flex",alignItems:"center",gap:7,
+              transition:"color .2s",
+            }}
+          >
+            <div style={{
+              width:6,height:6,borderRadius:"50%",background:"#C41E3A",
+              animation:"blink 1.4s ease-in-out infinite",flexShrink:0,
+            }}/>
+            {T.newsLiveLink||"Actualités en direct"} →
+          </button>
+
           {/* PWA install banner */}
           {showInstall&&(
             <div style={{display:"flex",alignItems:"center",gap:10,

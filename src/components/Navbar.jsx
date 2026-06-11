@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TRANSLATIONS, BR, F } from "../constants.js";
-import MoundiLogo from "./MoundiLogo.jsx";
 import { getLiveMatches, getNextMatch, getTeamIsoFromName } from "../services/wc2026Api.js";
 
 function Navbar({
@@ -135,13 +134,23 @@ function Navbar({
       }}>
 
         {/* ── LEFT: Logo ─────────────────────────────────────────────────── */}
-        <div onClick={() => setPage("home")} style={{ cursor: "pointer", flexShrink: 0 }}>
-          <MoundiLogo
-            size={isDesk ? 52 : 32}
-            textColor={BR.red}
-            showSubtitle={isDesk}
-            textSize={isDesk ? 18 : 15}
+        <div onClick={() => setPage("home")} style={{ cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", gap: 10 }}>
+          <img
+            src="/logo.webp"
+            alt="MoundiGuide"
+            style={{ height: isDesk ? 52 : 32, width: isDesk ? 52 : 32, objectFit: "contain", flexShrink: 0 }}
+            onError={e => { e.target.style.display = "none"; }}
           />
+          <div style={{ lineHeight: 1 }}>
+            <div style={{ fontFamily: F, fontWeight: 700, fontSize: isDesk ? 18 : 15, color: BR.red, letterSpacing: 0.3 }}>
+              Moundi Guide
+            </div>
+            {isDesk && (
+              <div style={{ fontFamily: F, fontSize: 8, color: "rgba(120,120,120,0.9)", letterSpacing: 2, textTransform: "uppercase", marginTop: 2, whiteSpace: "nowrap" }}>
+                Unity · Community · Innovation
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── CENTER: Nav links — absolutely centered (desktop only) ──────── */}
@@ -153,6 +162,31 @@ function Navbar({
             <NavLink id="home"     label={T.navHome}/>
             <NavLink id="ticket"   label={T.navTicket}/>
             <NavLink id="schedule" label={T.navSchedule}/>
+            {/* Actualités */}
+            <button
+              onClick={() => { setPage("news"); setMenuOpen(false); }}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontFamily: F, fontSize: 14, fontWeight: page === "news" ? 600 : 500,
+                color: page === "news" ? "#C41E3A" : "#121414",
+                padding: "8px 16px", position: "relative", transition: "color .2s",
+                display: "flex", alignItems: "center", gap: 5,
+              }}
+            >
+              {T.navNews || "Actualités"}
+              <div style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: "#C41E3A",
+                animation: "blink 1.4s ease-in-out infinite",
+                flexShrink: 0,
+              }}/>
+              {page === "news" && (
+                <div style={{
+                  position: "absolute", bottom: 0, left: 8, right: 8,
+                  height: 2, background: "#C41E3A", borderRadius: 2,
+                }}/>
+              )}
+            </button>
             {/* Fiche Équipe */}
             <button
               onClick={() => selectedTeam ? setShowTeamProfile(true) : setPage("profile")}
@@ -396,8 +430,9 @@ function Navbar({
           {[
             { id: "home",     icon: "🏠", label: T.mobileHome },
             { id: "ticket",   icon: "🎟️", label: T.mobileTick },
-            { id: "teamsheet",icon: "📋", label: T.teamSheet || "Fiche Équipe", teamsheet: true },
             { id: "schedule", icon: "📅", label: T.mobileSch  },
+            { id: "news",     icon: "📰", label: T.navNews || "Actualités" },
+            { id: "teamsheet",icon: "📋", label: T.teamSheet || "Fiche Équipe", teamsheet: true },
           ].map(({ id, icon, label, teamsheet }) => {
             const active = !teamsheet && page === id;
             return (

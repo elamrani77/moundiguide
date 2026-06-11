@@ -384,7 +384,7 @@ export const POIS=[
 // ── Full UI translations (6 languages) ──
 export const TRANSLATIONS = {
   fr:{
-    navHome:"Accueil", navTicket:"Tickets", navSchedule:"Calendrier",
+    navHome:"Accueil", navTicket:"Tickets", navSchedule:"Calendrier", navNews:"Actualités",
     themeToggle:"☀️ Clair", themeToggleDk:"🌙 Sombre", langLabel:"🌍 Langue",
     mobileHome:"🏠 Accueil", mobileTick:"🎟️ Tickets", mobileSch:"📅 Calendrier",
     heroBadge:"Coupe du Monde FIFA 2030",
@@ -442,7 +442,7 @@ export const TRANSLATIONS = {
     manOfMatch:"Homme de match",
   },
   en:{
-    navHome:"Home", navTicket:"Ticket", navSchedule:"Schedule",
+    navHome:"Home", navTicket:"Ticket", navSchedule:"Schedule", navNews:"News",
     themeToggle:"☀️ Light", themeToggleDk:"🌙 Dark", langLabel:"🌍 Language",
     mobileHome:"🏠 Home", mobileTick:"🎟️ Ticket", mobileSch:"📅 Schedule",
     heroBadge:"FIFA World Cup 2030",
@@ -500,7 +500,7 @@ export const TRANSLATIONS = {
     manOfMatch:"Key player",
   },
   ar:{
-    navHome:"الرئيسية", navTicket:"التذاكر", navSchedule:"الجدول",
+    navHome:"الرئيسية", navTicket:"التذاكر", navSchedule:"الجدول", navNews:"الأخبار",
     themeToggle:"☀️ فاتح", themeToggleDk:"🌙 داكن", langLabel:"🌍 اللغة",
     mobileHome:"🏠 الرئيسية", mobileTick:"🎟️ التذاكر", mobileSch:"📅 الجدول",
     heroBadge:"كأس العالم FIFA 2030",
@@ -558,7 +558,7 @@ export const TRANSLATIONS = {
     manOfMatch:"رجل المباراة",
   },
   es:{
-    navHome:"Inicio", navTicket:"Entradas", navSchedule:"Calendario",
+    navHome:"Inicio", navTicket:"Entradas", navSchedule:"Calendario", navNews:"Noticias",
     themeToggle:"☀️ Claro", themeToggleDk:"🌙 Oscuro", langLabel:"🌍 Idioma",
     mobileHome:"🏠 Inicio", mobileTick:"🎟️ Entradas", mobileSch:"📅 Calendario",
     heroBadge:"Copa del Mundo FIFA 2030",
@@ -616,7 +616,7 @@ export const TRANSLATIONS = {
     manOfMatch:"Jugador clave",
   },
   pt:{
-    navHome:"Início", navTicket:"Bilhetes", navSchedule:"Calendário",
+    navHome:"Início", navTicket:"Bilhetes", navSchedule:"Calendário", navNews:"Notícias",
     themeToggle:"☀️ Claro", themeToggleDk:"🌙 Escuro", langLabel:"🌍 Idioma",
     mobileHome:"🏠 Início", mobileTick:"🎟️ Bilhetes", mobileSch:"📅 Calendário",
     heroBadge:"Copa do Mundo FIFA 2030",
@@ -674,7 +674,7 @@ export const TRANSLATIONS = {
     manOfMatch:"Jogador chave",
   },
   zh:{
-    navHome:"首页", navTicket:"门票", navSchedule:"赛程",
+    navHome:"首页", navTicket:"门票", navSchedule:"赛程", navNews:"新闻",
     themeToggle:"☀️ 浅色", themeToggleDk:"🌙 深色", langLabel:"🌍 语言",
     mobileHome:"🏠 首页", mobileTick:"🎟️ 门票", mobileSch:"📅 赛程",
     heroBadge:"2030年FIFA世界杯",

@@ -3,7 +3,7 @@ import { BR } from "../constants.js";
 export default function MoundiLogo({size=36, showText=true, textColor="#111", showSubtitle=true, textSize=18}){
   return(
     <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
-      <img src="/logo.png" alt="Moundi Guide" style={{height:size,width:size,objectFit:"contain"}}
+      <img src="/logo.webp" alt="Moundi Guide" style={{height:size,width:size,objectFit:"contain"}}
         onError={e=>{e.target.style.display="none";e.target.nextSibling&&(e.target.nextSibling.style.display="flex");}}
       />
       {/* SVG fallback shown if logo.png missing */}
