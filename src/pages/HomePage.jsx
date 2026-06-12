@@ -351,12 +351,14 @@ export default function HomePage({C,ac,F: Fprop,lang,send,setPage,isDesk,selecte
           {/* Actualités en direct */}
           <button
             onClick={()=>{setPage("news");track("cta_click",{button:"actualites"});}}
+            onMouseEnter={e=>{e.currentTarget.style.textDecoration="underline";}}
+            onMouseLeave={e=>{e.currentTarget.style.textDecoration="none";}}
             style={{
               background:"none",border:"none",cursor:"pointer",
               fontFamily:font,fontSize:13,fontWeight:500,
-              color:"rgba(255,255,255,0.65)",padding:"8px 0",
+              color:"#C41E3A",padding:"8px 0",
               display:"flex",alignItems:"center",gap:7,
-              transition:"color .2s",
+              textDecoration:"none",transition:"opacity .2s",
             }}
           >
             <div style={{
